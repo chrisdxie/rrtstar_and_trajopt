@@ -142,7 +142,7 @@ main () {
   for (int i = 0; i < 2000; i++){
     planner.iteration ();
     
-    if (i%1 == 0) {
+    if (i%100 == 0) {
       cout << "Iteration: " << i << endl;
     }
   }
@@ -157,7 +157,26 @@ main () {
   trajectory_t trajectory_final;
   min_time_reachability.get_solution (trajectory_final);
 
+  // 5. PRINT THE RESULTS
+  cout << "Printing states of best trajectory:" << endl;
+  for (typename list<state_t*>::iterator iter_state = trajectory_final.list_states.begin(); 
+       iter_state != trajectory_final.list_states.end(); iter_state++) {
+    state_t *traj_state = *iter_state;
+    for (int i = 0; i < 3; i++) {
+      cout << traj_state->state_vars[i] << " ";
+    }
+    cout << endl;
+  }
 
+  cout << "Printing inputs of best trajectory:" << endl;
+  for (typename list<input_t*>::iterator iter_input = trajectory_final.list_inputs.begin();
+       iter_input != trajectory_final.list_inputs.end(); iter_input++) {
+    input_t *traj_input = *iter_input;
+    for (int i = 0; i < 2; i++) {
+      cout << traj_input->input_vars[i] << " ";
+    }
+    cout << endl;
+  }
 
   
   return 1;
