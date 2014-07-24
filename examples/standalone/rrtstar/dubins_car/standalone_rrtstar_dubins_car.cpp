@@ -1,5 +1,5 @@
 // Standard header files
-#include<iostream>
+#include <iostream>
 using namespace std;
 
 
@@ -51,9 +51,10 @@ typedef rrtstar<typeparams>  rrtstar_t;
 
 
 int
-main () {
+main (int argc, char* argv[]) {
   
-  
+  // Grab number of iterations from command line input
+  int NUM_ITERS = atoi(argv[1]);
 
 
   // 1. CREATE PLANNING OBJECTS
@@ -139,7 +140,7 @@ main () {
 
 
   // 3. RUN THE PLANNER 
-  for (int i = 0; i < 2000; i++){
+  for (int i = 0; i < NUM_ITERS; i++){
     planner.iteration ();
     
     if (i%100 == 0) {
