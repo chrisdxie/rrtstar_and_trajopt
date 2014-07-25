@@ -1,5 +1,6 @@
 // Standard header files
 #include <iostream>
+#include <iomanip>
 using namespace std;
 
 
@@ -74,7 +75,7 @@ main (int argc, char* argv[]) {
   planner.parameters.set_phase (2);   // The phase parameter can be used to run the algorithm as an RRT, 
                                       // See the documentation of the RRG algorithm for more information.
 
-  planner.parameters.set_gamma (35.0);    // Set this parameter should be set at least to the side length of
+  planner.parameters.set_gamma (20.0);    // Set this parameter should be set at least to the side length of
                                           //   the (bounded) state space. E.g., if the state space is a box
                                           //   with side length L, then this parameter should be set to at 
                                           //   least L for rapid and efficient convergence in trajectory space.
@@ -92,11 +93,11 @@ main (int argc, char* argv[]) {
     
   // 2. Initialize the sampler component 
   region<3> sampler_support;
-  sampler_support.center[0] = 0.0;
-  sampler_support.center[1] = 0.0;
+  sampler_support.center[0] = 5.0;
+  sampler_support.center[1] = 5.0;
   sampler_support.center[2] = 0.0;
-  sampler_support.size[0] = 20.0;
-  sampler_support.size[1] = 20.0;
+  sampler_support.size[0] = 10.0;
+  sampler_support.size[1] = 10.0;
   sampler_support.size[2] = 2.0*M_PI;
   sampler.set_support (sampler_support);
 
@@ -109,20 +110,42 @@ main (int argc, char* argv[]) {
 
  
   // 2.d Initialize the collision checker
+  /*
   region<2> obstacle_new;
   for (int i = 0; i < 2; i++) {
     obstacle_new.center[i] = 5.0;
     obstacle_new.size[i] = 5.0;
-  }
-  collision_checker.add_obstacle (obstacle_new);
-  
+  }*/
+  region<2> obstacle_1;
+  region<2> obstacle_2;
+  region<2> obstacle_3;
+
+  obstacle_1.center[0] = 2;
+  obstacle_1.center[1] = 8;
+  obstacle_1.size[0] = 1;
+  obstacle_1.size[1] = 3;
+  obstacle_2.center[0] = 4;
+  obstacle_2.center[1] = 3;
+  obstacle_2.size[0] = 4;
+  obstacle_2.size[1] = 2;
+  obstacle_3.center[0] = 7;
+  obstacle_3.center[1] = 7;
+  obstacle_3.size[0] = 2;
+  obstacle_3.size[1] = 2;
+
+
+  //collision_checker.add_obstacle (obstacle_new);
+  collision_checker.add_obstacle (obstacle_1);
+  collision_checker.add_obstacle (obstacle_2);
+  collision_checker.add_obstacle (obstacle_3);
+
   
   // 2.e Initialize the model checker and the cost evaluator
   region<2> region_goal;
-  region_goal.center[0] = 8.0;
-  region_goal.center[1] = 8.0;  
-  region_goal.size[0] = 2.0;
-  region_goal.size[1] = 2.0;
+  region_goal.center[0] = 9.0;
+  region_goal.center[1] = 9.0;  
+  region_goal.size[0] = 1.0;
+  region_goal.size[1] = 1.0;
   min_time_reachability.set_goal_region (region_goal);
   
   
@@ -164,7 +187,7 @@ main (int argc, char* argv[]) {
        iter_state != trajectory_final.list_states.end(); iter_state++) {
     state_t *traj_state = *iter_state;
     for (int i = 0; i < 3; i++) {
-      cout << traj_state->state_vars[i] << " ";
+      cout << std::setprecision(8) << traj_state->state_vars[i] << " ";
     }
     cout << endl;
   }
@@ -174,7 +197,7 @@ main (int argc, char* argv[]) {
        iter_input != trajectory_final.list_inputs.end(); iter_input++) {
     input_t *traj_input = *iter_input;
     for (int i = 0; i < 2; i++) {
-      cout << traj_input->input_vars[i] << " ";
+      cout << std::setprecision(8) << traj_input->input_vars[i] << " ";
     }
     cout << endl;
   }
