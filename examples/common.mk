@@ -12,7 +12,28 @@ SMP_ROOT_PATH = $(shell pwd)/../../../../
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 
+#-----------------------------------------------------------------------------
+# Boost and Python
+#-----------------------------------------------------------------------------
 
+# Boost include directory
+BOOST_INCLUDE_PATH = /usr/local/include/
+
+# Python include directory
+PYTHON_INCLUDE_PATH = /Library/Frameworks/Python.framework/Versions/2.7/include/python2.7
+
+# Boost libraries
+BL1 = /usr/local/lib/libboost_iostreams-mt.dylib
+BL2 = /usr/local/lib/libboost_python.dylib
+BL3 = /usr/local/lib/libboost_filesystem-mt.dylib
+BL4 = /usr/local/lib/libboost_system-mt.dylib
+BL5 = /usr/local/lib/libboost_numpy.dylib
+
+# Python libraries
+PYTHON_LIBRARIES = /Library/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib
+
+# Boost and Python flags
+CXXFLAGS_BOOST_PYTHON := -I$(BOOST_INCLUDE_PATH) -I$(PYTHON_INCLUDE_PATH) -L/usr/local/lib  -L/Library/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib  /usr/local/lib/libboost_iostreams-mt.dylib /usr/local/lib/libboost_python.dylib /usr/local/lib/libboost_thread-mt.dylib /usr/local/lib/libboost_filesystem-mt.dylib /usr/local/lib/libboost_system-mt.dylib /usr/local/lib/libboost_numpy.dylib /Library/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib -Wl,-rpath,/usr/local/lib -Wl,-rpath,/Library/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib 
 
 
 #-----------------------------------------------------------------------------
@@ -55,9 +76,9 @@ LDFALGS_SMP :=
 # Flags
 #-----------------------------------------------------------------------------
 
-CXXFLAGS = $(CXXFLAGS_STD) $(CXXFLAGS_SMP) 
+CXXFLAGS = $(CXXFLAGS_STD) $(CXXFLAGS_SMP) $(CXXFLAGS_BOOST_PYTHON)
 
-LDFLAGS	= $(LDFLAGS_STD) $(LDFLAGS_SMP) 
+LDFLAGS	= $(LDFLAGS_STD) $(LDFLAGS_SMP) $(CXXFLAGS_BOOST_PYTHON)
 
 
 

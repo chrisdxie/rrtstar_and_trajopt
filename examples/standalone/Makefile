@@ -1,4 +1,4 @@
-SUBDIRS:= rrtstar/dubins_car
+SUBDIRS:= rrtstar/dubins_car rrtstar/double_integrator
 
 .PHONY: all clean 
 .SILENT:

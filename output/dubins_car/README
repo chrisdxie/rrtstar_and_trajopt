@@ -1,3 +1,0 @@
-These are the outputs of the dubins car example while running 10000 iterations.
-
-It seems that the inputs are integrated over a timestep of 1. 
