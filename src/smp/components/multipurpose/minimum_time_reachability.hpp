@@ -65,7 +65,7 @@ int smp::minimum_time_reachability<typeparams,NUM_DIMENSIONS>
     }
     
     
-    if ( (vertex_in->data.total_cost < min_cost_vertex->data.total_cost) ) {
+    if ( (vertex_in->data.total_cost <= min_cost_vertex->data.total_cost) ) {
       cout << "COST -- Updating minimum cost vertex: " << vertex_in->data.total_cost << endl;
       min_cost_vertex = vertex_in;
       update_trajectory = true;

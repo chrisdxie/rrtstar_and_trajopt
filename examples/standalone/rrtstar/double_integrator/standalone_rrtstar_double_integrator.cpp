@@ -189,7 +189,7 @@ main (int argc, char* argv[]) {
   obstacle_1.center[1] = 8;
   obstacle_1.size[0] = 1;
   obstacle_1.size[1] = 3;
-  obstacle_2.center[0] = 4;
+  obstacle_2.center[0] = 3;
   obstacle_2.center[1] = 3;
   obstacle_2.size[0] = 4;
   obstacle_2.size[1] = 2;

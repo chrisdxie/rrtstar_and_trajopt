@@ -19,7 +19,7 @@
 #define INPUT_CONSTRAINT_MAX 1.0
 #define INPUT_CONSTRAINT_MIN -1.0
 //
-#define DELTA_T 0.1             // The time interval of integration and node placement
+#define DELTA_T 0.5             // The time interval of integration and node placement
 
 
 #include <iostream>
