@@ -1,0 +1,130 @@
+The system is: Darwin - 13.2.0 - x86_64
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: /opt/local/bin/c++ 
+Build flags: 
+Id flags: 
+
+The output was:
+0
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+
+The CXX compiler identification is GNU, found in "/Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/other_things/discrete_double_integrator_acado/build/CMakeFiles/3.0.0/CompilerIdCXX/a.out"
+
+Determining if the CXX compiler works passed with the following output:
+Change Dir: /Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/other_things/discrete_double_integrator_acado/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec1730624876/fast"
+/Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTryCompileExec1730624876.dir/build.make CMakeFiles/cmTryCompileExec1730624876.dir/build
+/opt/local/bin/cmake -E cmake_progress_report /Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/other_things/discrete_double_integrator_acado/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec1730624876.dir/testCXXCompiler.cxx.o
+/opt/local/bin/c++     -o CMakeFiles/cmTryCompileExec1730624876.dir/testCXXCompiler.cxx.o -c /Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/other_things/discrete_double_integrator_acado/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTryCompileExec1730624876
+/opt/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec1730624876.dir/link.txt --verbose=1
+/opt/local/bin/c++     -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTryCompileExec1730624876.dir/testCXXCompiler.cxx.o  -o cmTryCompileExec1730624876  
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: /Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/other_things/discrete_double_integrator_acado/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTryCompileExec1556543701/fast"
+/Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTryCompileExec1556543701.dir/build.make CMakeFiles/cmTryCompileExec1556543701.dir/build
+/opt/local/bin/cmake -E cmake_progress_report /Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/other_things/discrete_double_integrator_acado/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec1556543701.dir/CMakeCXXCompilerABI.cpp.o
+/opt/local/bin/c++     -o CMakeFiles/cmTryCompileExec1556543701.dir/CMakeCXXCompilerABI.cpp.o -c /opt/local/share/cmake-3.0/Modules/CMakeCXXCompilerABI.cpp
+Linking CXX executable cmTryCompileExec1556543701
+/opt/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec1556543701.dir/link.txt --verbose=1
+/opt/local/bin/c++     -Wl,-search_paths_first -Wl,-headerpad_max_install_names -v -Wl,-v CMakeFiles/cmTryCompileExec1556543701.dir/CMakeCXXCompilerABI.cpp.o  -o cmTryCompileExec1556543701   
+Using built-in specs.
+COLLECT_GCC=/opt/local/bin/c++
+COLLECT_LTO_WRAPPER=/opt/local/libexec/gcc/x86_64-apple-darwin13/4.7.3/lto-wrapper
+Target: x86_64-apple-darwin13
+Configured with: /opt/local/var/macports/build/_opt_mports_dports_lang_gcc47/gcc47/work/gcc-4.7.3/configure --prefix=/opt/local --build=x86_64-apple-darwin13 --enable-languages=c,c++,objc,obj-c++,lto,fortran,java --libdir=/opt/local/lib/gcc47 --includedir=/opt/local/include/gcc47 --infodir=/opt/local/share/info --mandir=/opt/local/share/man --datarootdir=/opt/local/share/gcc-4.7 --with-libiconv-prefix=/opt/local --with-local-prefix=/opt/local --with-system-zlib --disable-nls --program-suffix=-mp-4.7 --with-gxx-include-dir=/opt/local/include/gcc47/c++/ --with-gmp=/opt/local --with-mpfr=/opt/local --with-mpc=/opt/local --with-ppl=/opt/local --with-cloog=/opt/local --enable-cloog-backend=isl --disable-cloog-version-check --enable-stage1-checking --disable-multilib --enable-lto --enable-libstdcxx-time --with-as=/opt/local/bin/as --with-ld=/opt/local/bin/ld --with-ar=/opt/local/bin/ar --with-bugurl=https://trac.macports.org/newticket --disable-ppl-version-check --with-pkgversion='MacPorts gcc47 4.7.3_5'
+Thread model: posix
+gcc version 4.7.3 (MacPorts gcc47 4.7.3_5) 
+COMPILER_PATH=/opt/local/libexec/gcc/x86_64-apple-darwin13/4.7.3/:/opt/local/libexec/gcc/x86_64-apple-darwin13/4.7.3/:/opt/local/libexec/gcc/x86_64-apple-darwin13/:/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3/:/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/
+LIBRARY_PATH=/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3/:/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3/../../../:/usr/lib/
+COLLECT_GCC_OPTIONS='-mmacosx-version-min=10.9.2' '-v' '-o' 'cmTryCompileExec1556543701' '-shared-libgcc' '-mtune=core2'
+ /opt/local/libexec/gcc/x86_64-apple-darwin13/4.7.3/collect2 -dynamic -arch x86_64 -macosx_version_min 10.9.2 -weak_reference_mismatches non-weak -o cmTryCompileExec1556543701 -L/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3 -L/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3/../../.. -search_paths_first -headerpad_max_install_names -v CMakeFiles/cmTryCompileExec1556543701.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -no_compact_unwind -lSystem -lgcc_ext.10.5 -lgcc -lSystem -v
+collect2 version 4.7.3
+/opt/local/bin/ld -dynamic -arch x86_64 -macosx_version_min 10.9.2 -weak_reference_mismatches non-weak -o cmTryCompileExec1556543701 -L/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3 -L/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3/../../.. -search_paths_first -headerpad_max_install_names -v CMakeFiles/cmTryCompileExec1556543701.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -no_compact_unwind -lSystem -lgcc_ext.10.5 -lgcc -lSystem -v
+@(#)PROGRAM:ld  PROJECT:ld64-236.3
+configured to support archs: i386 x86_64 x86_64h armv6 armv7 armv7s armv7m arm64
+@(#)PROGRAM:ld  PROJECT:ld64-236.3
+configured to support archs: i386 x86_64 x86_64h armv6 armv7 armv7s armv7m arm64
+Library search paths:
+	/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3
+	/opt/local/lib/gcc47
+	/usr/lib
+	/usr/local/lib
+Framework search paths:
+	/Library/Frameworks/
+	/System/Library/Frameworks/
+
+
+Parsed CXX implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/other_things/discrete_double_integrator_acado/build/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:"/usr/bin/make" "cmTryCompileExec1556543701/fast"]
+  ignore line: [/Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTryCompileExec1556543701.dir/build.make CMakeFiles/cmTryCompileExec1556543701.dir/build]
+  ignore line: [/opt/local/bin/cmake -E cmake_progress_report /Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/other_things/discrete_double_integrator_acado/build/CMakeFiles/CMakeTmp/CMakeFiles 1]
+  ignore line: [Building CXX object CMakeFiles/cmTryCompileExec1556543701.dir/CMakeCXXCompilerABI.cpp.o]
+  ignore line: [/opt/local/bin/c++     -o CMakeFiles/cmTryCompileExec1556543701.dir/CMakeCXXCompilerABI.cpp.o -c /opt/local/share/cmake-3.0/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [Linking CXX executable cmTryCompileExec1556543701]
+  ignore line: [/opt/local/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec1556543701.dir/link.txt --verbose=1]
+  ignore line: [/opt/local/bin/c++     -Wl,-search_paths_first -Wl,-headerpad_max_install_names -v -Wl,-v CMakeFiles/cmTryCompileExec1556543701.dir/CMakeCXXCompilerABI.cpp.o  -o cmTryCompileExec1556543701   ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/opt/local/bin/c++]
+  ignore line: [COLLECT_LTO_WRAPPER=/opt/local/libexec/gcc/x86_64-apple-darwin13/4.7.3/lto-wrapper]
+  ignore line: [Target: x86_64-apple-darwin13]
+  ignore line: [Configured with: /opt/local/var/macports/build/_opt_mports_dports_lang_gcc47/gcc47/work/gcc-4.7.3/configure --prefix=/opt/local --build=x86_64-apple-darwin13 --enable-languages=c,c++,objc,obj-c++,lto,fortran,java --libdir=/opt/local/lib/gcc47 --includedir=/opt/local/include/gcc47 --infodir=/opt/local/share/info --mandir=/opt/local/share/man --datarootdir=/opt/local/share/gcc-4.7 --with-libiconv-prefix=/opt/local --with-local-prefix=/opt/local --with-system-zlib --disable-nls --program-suffix=-mp-4.7 --with-gxx-include-dir=/opt/local/include/gcc47/c++/ --with-gmp=/opt/local --with-mpfr=/opt/local --with-mpc=/opt/local --with-ppl=/opt/local --with-cloog=/opt/local --enable-cloog-backend=isl --disable-cloog-version-check --enable-stage1-checking --disable-multilib --enable-lto --enable-libstdcxx-time --with-as=/opt/local/bin/as --with-ld=/opt/local/bin/ld --with-ar=/opt/local/bin/ar --with-bugurl=https://trac.macports.org/newticket --disable-ppl-version-check --with-pkgversion='MacPorts gcc47 4.7.3_5']
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 4.7.3 (MacPorts gcc47 4.7.3_5) ]
+  ignore line: [COMPILER_PATH=/opt/local/libexec/gcc/x86_64-apple-darwin13/4.7.3/:/opt/local/libexec/gcc/x86_64-apple-darwin13/4.7.3/:/opt/local/libexec/gcc/x86_64-apple-darwin13/:/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3/:/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/]
+  ignore line: [LIBRARY_PATH=/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3/:/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3/../../../:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-mmacosx-version-min=10.9.2' '-v' '-o' 'cmTryCompileExec1556543701' '-shared-libgcc' '-mtune=core2']
+  link line: [ /opt/local/libexec/gcc/x86_64-apple-darwin13/4.7.3/collect2 -dynamic -arch x86_64 -macosx_version_min 10.9.2 -weak_reference_mismatches non-weak -o cmTryCompileExec1556543701 -L/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3 -L/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3/../../.. -search_paths_first -headerpad_max_install_names -v CMakeFiles/cmTryCompileExec1556543701.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -no_compact_unwind -lSystem -lgcc_ext.10.5 -lgcc -lSystem -v]
+    arg [/opt/local/libexec/gcc/x86_64-apple-darwin13/4.7.3/collect2] ==> ignore
+    arg [-dynamic] ==> ignore
+    arg [-arch] ==> ignore
+    arg [x86_64] ==> ignore
+    arg [-macosx_version_min] ==> ignore
+    arg [10.9.2] ==> ignore
+    arg [-weak_reference_mismatches] ==> ignore
+    arg [non-weak] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTryCompileExec1556543701] ==> ignore
+    arg [-L/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3] ==> dir [/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3]
+    arg [-L/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3/../../..] ==> dir [/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3/../../..]
+    arg [-search_paths_first] ==> ignore
+    arg [-headerpad_max_install_names] ==> ignore
+    arg [-v] ==> ignore
+    arg [CMakeFiles/cmTryCompileExec1556543701.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+    arg [-lstdc++] ==> lib [stdc++]
+    arg [-no_compact_unwind] ==> ignore
+    arg [-lSystem] ==> lib [System]
+    arg [-lgcc_ext.10.5] ==> lib [gcc_ext.10.5]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lSystem] ==> lib [System]
+    arg [-v] ==> ignore
+  Library search paths: [;/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3;/opt/local/lib/gcc47;/usr/lib;/usr/local/lib]
+  Framework search paths: [;/Library/Frameworks/;/System/Library/Frameworks/]
+  remove lib [System]
+  remove lib [gcc_ext.10.5]
+  remove lib [gcc]
+  remove lib [System]
+  collapse library dir [/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3] ==> [/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3]
+  collapse library dir [/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3/../../..] ==> [/opt/local/lib/gcc47]
+  collapse library dir [/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3] ==> [/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3]
+  collapse library dir [/opt/local/lib/gcc47] ==> [/opt/local/lib/gcc47]
+  collapse library dir [/usr/lib] ==> [/usr/lib]
+  collapse library dir [/usr/local/lib] ==> [/usr/local/lib]
+  collapse framework dir [/Library/Frameworks/] ==> [/Library/Frameworks]
+  collapse framework dir [/System/Library/Frameworks/] ==> [/System/Library/Frameworks]
+  implicit libs: [stdc++]
+  implicit dirs: [/opt/local/lib/gcc47/gcc/x86_64-apple-darwin13/4.7.3;/opt/local/lib/gcc47;/usr/lib;/usr/local/lib]
+  implicit fwks: [/Library/Frameworks;/System/Library/Frameworks]
+
+
