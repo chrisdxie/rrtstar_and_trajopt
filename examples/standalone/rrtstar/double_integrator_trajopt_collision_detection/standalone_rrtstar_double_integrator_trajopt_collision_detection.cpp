@@ -16,6 +16,7 @@ using namespace Eigen;
 
 // SMP HEADER FILES ------
 #include <smp/components/extenders/double_integrator.hpp>
+#include <smp/components/extenders/double_integrator_trajopt_collision_detection.hpp>
 #include <smp/components/samplers/uniform.hpp>
 #include <smp/components/collision_checkers/standard.hpp>
 #include <smp/components/distance_evaluators/kdtree.hpp>
@@ -49,7 +50,7 @@ typedef trajectory<typeparams> trajectory_t;
 // Define all planner component types
 typedef sampler_uniform<typeparams,4> sampler_t;
 typedef distance_evaluator_kdtree<typeparams,4> distance_evaluator_t;
-typedef extender_double_integrator<typeparams,2> extender_t;
+typedef extender_double_integrator_trajopt<typeparams,2> extender_t;
 typedef collision_checker_standard<typeparams,4> collision_checker_t;
 typedef minimum_time_reachability<typeparams,4> min_time_reachability_t;
 
@@ -82,7 +83,7 @@ np::ndarray eigen_to_ndarray(const MatrixXd& m) {
 }
 
 py::object init_display() {
-    // necessary initializations
+  // necessary initializations
   Py_Initialize();
   np::initialize();
   py::numeric::array::set_module_and_type("numpy", "ndarray");
@@ -92,8 +93,8 @@ py::object init_display() {
   // The above won't work with my compiler for some reason...
   std::string working_dir = "/Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt";
   working_dir += "/python_plotting/";
-  
-    // necessary imports
+
+  // necessary imports
   py::object main_module = py::import("__main__");
   py::object main_namespace = main_module.attr("__dict__");
   py::exec("import sys, os", main_namespace);
@@ -102,7 +103,7 @@ py::object init_display() {
   // get python file module
   py::object plot_mod = py::import("python_plot_double_integrator");
 
-    // get function from module
+  // get function from module
   py::object plotter = plot_mod.attr("plot");
   return plotter;
 }
@@ -137,9 +138,10 @@ main (int argc, char* argv[]) {
     if (arg2.compare("random") == 0) {
       srand(time(NULL));
     } else {
-      srand(atoi(argv[2])); // seed was passed in
+      srand(atoi(argv[2]));
     }
   }
+
 
 
   // 1. CREATE PLANNING OBJECTS
@@ -251,7 +253,11 @@ main (int argc, char* argv[]) {
 
 
   
-  // 3. SETUP FOR PLOTTING
+
+
+
+
+   // 3. SETUP FOR PLOTTING
 
   std::cout << "Initializing display...\n";
   py::object plotter = init_display(); // Initialize python interpreter and pyplot plot
@@ -285,7 +291,7 @@ main (int argc, char* argv[]) {
     if (i%100 == 0){
       cout << "Iteration : " << i << endl;
     }
-    if ((i+1) % 1000 == 0) { // Plot every 1k iterations, and save automatically in a folder called "pics"
+    if ((i+1) % 100 == 0) { // Plot every 100 iterations, and save automatically in a folder called "pics"
 
       trajectory_t trajectory_final;
       min_time_reachability.get_solution (trajectory_final);
@@ -294,7 +300,7 @@ main (int argc, char* argv[]) {
       int num_states = trajectory_final.list_states.size();
       MatrixXd states(4, num_states);
 
-      cout << "Plotting states of best trajectory after " << i << " iterations:" << endl;
+      cout << "Plotting states of best trajectory after " << i+1 << " iterations:" << endl;
       int index = 0;
       for (typename list<state_t*>::iterator iter_state = trajectory_final.list_states.begin(); 
            iter_state != trajectory_final.list_states.end(); iter_state++) {

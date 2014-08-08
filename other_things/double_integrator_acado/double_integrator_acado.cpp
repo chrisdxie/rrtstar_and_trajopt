@@ -99,7 +99,7 @@ int main() {
     z(0) = x; z(1) = y; z(2) = xdot; z(3) = ydot; z(4) = ux; z(5) = uy; z(6) = T;
 
     CFunction SD( 1, signedDistanceFunction);
-    CFunction SWVSD( 1, sweptThroughVolumeSignedDistanceFunction);
+    //CFunction SWVSD( 1, sweptThroughVolumeSignedDistanceFunction);
 
     //---------------------------------------------------------------------
 
@@ -166,19 +166,49 @@ int main() {
 
     OptimizationAlgorithm algorithm( ocp )		;
     //algorithm << w1 							;
-    algorithm << w2                             ;
+    //algorithm << w2                             ;
     algorithm.initializeParameters(T_init)		;
     algorithm.initializeDifferentialStates(state_init);
     //algorithm.set(HESSIAN_APPROXIMATION, FULL_BFGS_UPDATE);
     algorithm.set(HESSIAN_APPROXIMATION, BLOCK_BFGS_UPDATE);    // default
     //algorithm.set(HESSIAN_APPROXIMATION, EXACT_HESSIAN);
-    algorithm.solve()							;
+    algorithm.set(PRINTLEVEL, NONE); // How to shush the solver
+    returnValue r = algorithm.solve()							;
 
-    VariablesGrid states, parameters;
+    VariablesGrid states, parameters, controls;
     algorithm.getDifferentialStates(states);
+    algorithm.getControls(controls);
     algorithm.getParameters(parameters);
-    states.print();
-    parameters.print();
+    //states.print();
+    //controls.print();
+    //r.print();
+    // parameters.print();
+    if (r != SUCCESSFUL_RETURN) {
+        std::cout << "Not a successful return... " << std::endl;
+    } else {
+        std::cout << "SUCCESS!!!" << std::endl;
+    }
+    r.print();
+
+    MatrixXd st(num_discretization, 4);
+    for (int i = 0; i < num_discretization; i++) {
+        for (int j = 0; j < 4; j++) {
+            st(i,j) = states(i+1,j); // Can access like this. Will exclude x0, and include x_N
+        }
+    }
+
+    MatrixXd co(num_discretization, 2);
+    for (int i = 0; i < num_discretization; i++) {
+        for (int j = 0; j < 2; j++) {
+            co(i, j) = controls(i, j); // Gets u0 - u_{N-1}
+        }
+    }
+
+    MatrixXd par(num_discretization, 1);
+    for (int i = 0; i < num_discretization; i++) {
+        par(i,0) = parameters(i+1,0);
+    }
+    
 
     return 0									;
 

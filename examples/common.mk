@@ -35,6 +35,18 @@ PYTHON_LIBRARIES = /Library/Frameworks/Python.framework/Versions/2.7/lib/libpyth
 # Boost and Python flags
 CXXFLAGS_BOOST_PYTHON := -I$(BOOST_INCLUDE_PATH) -I$(PYTHON_INCLUDE_PATH) -L/usr/local/lib  -L/Library/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib  /usr/local/lib/libboost_iostreams-mt.dylib /usr/local/lib/libboost_python.dylib /usr/local/lib/libboost_thread-mt.dylib /usr/local/lib/libboost_filesystem-mt.dylib /usr/local/lib/libboost_system-mt.dylib /usr/local/lib/libboost_numpy.dylib /Library/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib -Wl,-rpath,/usr/local/lib -Wl,-rpath,/Library/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib 
 
+#-----------------------------------------------------------------------------
+# ACADO 
+#-----------------------------------------------------------------------------
+
+# ACADO flags
+ACADO_INCLUDE_PATH := -I/Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/ACADOtoolkit/include -I/Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/ACADOtoolkit/external_packages -I/Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/ACADOtoolkit/external_packages/csparse/ -I/Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/ACADOtoolkit/external_packages/qpOASES-3.0beta/include
+
+# ACADO library
+ACADO_LIBRARY_PATH := -L/Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/ACADOtoolkit/build/libs -lacado_toolkit_s
+
+# Combine include and library flags
+ACADO_FLAGS := $(ACADO_INCLUDE_PATH) $(ACADO_LIBRARY_PATH) 
 
 #-----------------------------------------------------------------------------
 # Standard
@@ -44,6 +56,7 @@ CXXFLAGS_BOOST_PYTHON := -I$(BOOST_INCLUDE_PATH) -I$(PYTHON_INCLUDE_PATH) -L/usr
 CC := gcc
 CXX := g++
 LDXX := g++
+LLVMLDXX := llvm-g++
 
 
 # Standard flags
@@ -76,9 +89,9 @@ LDFALGS_SMP :=
 # Flags
 #-----------------------------------------------------------------------------
 
-CXXFLAGS = $(CXXFLAGS_STD) $(CXXFLAGS_SMP) $(CXXFLAGS_BOOST_PYTHON)
+CXXFLAGS = $(CXXFLAGS_STD) $(CXXFLAGS_SMP) $(CXXFLAGS_BOOST_PYTHON) $(ACADO_FLAGS)
 
-LDFLAGS	= $(LDFLAGS_STD) $(LDFLAGS_SMP) $(CXXFLAGS_BOOST_PYTHON)
+LDFLAGS	= $(LDFLAGS_STD) $(LDFLAGS_SMP) $(CXXFLAGS_BOOST_PYTHON) $(ACADO_FLAGS)
 
 
 
