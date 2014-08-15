@@ -67,8 +67,8 @@ int main() {
 
     double start_x = 0.0;
     double start_y = 0.0;
-	double end_x = 3.5;
-	double end_y = 1.5;
+	double end_x = 4;
+	double end_y = 2;
     double d_safe = 0.05;
 	int num_discretization = 20;
 
@@ -116,7 +116,7 @@ int main() {
     ocp.subjectTo( AT_END, ydot == 0.0 )		;
 
     // Obstacles
-    ocp.subjectTo( SD(z) >= d_safe );
+    //ocp.subjectTo( SD(z) >= d_safe );
     //ocp.subjectTo( SWVSD(z) >= d_safe );
 
     ocp.subjectTo( -1 <= ux <= 1 )				;
@@ -166,7 +166,7 @@ int main() {
 
     OptimizationAlgorithm algorithm( ocp )		;
     //algorithm << w1 							;
-    //algorithm << w2                             ;
+    algorithm << w2                             ;
     algorithm.initializeParameters(T_init)		;
     algorithm.initializeDifferentialStates(state_init);
     //algorithm.set(HESSIAN_APPROXIMATION, FULL_BFGS_UPDATE);

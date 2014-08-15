@@ -18,8 +18,10 @@ function [dist pts] = signedDistancePolygons(poly1, poly2)
 % Author: Alex Lee
 
 % check if the polygons are intersecting each other
-if any(isPointInPolygon(poly1, poly2)) || any(isPointInPolygon(poly2, poly1))
-    [dist pts] = penetrationDepth(poly1, poly2);
-else
-    [dist pts] = distancePolygons(poly1, poly2);
-end
+% if any(isPointInPolygon(poly1, poly2)) || any(isPointInPolygon(poly2, poly1))
+%     [dist pts] = penetrationDepth(poly1, poly2);
+% else
+%     [dist pts] = distancePolygons(poly1, poly2);
+% end
+[dist pts] = penetrationDepth(poly1, poly2);
+

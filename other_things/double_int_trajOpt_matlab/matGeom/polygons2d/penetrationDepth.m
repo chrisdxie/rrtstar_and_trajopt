@@ -67,6 +67,10 @@ for i=1:2
         [min_pos1 argmin_pos1] = min(pos1);
         [max_pos1 argmax_pos1] = max(pos1);
         diffs = [ min_pos2-max_pos1; min_pos1-max_pos2 ];
+        if any(diffs >= 0)
+            [dist contact_pts] = distancePolygons(poly1, poly2);
+            return
+        end
         arg_diffs = [ argmax_pos1 argmin_pos2; argmin_pos1 argmax_pos2 ];
         if diffs(1)>=0 && diffs(2)>=0
             [dist arg_dist] = min(diffs);

@@ -2,7 +2,7 @@ function [ x ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min, u_max
 
     setup
 
-    addpath ../../../Courses/CS287/Homeworks/HW3/starter_PS3/q2_starter/  %TODO: your path might be different depending on where you solved q2
+    %addpath ../../../../Courses/CS287/Homeworks/HW3/starter_PS3/q2_starter/  %TODO: your path might be different depending on where you solved q2
 
     n = size(x_start,1); % Dimension of state
     m = n/2; % Dimension of input

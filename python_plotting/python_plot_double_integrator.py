@@ -6,7 +6,7 @@ import os
 from math import pi, atan
 
 
-def plot(states, obstacles, goal_region, iter):
+def plot(states, obstacles, goal_region, iter, cost):
 
     plt.clf()
     plt.cla()
@@ -74,6 +74,9 @@ def plot(states, obstacles, goal_region, iter):
             continue
         else:
             plt.plot(states[0,i], states[1,i], marker=(3,0,orientation*180/pi-90), markersize=10, color='b')
+
+    # Title
+    plt.title('Cost: ' + str(cost))
 
     plt.show(block=False)
     plt.pause(.1)

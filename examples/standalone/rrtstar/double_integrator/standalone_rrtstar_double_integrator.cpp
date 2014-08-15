@@ -16,7 +16,7 @@ using namespace Eigen;
 
 // SMP HEADER FILES ------
 #include <smp/components/extenders/double_integrator.hpp>
-#include <smp/components/samplers/uniform.hpp>
+#include <smp/components/samplers/boost_random_uniform.hpp>
 #include <smp/components/collision_checkers/standard.hpp>
 #include <smp/components/distance_evaluators/kdtree.hpp>
 #include <smp/components/multipurpose/minimum_time_reachability.hpp>
@@ -108,11 +108,11 @@ py::object init_display() {
 }
 
 void plot(py::object plotter, np::ndarray states, np::ndarray obstacles,
-    np::ndarray goal_region, int iter) {
+    np::ndarray goal_region, int iter, double cost) {
 
   try {
       // pass control to python now
-    plotter(states, obstacles, goal_region, iter);
+    plotter(states, obstacles, goal_region, iter, cost);
   }
   catch(py::error_already_set const &) {
       // will pass python errors to cpp for printing
@@ -131,13 +131,16 @@ main (int argc, char* argv[]) {
     NUM_ITERS = atoi(argv[1]);
   }
 
+  int seed = 0; // default random seed
   // Expecting something in the form of: executable <NUM_ITERS> <{"random" or some random seed}>
   if (argc >= 3) {
     std::string arg2 = argv[2];
     if (arg2.compare("random") == 0) {
       srand(time(NULL));
+      seed = time(NULL);
     } else {
       srand(atoi(argv[2])); // seed was passed in
+      seed = atoi(argv[2]);
     }
   }
 
@@ -145,7 +148,7 @@ main (int argc, char* argv[]) {
   // 1. CREATE PLANNING OBJECTS
   
   // 1.a Create the components
-  sampler_t sampler;
+  sampler_t sampler(seed);
   distance_evaluator_t distance_evaluator;
   extender_t extender;
   collision_checker_t collision_checker;
@@ -294,7 +297,7 @@ main (int argc, char* argv[]) {
       int num_states = trajectory_final.list_states.size();
       MatrixXd states(4, num_states);
 
-      cout << "Plotting states of best trajectory after " << i << " iterations:" << endl;
+      cout << "Plotting states of best trajectory after " << i+1 << " iterations:" << endl;
       int index = 0;
       for (typename list<state_t*>::iterator iter_state = trajectory_final.list_states.begin(); 
            iter_state != trajectory_final.list_states.end(); iter_state++) {
@@ -307,6 +310,7 @@ main (int argc, char* argv[]) {
 
       np::ndarray states_np = eigen_to_ndarray(states);
 
+      double best_cost = min_time_reachability.get_best_cost();
       /*
       cout << "Printing inputs of best trajectory:" << endl;
       for (typename list<input_t*>::iterator iter_input = trajectory_final.list_inputs.begin();
@@ -319,7 +323,7 @@ main (int argc, char* argv[]) {
       }
       */
 
-      plot(plotter, states_np, obstacles_np, goal_region_np, i+1);
+      plot(plotter, states_np, obstacles_np, goal_region_np, i+1, best_cost);
     }
   }
 
