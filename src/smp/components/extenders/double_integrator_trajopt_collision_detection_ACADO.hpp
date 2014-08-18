@@ -1,7 +1,7 @@
-#ifndef _SMP_SYSTEM_DOUBLE_INTEGRATOR_TRAJOPT_HPP_
-#define _SMP_SYSTEM_DOUBLE_INTEGRATOR_TRAJOPT_HPP_
+#ifndef _SMP_SYSTEM_DOUBLE_INTEGRATOR_TRAJOPT_ACADO_HPP_
+#define _SMP_SYSTEM_DOUBLE_INTEGRATOR_TRAJOPT_ACADO_HPP_
 
-#include <smp/components/extenders/double_integrator_trajopt.h>
+#include <smp/components/extenders/double_integrator_trajopt_ACADO.h>
 
 #define VELOCITY_CONSTRAINT_RANGE 2.0
 #define VELOCITY_CONSTRAINT_RANGE_2 1.0
@@ -126,7 +126,7 @@ int smp::extender_double_integrator_trajopt<typeparams,NUM_DIMENSIONS>
   ocp.subjectTo( AT_END, ydot == end_ydot );
 
   // Obstacles, worry about this alter
-  //ocp.subjectTo( SD(z) >= D_SAFE );
+  ocp.subjectTo( SD(z) >= D_SAFE );
   //ocp.subjectTo( SWVSD(z) >= D_SAFE );
 
   ocp.subjectTo( INPUT_CONSTRAINT_MIN <= ux <= INPUT_CONSTRAINT_MAX );

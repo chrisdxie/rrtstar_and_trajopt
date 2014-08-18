@@ -16,8 +16,8 @@ using namespace Eigen;
 
 // SMP HEADER FILES ------
 #include <smp/components/extenders/double_integrator.hpp>
-#include <smp/components/extenders/double_integrator_trajopt.hpp>
-#include <smp/components/samplers/uniform.hpp>
+#include <smp/components/extenders/double_integrator_trajopt_noCD_FORCES.hpp>
+#include <smp/components/samplers/boost_random_uniform.hpp>
 #include <smp/components/collision_checkers/standard.hpp>
 #include <smp/components/distance_evaluators/kdtree.hpp>
 #include <smp/components/multipurpose/minimum_time_reachability.hpp>

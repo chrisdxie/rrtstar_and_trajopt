@@ -6,8 +6,8 @@
   when appropriate.
 */
 
-#ifndef _SMP_SYSTEM_DOUBLE_INTEGRATOR_TRAJOPT_H_
-#define _SMP_SYSTEM_DOUBLE_INTEGRATOR_TRAJOPT_H_
+#ifndef _SMP_SYSTEM_DOUBLE_INTEGRATOR_TRAJOPT_FORCES_H_
+#define _SMP_SYSTEM_DOUBLE_INTEGRATOR_TRAJOPT_FORCES_H_
 
 #include <smp/components/extenders/double_integrator.h>
 
@@ -41,7 +41,7 @@ namespace smp {
 
         typedef trajectory< typeparams > trajectory_t;
 
-        int run_ACADO_optimization(state_t *start_state, state_t *end_state, 
+        int run_FORCES_optimization(state_t *start_state, state_t *end_state, 
                                    list<state_t*> *list_states, list<input_t*> *list_inputs);
 
     public:
