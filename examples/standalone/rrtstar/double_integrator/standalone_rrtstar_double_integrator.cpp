@@ -90,7 +90,7 @@ py::object init_display() {
   // use boost to find directory of python_plot.py
   // std::string working_dir = boost::filesystem::current_path().normalize().string();
   // The above won't work with my compiler for some reason...
-  std::string working_dir = "/Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt";
+  std::string working_dir = "/home/chris/rrtstar_and_trajopt";
   working_dir += "/python_plotting/";
   
     // necessary imports
@@ -112,7 +112,7 @@ void plot(py::object plotter, np::ndarray states, np::ndarray obstacles,
 
   try {
       // pass control to python now
-    plotter(states, obstacles, goal_region, iter, cost);
+    plotter(states, obstacles, goal_region, iter, "", cost);
   }
   catch(py::error_already_set const &) {
       // will pass python errors to cpp for printing
@@ -133,13 +133,14 @@ main (int argc, char* argv[]) {
 
   int seed = 0; // default random seed
   // Expecting something in the form of: executable <NUM_ITERS> <{"random" or some random seed}>
+  int seed = 0;
   if (argc >= 3) {
     std::string arg2 = argv[2];
     if (arg2.compare("random") == 0) {
-      srand(time(NULL));
+      //srand(time(NULL));
       seed = time(NULL);
     } else {
-      srand(atoi(argv[2])); // seed was passed in
+      //srand(atoi(argv[2])); // seed was passed in
       seed = atoi(argv[2]);
     }
   }
@@ -311,6 +312,7 @@ main (int argc, char* argv[]) {
       np::ndarray states_np = eigen_to_ndarray(states);
 
       double best_cost = min_time_reachability.get_best_cost();
+
       /*
       cout << "Printing inputs of best trajectory:" << endl;
       for (typename list<input_t*>::iterator iter_input = trajectory_final.list_inputs.begin();

@@ -136,7 +136,7 @@ int main() {
     // w1.addSubplot( ux, "Control for x" )			;
     // w1.addSubplot( uy, "Control for y" )			;
 
-    GnuplotWindow w2(PLOT_AT_EACH_ITERATION)  ;
+    GnuplotWindow w2;
     w2.addSubplot( x, y, "Position" , "", "", PM_POINTS)         ;
     w2.addSubplot( xdot, "Velocity x" )          ;
     w2.addSubplot( ydot, "Velocity y" )            ;
@@ -209,6 +209,7 @@ int main() {
         par(i,0) = parameters(i+1,0);
     }
     
+    std::cout << st << std::endl;
 
     return 0									;
 

@@ -91,7 +91,7 @@ py::object init_display() {
   // use boost to find directory of python_plot.py
   // std::string working_dir = boost::filesystem::current_path().normalize().string();
   // The above won't work with my compiler for some reason...
-  std::string working_dir = "/Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt";
+  std::string working_dir = "/home/chris/rrtstar_and_trajopt";
   working_dir += "/python_plotting/";
 
   // necessary imports
@@ -109,11 +109,11 @@ py::object init_display() {
 }
 
 void plot(py::object plotter, np::ndarray states, np::ndarray obstacles,
-    np::ndarray goal_region, int iter) {
+    np::ndarray goal_region, int iter, double cost) {
 
   try {
       // pass control to python now
-    plotter(states, obstacles, goal_region, iter);
+    plotter(states, obstacles, goal_region, iter, "with_trajopt", cost);
   }
   catch(py::error_already_set const &) {
       // will pass python errors to cpp for printing
@@ -133,12 +133,15 @@ main (int argc, char* argv[]) {
   }
 
   // Expecting something in the form of: executable <NUM_ITERS> <{"random" or some random seed}>
+  int seed = 0;
   if (argc >= 3) {
     std::string arg2 = argv[2];
     if (arg2.compare("random") == 0) {
-      srand(time(NULL));
+      //srand(time(NULL));
+      seed = time(NULL);
     } else {
-      srand(atoi(argv[2]));
+      //srand(atoi(argv[2]));
+      seed = atoi(argv[2]);
     }
   }
 
@@ -147,7 +150,7 @@ main (int argc, char* argv[]) {
   // 1. CREATE PLANNING OBJECTS
   
   // 1.a Create the components
-  sampler_t sampler;
+  sampler_t sampler(seed);
   distance_evaluator_t distance_evaluator;
   extender_t extender;
   collision_checker_t collision_checker;
@@ -288,7 +291,7 @@ main (int argc, char* argv[]) {
 
     planner.iteration ();
     
-    if (i%100 == 0){
+    if (i%1 == 0){
       cout << "Iteration : " << i << endl;
     }
     if ((i+1) % 100 == 0) { // Plot every 100 iterations, and save automatically in a folder called "pics"
@@ -313,6 +316,8 @@ main (int argc, char* argv[]) {
 
       np::ndarray states_np = eigen_to_ndarray(states);
 
+      double best_cost = min_time_reachability.get_best_cost();
+
       /*
       cout << "Printing inputs of best trajectory:" << endl;
       for (typename list<input_t*>::iterator iter_input = trajectory_final.list_inputs.begin();
@@ -325,7 +330,7 @@ main (int argc, char* argv[]) {
       }
       */
 
-      plot(plotter, states_np, obstacles_np, goal_region_np, i+1);
+      plot(plotter, states_np, obstacles_np, goal_region_np, i+1, best_cost);
     }
   }
 

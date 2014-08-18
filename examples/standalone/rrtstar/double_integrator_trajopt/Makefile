@@ -20,7 +20,7 @@ SMP_OBJ = standalone_rrtstar_double_integrator_trajopt.o \
 # Make the program
 #-----------------------------------------------------------------------------
 
-all: 
+all: 	
 	$(MAKE) targets
 
 default: 
@@ -29,9 +29,8 @@ default:
 targets:  $(SMP) 
 
 
-$(SMP): $(SMP_OBJ) 
-	$(LDXX) $(SMP_OBJ_COMPILE) -o $(SMP) $(LDFLAGS) 
-
+$(SMP): $(SMP_OBJ)
+	$(LDXX) $(SMP_OBJ_COMPILE) -o $(SMP) $(LDFLAGS)
 
 
 

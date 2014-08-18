@@ -1,4 +1,4 @@
-SUBDIRS:= rrtstar/dubins_car rrtstar/double_integrator rrtstar/double_integrator_trajopt rrtstar/double_integrator_trajopt_collision_detection
+SUBDIRS:= rrtstar/double_integrator rrtstar/double_integrator_trajopt rrtstar/double_integrator_trajopt_collision_detection
 
 .PHONY: all clean 
 .SILENT:

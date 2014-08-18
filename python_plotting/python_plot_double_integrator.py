@@ -6,7 +6,7 @@ import os
 from math import pi, atan
 
 
-def plot(states, obstacles, goal_region, iter, cost):
+def plot(states, obstacles, goal_region, iter, extra_string, cost):
 
     plt.clf()
     plt.cla()
@@ -82,7 +82,7 @@ def plot(states, obstacles, goal_region, iter, cost):
     plt.pause(.1)
     #raw_input("Press Enter to continue")
 
-    save('pics/{0}_iters'.format(iter), 'pdf')
+    save('pics/{0}_iters_{1}'.format(iter,extra_string), 'pdf')
 
 
 
