@@ -60,6 +60,8 @@ int smp::extender_double_integrator_trajopt<typeparams,NUM_DIMENSIONS>
 
   // Initialize pointer to time variable, delta
   double* delta;
+  double delta_init = 1;
+  delta = &delta_init;
 
   // Call SQP
   int success = solve_double_integrator_noCD_BVP(x_start, x_goal, X, U, delta, bounds);
