@@ -190,7 +190,7 @@ outputs(i) = newOutput(var, i, 1:nX);
 
 solver_name = 'double_integrator_QP_solver_noCD';
 codeoptions = getOptions(solver_name);
-codeoptions.printlevel = 2; % Debugging info for now
+codeoptions.printlevel = 0; % Debugging info for now
 codeoptions.timing=1;       % Debugging, just to see how long it takes
 codeoptions.maxit=100;
 

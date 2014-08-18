@@ -486,7 +486,8 @@ bool minimize_merit_function(StdVectorX& X, StdVectorU& U, double* delta, bounds
 				}
 			} else {
 				std::cout << "Some problem in solver\n";
-				exit(0);
+				success = false;
+				return success;
 			}
 
 			double model_merit = optcost;

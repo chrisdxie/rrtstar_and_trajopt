@@ -83,7 +83,7 @@ int smp::extender_double_integrator_trajopt<typeparams,NUM_DIMENSIONS>
     input_t *input_new = new input_t;
     (*input_new)[0] = *delta;
     for (int j = 1; j < 3; j++) {
-      (*input_new)[j] = U[i](j);
+      (*input_new)[j] = U[i](j-1);
     }
     list_inputs->push_back(input_new);
   }

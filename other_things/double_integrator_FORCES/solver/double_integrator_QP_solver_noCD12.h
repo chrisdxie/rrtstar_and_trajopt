@@ -28,7 +28,7 @@ typedef double double_integrator_QP_solver_noCD_FLOAT;
 /* SOLVER SETTINGS ------------------------------------------------------*/
 /* print level */
 #ifndef double_integrator_QP_solver_noCD_SET_PRINTLEVEL
-#define double_integrator_QP_solver_noCD_SET_PRINTLEVEL    (2)
+#define double_integrator_QP_solver_noCD_SET_PRINTLEVEL    (0)
 #endif
 
 /* timing */
