@@ -7,3 +7,6 @@ build/
 
 # This should be downloaded by user
 ACADOtoolkit/
+
+# PYC files
+*.pyc

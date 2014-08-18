@@ -2,7 +2,7 @@
 #define _SMP_SYSTEM_DOUBLE_INTEGRATOR_TRAJOPT_NOCD_FORCES_HPP_
 
 #include <smp/components/extenders/double_integrator_trajopt_FORCES.h>
-#include "../../../other_things/../../../../other_things/double_integrator_FORCES/SQP/without_CD/double_integrator_noCD_sqp.hpp"
+#include "../../../../other_things/double_integrator_FORCES/SQP/without_CD/double_integrator_noCD_sqp.hpp"
 
 #include <iostream>
 #include <cstdlib>
@@ -62,7 +62,7 @@ int smp::extender_double_integrator_trajopt<typeparams,NUM_DIMENSIONS>
   double* delta;
 
   // Call SQP
-  int success = solve_double_integrator_noCD_BVP(x_start, x_goal, X, U, delta);
+  int success = solve_double_integrator_noCD_BVP(x_start, x_goal, X, U, delta, bounds);
 
   if (success == 0) {
     return 0;

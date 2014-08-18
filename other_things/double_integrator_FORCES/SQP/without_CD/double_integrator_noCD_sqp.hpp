@@ -605,56 +605,56 @@ int solve_double_integrator_noCD_BVP(VectorX x_start, VectorX x_goal, StdVectorX
 /*
  *  This function serves as a testing function for the methods written above
  */
-int main() {
-
-	double_integrator_QP_solver_noCD_params problem;
-	double_integrator_QP_solver_noCD_output output;
-	double_integrator_QP_solver_noCD_info info;
-	setup_state_vars(problem, output);
-
-	StdVectorX X(T);
-	StdVectorU U(T-1);
-	double *delta; double delta_init = 1;
-	delta = &delta_init;
-
-	// Start and goal state
-	Vector4d x_start;
-	x_start << 0, 0, 0, 0;
-	Vector4d x_goal;
-	x_goal << 5, 5, 0, 0;
-
-	// Initialize X variable
-	Matrix<double, X_DIM, T> init;
-	for(int i = 0; i < X_DIM; ++i) {
-		init.row(i).setLinSpaced(T, x_start(i), x_goal(i));
-	}
-
-//	std::cout << "init:\n" << init << "\n";
-
-	for(int t = 0; t < T; ++t) {
-		X[t] = init.col(t);
-	}
-
-	// Initialize U variable
-	for(int t = 0; t < T-1; ++t) {
-		U[t] = .5*MatrixXd::Zero(U_DIM, 1);
-	}
-
-	// Init bounds
-	bounds_t bounds;
-
-	bounds.u_max = 1;
-	bounds.u_min = -1;
-	bounds.x_max = 10;
-	bounds.x_min = -10;
-	bounds.v_max = 1;
-	bounds.v_min = -1;
-	bounds.x_goal = x_goal;
-	bounds.x_start = x_start;
-
-	bool success = penalty_sqp(X, U, delta, bounds, problem, output, info);
-
-	cleanup_state_vars();
-}
+//int main() {
+//
+//	double_integrator_QP_solver_noCD_params problem;
+//	double_integrator_QP_solver_noCD_output output;
+//	double_integrator_QP_solver_noCD_info info;
+//	setup_state_vars(problem, output);
+//
+//	StdVectorX X(T);
+//	StdVectorU U(T-1);
+//	double *delta; double delta_init = 1;
+//	delta = &delta_init;
+//
+//	// Start and goal state
+//	Vector4d x_start;
+//	x_start << 0, 0, 0, 0;
+//	Vector4d x_goal;
+//	x_goal << 5, 5, 0, 0;
+//
+//	// Initialize X variable
+//	Matrix<double, X_DIM, T> init;
+//	for(int i = 0; i < X_DIM; ++i) {
+//		init.row(i).setLinSpaced(T, x_start(i), x_goal(i));
+//	}
+//
+////	std::cout << "init:\n" << init << "\n";
+//
+//	for(int t = 0; t < T; ++t) {
+//		X[t] = init.col(t);
+//	}
+//
+//	// Initialize U variable
+//	for(int t = 0; t < T-1; ++t) {
+//		U[t] = .5*MatrixXd::Zero(U_DIM, 1);
+//	}
+//
+//	// Init bounds
+//	bounds_t bounds;
+//
+//	bounds.u_max = 1;
+//	bounds.u_min = -1;
+//	bounds.x_max = 10;
+//	bounds.x_min = -10;
+//	bounds.v_max = 1;
+//	bounds.v_min = -1;
+//	bounds.x_goal = x_goal;
+//	bounds.x_start = x_start;
+//
+//	bool success = penalty_sqp(X, U, delta, bounds, problem, output, info);
+//
+//	cleanup_state_vars();
+//}
 
 #endif /* DOUBLE_INTEGRATOR_NOCD_SQP_HPP_ */

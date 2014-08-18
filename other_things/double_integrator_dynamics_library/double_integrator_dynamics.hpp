@@ -86,7 +86,6 @@ VectorXd double_integrator_dynamics::dynamics_difference(VectorXd (*f)(VectorXd,
 								 VectorXd x_next, VectorXd u, double delta) {
 
 	int nX = x.size();
-	int nU = u.size();
 	assert(nX == x_next.size()); // Just checking
 
 	VectorXd simulated_x_next = rk4(f, x, u, delta);
