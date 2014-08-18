@@ -88,10 +88,13 @@ while true
 
     % Check constraints
     constraints_satisfied = true;
+    nonconvex_ineq_constraints = g(x);
+    nonconvex_ineq_constraints(nonconvex_ineq_constraints < 0) = 0;
+    nonconvex_eq_constraints = h(x);
     if any(A_ineq*x0 - b_ineq > cfg.cnt_tolerance) || ...
        any(A_eq*x0 - b_eq > cfg.cnt_tolerance) || ...
-       max(g(x)) > cfg.cnt_tolerance || ...
-       max(abs(h(x))) > cfg.cnt_tolerance
+       sum(nonconvex_ineq_constraints) +  ...
+            sum(abs(nonconvex_eq_constraints)) > cfg.cnt_tolerance
         constraints_satisfied = false;
     end
     

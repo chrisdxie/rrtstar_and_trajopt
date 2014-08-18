@@ -77,7 +77,7 @@ MatrixXd signed_distance_2d::signedDistancePolygons(MatrixXd polygon1, MatrixXd 
 			if (abs(o) < abs(overlap)) {
 
 				// Update best points
-				Vector2d contact_point = ((point_poly1 - point_poly2).dot(axis)) * axis.array();
+				Vector2d contact_point = ((point_poly1 - point_poly2).dot(axis)) * axis;
 				contact_point += point_poly2;
 
 				if (!onEdgeOfPoly(poly1, contact_point)) {

@@ -38,12 +38,9 @@ function [ x ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min, u_max
     
     % The constraint function g does all the work of computing signed distances
     % and their gradients. This is a nonconvex inequality constraint
-    if length(obstacles) == 0
-        g = @(x) 0;
-    else
-        g = @(x) g_collisions(x, dsafe, [n,T], make_robot_poly, obstacles);
-    end
-        
+    if length(obstacles)
+    g = @(x) g_collisions(x, dsafe, [n,T], make_robot_poly, obstacles);
+    
     % The nonconvex system dynamics
     traj_dynamics_cfg = struct();
     traj_dynamics_cfg.nX = n;
@@ -89,7 +86,7 @@ function [ x ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min, u_max
     cfg = struct();
     cfg.callback = @(x,~) plot_traj(make_robot_poly, obstacles, reshape(x(1:n*T),size(traj_init))); % This does the plotting
     cfg.initial_trust_box_size=.1;
-    cfg.g_use_numerical = true;
+    cfg.g_use_numerical = false;
     cfg.min_approx_improve = 1e-2;
 
     x = penalty_sqp(x0, Q, q, f, A_ineq, b_ineq, A_eq, b_eq, g, h, cfg);

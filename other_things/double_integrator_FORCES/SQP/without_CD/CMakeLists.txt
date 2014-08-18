@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6.0)
-project (double_integrator)
+project (double_integrator_no_CD)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
@@ -20,5 +20,5 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${Eigen_IN
 
 link_directories(${Boost_LIBRARY_DIRS})
 
-add_executable(double-integrator-test  double_integrator_sqp.cpp double_integrator_QP_solver.c)
-target_link_libraries(double-integrator-test ${Boost_LIBRARIES} ${TIMER_LIBRARIES})
+add_executable(double-integrator-noCD-test  double_integrator_noCD_sqp.cpp double_integrator_QP_solver_noCD.c)
+target_link_libraries(double-integrator-noCD-test ${Boost_LIBRARIES} ${TIMER_LIBRARIES})
