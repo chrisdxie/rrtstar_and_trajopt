@@ -496,7 +496,7 @@ bool minimize_merit_function(StdVectorX& X, StdVectorU& U, double* delta, bounds
 			double merit_improve_ratio = exact_merit_improve/approx_merit_improve;
 
 			//printf("\tapprox improve: %.3f. exact improve: %.3f. ratio: %.3f \n", approx_merit_improve, exact_merit_improve, merit_improve_ratio);
-			if (approx_merit_improve < -1e-5) {
+			if (approx_merit_improve < -1) {
 				//printf("Approximate merit function got worse (%.3e).\n", approx_merit_improve);
 				//printf("Either convexification is wrong to zeroth order, or you're in numerical trouble\n");
 				success = false;
@@ -573,10 +573,7 @@ int solve_double_integrator_noCD_BVP(VectorX x_start, VectorX x_goal, StdVectorX
 	double_integrator_QP_solver_noCD_info info;
 	setup_state_vars(problem, output);
 
-//	StdVectorX X(T);
-//	StdVectorU U(T-1);
-	double delta_init = 1;
-	delta = &delta_init;
+	*delta = 1;
 
 	// Initialize X variable
 	Matrix<double, X_DIM, T> init;

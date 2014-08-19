@@ -117,15 +117,37 @@ int smp::extender_double_integrator_trajopt<typeparams,NUM_DIMENSIONS>
   // Looks like this does nothing for now
   intermediate_vertices_out->clear ();
 
-  // 2D ACADO stuffs
-  if (run_FORCES_optimization(state_from_in, state_towards_in,
-          &(trajectory_out->list_states), &(trajectory_out->list_inputs)) != 1) {
-
     // Check if exact extender can solve:
     #include "double_integrator.hpp"
     typedef extender_double_integrator<typeparams, 2> ex;
     ex exact_extender;
     int exact_connec = -1;
+    /*
+    if (exact_extender.extend(state_from_in, state_towards_in, &exact_connec, trajectory_out,
+        intermediate_vertices_out) == 1) {
+
+	double total = 0;
+	for(typename list<input_t*>::iterator iter = trajectory_out->list_inputs.begin(); iter != trajectory_out->list_inputs.end(); iter++) {
+	    input_t *input_curr = *iter;
+	    total += (*input_curr)[0];
+	}
+
+	std::cout << "Exact extender time: " << total << ", ";
+
+    }
+
+    trajectory_out->clear();
+    */
+
+  // 2D SQP stuffs
+  if (run_FORCES_optimization(state_from_in, state_towards_in,
+          &(trajectory_out->list_states), &(trajectory_out->list_inputs)) != 1) {
+
+    // Check if exact extender can solve:
+    //#include "double_integrator.hpp"
+    //typedef extender_double_integrator<typeparams, 2> ex;
+    //ex exact_extender;
+    //int exact_connec = -1;
     if (exact_extender.extend(state_from_in, state_towards_in, &exact_connec, trajectory_out, 
 	intermediate_vertices_out) == 1) {
 	std::cout << "SQP FORCES can't solve, but exact can." << "\n";
@@ -145,6 +167,8 @@ int smp::extender_double_integrator_trajopt<typeparams,NUM_DIMENSIONS>
 
     return 0;
   }
+
+  //std::cout << "SQP optimal time: " << trajectory_out->list_inputs.front()[0][0] * (T-1) << "\n";
 
   *exact_connection_out = 1; // Always an exact connection
   
