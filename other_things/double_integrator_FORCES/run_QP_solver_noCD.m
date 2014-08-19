@@ -95,10 +95,10 @@ function [output, exitflag, info] = run_QP_solver_noCD(args)
     
     % Create the string vector for lower and upper bound
     lb_string = '['; ub_string = '[';
-    for j=1:nX/2 % d = nX/2
-        lb_string = strcat(lb_string, ' x_min;');
-        ub_string = strcat(ub_string, ' x_max;');
-    end
+%     for j=1:nX/2 % d = nX/2
+%         lb_string = strcat(lb_string, ' x_min;');
+%         ub_string = strcat(ub_string, ' x_max;');
+%     end
     for j=1:nX/2
         lb_string = strcat(lb_string, ' v_min;');
         ub_string = strcat(ub_string, ' v_max;');

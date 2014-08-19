@@ -102,11 +102,11 @@ typedef struct double_integrator_QP_solver_noCD_params
     /* vector of size 17 */
     double_integrator_QP_solver_noCD_FLOAT f2[17];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT lb2[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT lb2[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT ub2[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT ub2[4];
 
     /* matrix of size [22 x 17] (column major format) */
     double_integrator_QP_solver_noCD_FLOAT A2[374];
@@ -117,11 +117,11 @@ typedef struct double_integrator_QP_solver_noCD_params
     /* vector of size 17 */
     double_integrator_QP_solver_noCD_FLOAT f3[17];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT lb3[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT lb3[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT ub3[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT ub3[4];
 
     /* matrix of size [22 x 17] (column major format) */
     double_integrator_QP_solver_noCD_FLOAT A3[374];
@@ -132,11 +132,11 @@ typedef struct double_integrator_QP_solver_noCD_params
     /* vector of size 17 */
     double_integrator_QP_solver_noCD_FLOAT f4[17];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT lb4[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT lb4[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT ub4[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT ub4[4];
 
     /* matrix of size [22 x 17] (column major format) */
     double_integrator_QP_solver_noCD_FLOAT A4[374];
@@ -147,11 +147,11 @@ typedef struct double_integrator_QP_solver_noCD_params
     /* vector of size 17 */
     double_integrator_QP_solver_noCD_FLOAT f5[17];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT lb5[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT lb5[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT ub5[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT ub5[4];
 
     /* matrix of size [22 x 17] (column major format) */
     double_integrator_QP_solver_noCD_FLOAT A5[374];
@@ -162,11 +162,11 @@ typedef struct double_integrator_QP_solver_noCD_params
     /* vector of size 17 */
     double_integrator_QP_solver_noCD_FLOAT f6[17];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT lb6[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT lb6[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT ub6[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT ub6[4];
 
     /* matrix of size [22 x 17] (column major format) */
     double_integrator_QP_solver_noCD_FLOAT A6[374];
@@ -177,11 +177,11 @@ typedef struct double_integrator_QP_solver_noCD_params
     /* vector of size 17 */
     double_integrator_QP_solver_noCD_FLOAT f7[17];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT lb7[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT lb7[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT ub7[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT ub7[4];
 
     /* matrix of size [22 x 17] (column major format) */
     double_integrator_QP_solver_noCD_FLOAT A7[374];
@@ -192,11 +192,11 @@ typedef struct double_integrator_QP_solver_noCD_params
     /* vector of size 17 */
     double_integrator_QP_solver_noCD_FLOAT f8[17];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT lb8[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT lb8[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT ub8[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT ub8[4];
 
     /* matrix of size [22 x 17] (column major format) */
     double_integrator_QP_solver_noCD_FLOAT A8[374];
@@ -207,11 +207,11 @@ typedef struct double_integrator_QP_solver_noCD_params
     /* vector of size 17 */
     double_integrator_QP_solver_noCD_FLOAT f9[17];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT lb9[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT lb9[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT ub9[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT ub9[4];
 
     /* matrix of size [22 x 17] (column major format) */
     double_integrator_QP_solver_noCD_FLOAT A9[374];
@@ -222,11 +222,11 @@ typedef struct double_integrator_QP_solver_noCD_params
     /* vector of size 17 */
     double_integrator_QP_solver_noCD_FLOAT f10[17];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT lb10[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT lb10[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT ub10[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT ub10[4];
 
     /* matrix of size [22 x 17] (column major format) */
     double_integrator_QP_solver_noCD_FLOAT A10[374];
@@ -237,11 +237,11 @@ typedef struct double_integrator_QP_solver_noCD_params
     /* vector of size 15 */
     double_integrator_QP_solver_noCD_FLOAT f11[15];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT lb11[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT lb11[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_noCD_FLOAT ub11[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_noCD_FLOAT ub11[4];
 
     /* matrix of size [22 x 15] (column major format) */
     double_integrator_QP_solver_noCD_FLOAT A11[330];

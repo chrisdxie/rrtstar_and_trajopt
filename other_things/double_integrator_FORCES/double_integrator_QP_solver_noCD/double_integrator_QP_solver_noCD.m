@@ -8,53 +8,53 @@
 %       PARAMS.A1 - matrix of size [22 x 17]
 %       PARAMS.b1 - column vector of length 22
 %       PARAMS.f2 - column vector of length 17
-%       PARAMS.lb2 - column vector of length 6
-%       PARAMS.ub2 - column vector of length 6
+%       PARAMS.lb2 - column vector of length 4
+%       PARAMS.ub2 - column vector of length 4
 %       PARAMS.A2 - matrix of size [22 x 17]
 %       PARAMS.b2 - column vector of length 22
 %       PARAMS.f3 - column vector of length 17
-%       PARAMS.lb3 - column vector of length 6
-%       PARAMS.ub3 - column vector of length 6
+%       PARAMS.lb3 - column vector of length 4
+%       PARAMS.ub3 - column vector of length 4
 %       PARAMS.A3 - matrix of size [22 x 17]
 %       PARAMS.b3 - column vector of length 22
 %       PARAMS.f4 - column vector of length 17
-%       PARAMS.lb4 - column vector of length 6
-%       PARAMS.ub4 - column vector of length 6
+%       PARAMS.lb4 - column vector of length 4
+%       PARAMS.ub4 - column vector of length 4
 %       PARAMS.A4 - matrix of size [22 x 17]
 %       PARAMS.b4 - column vector of length 22
 %       PARAMS.f5 - column vector of length 17
-%       PARAMS.lb5 - column vector of length 6
-%       PARAMS.ub5 - column vector of length 6
+%       PARAMS.lb5 - column vector of length 4
+%       PARAMS.ub5 - column vector of length 4
 %       PARAMS.A5 - matrix of size [22 x 17]
 %       PARAMS.b5 - column vector of length 22
 %       PARAMS.f6 - column vector of length 17
-%       PARAMS.lb6 - column vector of length 6
-%       PARAMS.ub6 - column vector of length 6
+%       PARAMS.lb6 - column vector of length 4
+%       PARAMS.ub6 - column vector of length 4
 %       PARAMS.A6 - matrix of size [22 x 17]
 %       PARAMS.b6 - column vector of length 22
 %       PARAMS.f7 - column vector of length 17
-%       PARAMS.lb7 - column vector of length 6
-%       PARAMS.ub7 - column vector of length 6
+%       PARAMS.lb7 - column vector of length 4
+%       PARAMS.ub7 - column vector of length 4
 %       PARAMS.A7 - matrix of size [22 x 17]
 %       PARAMS.b7 - column vector of length 22
 %       PARAMS.f8 - column vector of length 17
-%       PARAMS.lb8 - column vector of length 6
-%       PARAMS.ub8 - column vector of length 6
+%       PARAMS.lb8 - column vector of length 4
+%       PARAMS.ub8 - column vector of length 4
 %       PARAMS.A8 - matrix of size [22 x 17]
 %       PARAMS.b8 - column vector of length 22
 %       PARAMS.f9 - column vector of length 17
-%       PARAMS.lb9 - column vector of length 6
-%       PARAMS.ub9 - column vector of length 6
+%       PARAMS.lb9 - column vector of length 4
+%       PARAMS.ub9 - column vector of length 4
 %       PARAMS.A9 - matrix of size [22 x 17]
 %       PARAMS.b9 - column vector of length 22
 %       PARAMS.f10 - column vector of length 17
-%       PARAMS.lb10 - column vector of length 6
-%       PARAMS.ub10 - column vector of length 6
+%       PARAMS.lb10 - column vector of length 4
+%       PARAMS.ub10 - column vector of length 4
 %       PARAMS.A10 - matrix of size [22 x 17]
 %       PARAMS.b10 - column vector of length 22
 %       PARAMS.f11 - column vector of length 15
-%       PARAMS.lb11 - column vector of length 6
-%       PARAMS.ub11 - column vector of length 6
+%       PARAMS.lb11 - column vector of length 4
+%       PARAMS.ub11 - column vector of length 4
 %       PARAMS.A11 - matrix of size [22 x 15]
 %       PARAMS.b11 - column vector of length 22
 %       PARAMS.f12 - column vector of length 4

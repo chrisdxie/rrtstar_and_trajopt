@@ -545,6 +545,7 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double* delta, bounds_t bounds,
 		}
 
 		double constraint_violation = (computeMerit(delta, X, U, penalty_coeff) - computeObjective(delta, X, U))/penalty_coeff;
+		printf("Constraint violation: %.5f\n", constraint_violation);
 
 		if (constraint_violation <= cfg::cnt_tolerance) {
 			break;
@@ -623,9 +624,8 @@ int main() {
 	delta = &delta_init;
 
 	// Start and goal state
-	Vector4d x_start;
+	Vector4d x_start, x_goal;
 	x_start << 0, 0, 0, 0;
-	Vector4d x_goal;
 	x_goal << 5, 5, 0, 0;
 
 	// Initialize X variable
