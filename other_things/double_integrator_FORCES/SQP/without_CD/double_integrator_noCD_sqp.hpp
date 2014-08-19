@@ -575,8 +575,7 @@ int solve_double_integrator_noCD_BVP(VectorX x_start, VectorX x_goal, StdVectorX
 
 //	StdVectorX X(T);
 //	StdVectorU U(T-1);
-	double delta_init = 1;
-	delta = &delta_init;
+	*delta = 1;
 
 	// Initialize X variable
 	Matrix<double, X_DIM, T> init;
