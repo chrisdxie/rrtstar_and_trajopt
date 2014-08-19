@@ -1,7 +1,4 @@
 
-#ifndef DOUBLE_INTEGRATOR_NOCD_SQP_HPP_
-#define DOUBLE_INTEGRATOR_NOCD_SQP_HPP_
-
 #include <stdio.h>
 
 extern "C" {
@@ -30,8 +27,8 @@ const int T = TIMESTEPS; // I am mixing N and T for timesteps. They are SAME THI
 #define Z_DIM_N X_DIM
 #define LB_DIM_1 X_DIM+U_DIM+1
 #define UB_DIM_1 X_DIM+U_DIM
-#define LB_DIM_2_TO_N_MINUS_1 X_DIM+U_DIM
-#define UB_DIM_2_TO_N_MINUS_1 X_DIM+U_DIM
+#define LB_DIM_2_TO_N_MINUS_1 X_DIM/2+U_DIM
+#define UB_DIM_2_TO_N_MINUS_1 X_DIM/2+U_DIM
 #define LB_DIM_N X_DIM
 #define UB_DIM_N X_DIM
 #define A_DIM_OUTPUT_1_TO_N_MINUS_1 4*X_DIM+2*U_DIM+2
@@ -54,11 +51,11 @@ typedef std::vector<VectorX> StdVectorX;
 typedef std::vector<VectorU> StdVectorU;
 
 namespace cfg { // Taken from matlab implementation
-const double improve_ratio_threshold = .25;
+const double improve_ratio_threshold = .3; // .25
 const double min_approx_improve = 1e-2;
 const double min_trust_box_size = 1e-4;
-const double trust_shrink_ratio = .1;
-const double trust_expand_ratio = 1.5;
+const double trust_shrink_ratio = .75; // .1
+const double trust_expand_ratio = 1.2; // 1.5
 const double cnt_tolerance = 1e-4;
 const double penalty_coeff_increase_ratio = 10;
 const double initial_penalty_coeff = 1;
@@ -311,9 +308,8 @@ void fill_lb_and_ub(bounds_t bounds) {
 		VectorXd lbt_temp(LB_DIM_2_TO_N_MINUS_1);
 		VectorXd ubt_temp(UB_DIM_2_TO_N_MINUS_1);
 		for (int i = 0; i < LB_DIM_2_TO_N_MINUS_1; ++i) { // Taking advantage of fact that LB_DIM_2_TO_N_MINUS_1 = UB_DIM_2_TO_N_MINUS_1
-			if (i < X_DIM/2) { lbt_temp(i) = bounds.x_min; ubt_temp(i) = bounds.x_max; } // Position bounds
-			else if (i < X_DIM) {lbt_temp(i) = bounds.v_min; ubt_temp(i) = bounds.v_max; } // Velocity bounds
-			else if (i < X_DIM+U_DIM) {lbt_temp(i) = bounds.u_min; ubt_temp(i) = bounds.u_max; } // Control bounds
+			if (i < X_DIM/2) {lbt_temp(i) = bounds.v_min; ubt_temp(i) = bounds.v_max; } // Velocity bounds
+			else if (i < X_DIM/2+U_DIM) {lbt_temp(i) = bounds.u_min; ubt_temp(i) = bounds.u_max; } // Control bounds
 		}
 		fill_col_major(lb[t], lbt_temp); fill_col_major(ub[t], ubt_temp);
 //		std::cout << "lb" << t+1 << ":\n" << lbt_temp << "\n";
@@ -661,5 +657,3 @@ int main() {
 
 	cleanup_state_vars();
 }
-
-#endif /* DOUBLE_INTEGRATOR_NOCD_SQP_HPP_ */

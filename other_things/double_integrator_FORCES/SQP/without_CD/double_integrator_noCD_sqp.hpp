@@ -28,8 +28,8 @@ const int T = TIMESTEPS; // I am mixing N and T for timesteps. They are SAME THI
 #define Z_DIM_N X_DIM
 #define LB_DIM_1 X_DIM+U_DIM+1
 #define UB_DIM_1 X_DIM+U_DIM
-#define LB_DIM_2_TO_N_MINUS_1 X_DIM+U_DIM
-#define UB_DIM_2_TO_N_MINUS_1 X_DIM+U_DIM
+#define LB_DIM_2_TO_N_MINUS_1 X_DIM/2+U_DIM
+#define UB_DIM_2_TO_N_MINUS_1 X_DIM/2+U_DIM
 #define LB_DIM_N X_DIM
 #define UB_DIM_N X_DIM
 #define A_DIM_OUTPUT_1_TO_N_MINUS_1 4*X_DIM+2*U_DIM+2
@@ -309,9 +309,8 @@ void fill_lb_and_ub(bounds_t bounds) {
 		VectorXd lbt_temp(LB_DIM_2_TO_N_MINUS_1);
 		VectorXd ubt_temp(UB_DIM_2_TO_N_MINUS_1);
 		for (int i = 0; i < LB_DIM_2_TO_N_MINUS_1; ++i) { // Taking advantage of fact that LB_DIM_2_TO_N_MINUS_1 = UB_DIM_2_TO_N_MINUS_1
-			if (i < X_DIM/2) { lbt_temp(i) = bounds.x_min; ubt_temp(i) = bounds.x_max; } // Position bounds
-			else if (i < X_DIM) {lbt_temp(i) = bounds.v_min; ubt_temp(i) = bounds.v_max; } // Velocity bounds
-			else if (i < X_DIM+U_DIM) {lbt_temp(i) = bounds.u_min; ubt_temp(i) = bounds.u_max; } // Control bounds
+			if (i < X_DIM/2) {lbt_temp(i) = bounds.v_min; ubt_temp(i) = bounds.v_max; } // Velocity bounds
+			else if (i < X_DIM/2+U_DIM) {lbt_temp(i) = bounds.u_min; ubt_temp(i) = bounds.u_max; } // Control bounds
 		}
 		fill_col_major(lb[t], lbt_temp); fill_col_major(ub[t], ubt_temp);
 //		std::cout << "lb" << t+1 << ":\n" << lbt_temp << "\n";
@@ -543,6 +542,7 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double* delta, bounds_t bounds,
 		}
 
 		double constraint_violation = (computeMerit(delta, X, U, penalty_coeff) - computeObjective(delta, X, U))/penalty_coeff;
+		//printf("Constraint violation: %.5f\n", constraint_violation);
 
 		if (constraint_violation <= cfg::cnt_tolerance) {
 			break;
@@ -573,7 +573,10 @@ int solve_double_integrator_noCD_BVP(VectorX x_start, VectorX x_goal, StdVectorX
 	double_integrator_QP_solver_noCD_info info;
 	setup_state_vars(problem, output);
 
-	*delta = 1; // Initialize delta to 1
+//	StdVectorX X(T);
+//	StdVectorU U(T-1);
+	double delta_init = 1;
+	delta = &delta_init;
 
 	// Initialize X variable
 	Matrix<double, X_DIM, T> init;
@@ -618,9 +621,8 @@ int solve_double_integrator_noCD_BVP(VectorX x_start, VectorX x_goal, StdVectorX
 //	delta = &delta_init;
 //
 //	// Start and goal state
-//	Vector4d x_start;
+//	Vector4d x_start, x_goal;
 //	x_start << 0, 0, 0, 0;
-//	Vector4d x_goal;
 //	x_goal << 5, 5, 0, 0;
 //
 //	// Initialize X variable
