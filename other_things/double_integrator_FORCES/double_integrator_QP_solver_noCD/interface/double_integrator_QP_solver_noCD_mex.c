@@ -177,11 +177,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.lb2 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.lb2 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.lb2 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.lb2, 6);
+    copyMArrayToC(mxGetPr(par), params.lb2, 4);
 
 	par = mxGetField(PARAMS, 0, "ub2");
 #ifdef MEXARGMUENTCHECKS
@@ -192,11 +192,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.ub2 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.ub2 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.ub2 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.ub2, 6);
+    copyMArrayToC(mxGetPr(par), params.ub2, 4);
 
 	par = mxGetField(PARAMS, 0, "A2");
 #ifdef MEXARGMUENTCHECKS
@@ -252,11 +252,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.lb3 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.lb3 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.lb3 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.lb3, 6);
+    copyMArrayToC(mxGetPr(par), params.lb3, 4);
 
 	par = mxGetField(PARAMS, 0, "ub3");
 #ifdef MEXARGMUENTCHECKS
@@ -267,11 +267,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.ub3 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.ub3 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.ub3 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.ub3, 6);
+    copyMArrayToC(mxGetPr(par), params.ub3, 4);
 
 	par = mxGetField(PARAMS, 0, "A3");
 #ifdef MEXARGMUENTCHECKS
@@ -327,11 +327,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.lb4 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.lb4 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.lb4 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.lb4, 6);
+    copyMArrayToC(mxGetPr(par), params.lb4, 4);
 
 	par = mxGetField(PARAMS, 0, "ub4");
 #ifdef MEXARGMUENTCHECKS
@@ -342,11 +342,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.ub4 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.ub4 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.ub4 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.ub4, 6);
+    copyMArrayToC(mxGetPr(par), params.ub4, 4);
 
 	par = mxGetField(PARAMS, 0, "A4");
 #ifdef MEXARGMUENTCHECKS
@@ -402,11 +402,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.lb5 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.lb5 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.lb5 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.lb5, 6);
+    copyMArrayToC(mxGetPr(par), params.lb5, 4);
 
 	par = mxGetField(PARAMS, 0, "ub5");
 #ifdef MEXARGMUENTCHECKS
@@ -417,11 +417,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.ub5 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.ub5 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.ub5 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.ub5, 6);
+    copyMArrayToC(mxGetPr(par), params.ub5, 4);
 
 	par = mxGetField(PARAMS, 0, "A5");
 #ifdef MEXARGMUENTCHECKS
@@ -477,11 +477,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.lb6 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.lb6 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.lb6 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.lb6, 6);
+    copyMArrayToC(mxGetPr(par), params.lb6, 4);
 
 	par = mxGetField(PARAMS, 0, "ub6");
 #ifdef MEXARGMUENTCHECKS
@@ -492,11 +492,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.ub6 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.ub6 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.ub6 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.ub6, 6);
+    copyMArrayToC(mxGetPr(par), params.ub6, 4);
 
 	par = mxGetField(PARAMS, 0, "A6");
 #ifdef MEXARGMUENTCHECKS
@@ -552,11 +552,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.lb7 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.lb7 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.lb7 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.lb7, 6);
+    copyMArrayToC(mxGetPr(par), params.lb7, 4);
 
 	par = mxGetField(PARAMS, 0, "ub7");
 #ifdef MEXARGMUENTCHECKS
@@ -567,11 +567,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.ub7 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.ub7 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.ub7 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.ub7, 6);
+    copyMArrayToC(mxGetPr(par), params.ub7, 4);
 
 	par = mxGetField(PARAMS, 0, "A7");
 #ifdef MEXARGMUENTCHECKS
@@ -627,11 +627,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.lb8 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.lb8 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.lb8 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.lb8, 6);
+    copyMArrayToC(mxGetPr(par), params.lb8, 4);
 
 	par = mxGetField(PARAMS, 0, "ub8");
 #ifdef MEXARGMUENTCHECKS
@@ -642,11 +642,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.ub8 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.ub8 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.ub8 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.ub8, 6);
+    copyMArrayToC(mxGetPr(par), params.ub8, 4);
 
 	par = mxGetField(PARAMS, 0, "A8");
 #ifdef MEXARGMUENTCHECKS
@@ -702,11 +702,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.lb9 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.lb9 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.lb9 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.lb9, 6);
+    copyMArrayToC(mxGetPr(par), params.lb9, 4);
 
 	par = mxGetField(PARAMS, 0, "ub9");
 #ifdef MEXARGMUENTCHECKS
@@ -717,11 +717,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.ub9 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.ub9 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.ub9 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.ub9, 6);
+    copyMArrayToC(mxGetPr(par), params.ub9, 4);
 
 	par = mxGetField(PARAMS, 0, "A9");
 #ifdef MEXARGMUENTCHECKS
@@ -777,11 +777,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.lb10 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.lb10 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.lb10 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.lb10, 6);
+    copyMArrayToC(mxGetPr(par), params.lb10, 4);
 
 	par = mxGetField(PARAMS, 0, "ub10");
 #ifdef MEXARGMUENTCHECKS
@@ -792,11 +792,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.ub10 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.ub10 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.ub10 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.ub10, 6);
+    copyMArrayToC(mxGetPr(par), params.ub10, 4);
 
 	par = mxGetField(PARAMS, 0, "A10");
 #ifdef MEXARGMUENTCHECKS
@@ -852,11 +852,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.lb11 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.lb11 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.lb11 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.lb11, 6);
+    copyMArrayToC(mxGetPr(par), params.lb11, 4);
 
 	par = mxGetField(PARAMS, 0, "ub11");
 #ifdef MEXARGMUENTCHECKS
@@ -867,11 +867,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.ub11 must be a double.");
     }
-    if( mxGetM(par) != 6 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.ub11 must be of size [6 x 1]");
+    if( mxGetM(par) != 4 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.ub11 must be of size [4 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.ub11, 6);
+    copyMArrayToC(mxGetPr(par), params.ub11, 4);
 
 	par = mxGetField(PARAMS, 0, "A11");
 #ifdef MEXARGMUENTCHECKS

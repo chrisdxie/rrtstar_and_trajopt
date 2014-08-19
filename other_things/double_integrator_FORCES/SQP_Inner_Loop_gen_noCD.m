@@ -68,8 +68,8 @@ for i=2:N-2
 
     % Dimensions
     stages(i).dims.n = 2*nX+2*nU+1+nX;                          % number of stage variables
-    stages(i).dims.l = nX+nU;                                   % number of lower bounds
-    stages(i).dims.u = nX+nU;                                   % number of upper bounds
+    stages(i).dims.l = d+nU;                                    % number of lower bounds
+    stages(i).dims.u = d+nU;                                    % number of upper bounds
     stages(i).dims.r = nX+nU+1;                                 % number of equality constraints
     stages(i).dims.p = 4*nX+2*nU+2;                             % number of affine constraints
     stages(i).dims.q = 0;                                       % number of quadratic constraints
@@ -79,11 +79,11 @@ for i=2:N-2
     params(end+1) = newParam(['f' i_str], i, 'cost.f');         % Parameter for cost
     
     % Lower Bounds
-    stages(i).ineq.b.lbidx = 1:stages(i).dims.l;                % Lower bounds on states, controls, and time
+    stages(i).ineq.b.lbidx = 3:3+stages(i).dims.l-1;                % Lower bounds on velocities, controls, and time
     params(end+1) = newParam(['lb' i_str], i, 'ineq.b.lb');
     
     % Upper bounds
-    stages(i).ineq.b.ubidx = 1:stages(i).dims.u;                % Upper bounds on states, controls, NOT time
+    stages(i).ineq.b.ubidx = 3:3+stages(i).dims.u-1;                % Upper bounds on velocities, controls, NOT time
     params(end+1) = newParam(['ub' i_str], i, 'ineq.b.ub');
     
     % Equality between z1 and z2 is time (delta), and next state. 
@@ -107,8 +107,8 @@ i_str = sprintf('%d', i);
 
 % Dimensions
 stages(i).dims.n = 2*nX+nU+1+nX;                         % number of stage variables
-stages(i).dims.l = nX+nU;                                   % number of lower bounds
-stages(i).dims.u = nX+nU;                                   % number of upper bounds
+stages(i).dims.l = d+nU;                                   % number of lower bounds
+stages(i).dims.u = d+nU;                                   % number of upper bounds
 stages(i).dims.r = nX;                                      % number of equality constraints
 stages(i).dims.p = 4*nX+2*nU+2;                        % number of affine constraints
 stages(i).dims.q = 0;                                       % number of quadratic constraints
@@ -118,11 +118,11 @@ stages(i).cost.H = zeros(stages(i).dims.n);                 % No quadratic cost
 params(end+1) = newParam(['f' i_str], i, 'cost.f');         % Parameter for cost
 
 % Lower Bounds
-stages(i).ineq.b.lbidx = 1:stages(i).dims.l;                % Lower bounds on states, controls, and time
+stages(i).ineq.b.lbidx = 3:3+stages(i).dims.l-1;                % Lower bounds on states, controls, and time
 params(end+1) = newParam(['lb' i_str], i, 'ineq.b.lb');
 
 % Upper bounds
-stages(i).ineq.b.ubidx = 1:stages(i).dims.u;                % Upper bounds on states, controls, NOT time
+stages(i).ineq.b.ubidx = 3:3+stages(i).dims.u-1;                % Upper bounds on states, controls, NOT time
 params(end+1) = newParam(['ub' i_str], i, 'ineq.b.ub');
 
 % Equality between z1 and z2 is time (delta), and next state.

@@ -24,14 +24,14 @@ function [x,success] = penalty_sqp(x0, Q, q, f, A_ineq, b_ineq, A_eq, b_eq, g, h
 assert(size(x0,2) == 1);
 
 cfg = {};
-cfg.improve_ratio_threshold = .25;
+cfg.improve_ratio_threshold = .3; % .25
 cfg.min_trust_box_size = 1e-4;
 cfg.min_approx_improve = 1e-4;
 cfg.max_iter = 50;
-cfg.trust_shrink_ratio = .1;
-cfg.trust_expand_ratio = 1.5;
+cfg.trust_shrink_ratio = .9; % .1
+cfg.trust_expand_ratio = 1.1; % 1.5
 cfg.cnt_tolerance = 1e-4;
-cfg.max_merit_coeff_increases = 5;
+cfg.max_merit_coeff_increases = 3;
 cfg.merit_coeff_increase_ratio = 10;
 cfg.initial_trust_box_size = 1;
 cfg.initial_penalty_coeff = 1.;

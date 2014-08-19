@@ -204,12 +204,12 @@ void double_integrator_QP_solver_noCD_LA_INITIALIZEVECTOR_74(double_integrator_Q
 
 
 /*
- * Initializes a vector of length 391 with a value.
+ * Initializes a vector of length 351 with a value.
  */
-void double_integrator_QP_solver_noCD_LA_INITIALIZEVECTOR_391(double_integrator_QP_solver_noCD_FLOAT* vec, double_integrator_QP_solver_noCD_FLOAT value)
+void double_integrator_QP_solver_noCD_LA_INITIALIZEVECTOR_351(double_integrator_QP_solver_noCD_FLOAT* vec, double_integrator_QP_solver_noCD_FLOAT value)
 {
 	int i;
-	for( i=0; i<391; i++ )
+	for( i=0; i<351; i++ )
 	{
 		vec[i] = value;
 	}
@@ -218,12 +218,12 @@ void double_integrator_QP_solver_noCD_LA_INITIALIZEVECTOR_391(double_integrator_
 
 /* 
  * Calculates a dot product and adds it to a variable: z += x'*y; 
- * This function is for vectors of length 391.
+ * This function is for vectors of length 351.
  */
-void double_integrator_QP_solver_noCD_LA_DOTACC_391(double_integrator_QP_solver_noCD_FLOAT *x, double_integrator_QP_solver_noCD_FLOAT *y, double_integrator_QP_solver_noCD_FLOAT *z)
+void double_integrator_QP_solver_noCD_LA_DOTACC_351(double_integrator_QP_solver_noCD_FLOAT *x, double_integrator_QP_solver_noCD_FLOAT *y, double_integrator_QP_solver_noCD_FLOAT *z)
 {
 	int i;
-	for( i=0; i<391; i++ ){
+	for( i=0; i<351; i++ ){
 		*z += x[i]*y[i];
 	}
 }
@@ -621,16 +621,46 @@ void double_integrator_QP_solver_noCD_LA_MVSUBADD_22_17(double_integrator_QP_sol
  *	 Output: y = t(tidx) - u + w
  *           z = z - v'*x;
  *           r = max([norm(y,inf), z]);
- * for vectors of length 6. Output z is of course scalar.
+ * for vectors of length 4. Output z is of course scalar.
  */
-void double_integrator_QP_solver_noCD_LA_VSUBADD3_6(double_integrator_QP_solver_noCD_FLOAT* t, double_integrator_QP_solver_noCD_FLOAT* u, int* uidx, double_integrator_QP_solver_noCD_FLOAT* v, double_integrator_QP_solver_noCD_FLOAT* w, double_integrator_QP_solver_noCD_FLOAT* y, double_integrator_QP_solver_noCD_FLOAT* z, double_integrator_QP_solver_noCD_FLOAT* r)
+void double_integrator_QP_solver_noCD_LA_VSUBADD3_4(double_integrator_QP_solver_noCD_FLOAT* t, double_integrator_QP_solver_noCD_FLOAT* u, int* uidx, double_integrator_QP_solver_noCD_FLOAT* v, double_integrator_QP_solver_noCD_FLOAT* w, double_integrator_QP_solver_noCD_FLOAT* y, double_integrator_QP_solver_noCD_FLOAT* z, double_integrator_QP_solver_noCD_FLOAT* r)
 {
 	int i;
 	double_integrator_QP_solver_noCD_FLOAT norm = *r;
 	double_integrator_QP_solver_noCD_FLOAT vx = 0;
 	double_integrator_QP_solver_noCD_FLOAT x;
-	for( i=0; i<6; i++){
+	for( i=0; i<4; i++){
 		x = t[i] - u[uidx[i]];
+		y[i] = x + w[i];
+		vx += v[i]*x;
+		if( y[i] > norm ){
+			norm = y[i];
+		}
+		if( -y[i] > norm ){
+			norm = -y[i];
+		}
+	}
+	*z -= vx;
+	*r = norm;
+}
+
+
+/*
+ * Vector subtraction and addition.
+ *	 Input: five vectors t, tidx, u, v, w and two scalars z and r
+ *	 Output: y = t(tidx) - u + w
+ *           z = z - v'*x;
+ *           r = max([norm(y,inf), z]);
+ * for vectors of length 4. Output z is of course scalar.
+ */
+void double_integrator_QP_solver_noCD_LA_VSUBADD2_4(double_integrator_QP_solver_noCD_FLOAT* t, int* tidx, double_integrator_QP_solver_noCD_FLOAT* u, double_integrator_QP_solver_noCD_FLOAT* v, double_integrator_QP_solver_noCD_FLOAT* w, double_integrator_QP_solver_noCD_FLOAT* y, double_integrator_QP_solver_noCD_FLOAT* z, double_integrator_QP_solver_noCD_FLOAT* r)
+{
+	int i;
+	double_integrator_QP_solver_noCD_FLOAT norm = *r;
+	double_integrator_QP_solver_noCD_FLOAT vx = 0;
+	double_integrator_QP_solver_noCD_FLOAT x;
+	for( i=0; i<4; i++){
+		x = t[tidx[i]] - u[i];
 		y[i] = x + w[i];
 		vx += v[i]*x;
 		if( y[i] > norm ){
@@ -684,66 +714,6 @@ void double_integrator_QP_solver_noCD_LA_MVSUBADD_22_15(double_integrator_QP_sol
 	}
 	*y = norm;
 	*z -= lAxlessb;
-}
-
-
-/*
- * Vector subtraction and addition.
- *	 Input: five vectors t, tidx, u, v, w and two scalars z and r
- *	 Output: y = t(tidx) - u + w
- *           z = z - v'*x;
- *           r = max([norm(y,inf), z]);
- * for vectors of length 4. Output z is of course scalar.
- */
-void double_integrator_QP_solver_noCD_LA_VSUBADD3_4(double_integrator_QP_solver_noCD_FLOAT* t, double_integrator_QP_solver_noCD_FLOAT* u, int* uidx, double_integrator_QP_solver_noCD_FLOAT* v, double_integrator_QP_solver_noCD_FLOAT* w, double_integrator_QP_solver_noCD_FLOAT* y, double_integrator_QP_solver_noCD_FLOAT* z, double_integrator_QP_solver_noCD_FLOAT* r)
-{
-	int i;
-	double_integrator_QP_solver_noCD_FLOAT norm = *r;
-	double_integrator_QP_solver_noCD_FLOAT vx = 0;
-	double_integrator_QP_solver_noCD_FLOAT x;
-	for( i=0; i<4; i++){
-		x = t[i] - u[uidx[i]];
-		y[i] = x + w[i];
-		vx += v[i]*x;
-		if( y[i] > norm ){
-			norm = y[i];
-		}
-		if( -y[i] > norm ){
-			norm = -y[i];
-		}
-	}
-	*z -= vx;
-	*r = norm;
-}
-
-
-/*
- * Vector subtraction and addition.
- *	 Input: five vectors t, tidx, u, v, w and two scalars z and r
- *	 Output: y = t(tidx) - u + w
- *           z = z - v'*x;
- *           r = max([norm(y,inf), z]);
- * for vectors of length 4. Output z is of course scalar.
- */
-void double_integrator_QP_solver_noCD_LA_VSUBADD2_4(double_integrator_QP_solver_noCD_FLOAT* t, int* tidx, double_integrator_QP_solver_noCD_FLOAT* u, double_integrator_QP_solver_noCD_FLOAT* v, double_integrator_QP_solver_noCD_FLOAT* w, double_integrator_QP_solver_noCD_FLOAT* y, double_integrator_QP_solver_noCD_FLOAT* z, double_integrator_QP_solver_noCD_FLOAT* r)
-{
-	int i;
-	double_integrator_QP_solver_noCD_FLOAT norm = *r;
-	double_integrator_QP_solver_noCD_FLOAT vx = 0;
-	double_integrator_QP_solver_noCD_FLOAT x;
-	for( i=0; i<4; i++){
-		x = t[tidx[i]] - u[i];
-		y[i] = x + w[i];
-		vx += v[i]*x;
-		if( y[i] > norm ){
-			norm = y[i];
-		}
-		if( -y[i] > norm ){
-			norm = -y[i];
-		}
-	}
-	*z -= vx;
-	*r = norm;
 }
 
 
@@ -842,17 +812,17 @@ void double_integrator_QP_solver_noCD_LA_INEQ_P_22_17(double_integrator_QP_solve
  * Special function for box constraints of length 17
  * Returns also L/S, a value that is often used elsewhere.
  */
-void double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_6_6(double_integrator_QP_solver_noCD_FLOAT *lu, double_integrator_QP_solver_noCD_FLOAT *su, double_integrator_QP_solver_noCD_FLOAT *ru, double_integrator_QP_solver_noCD_FLOAT *ll, double_integrator_QP_solver_noCD_FLOAT *sl, double_integrator_QP_solver_noCD_FLOAT *rl, int* lbIdx, int* ubIdx, double_integrator_QP_solver_noCD_FLOAT *grad, double_integrator_QP_solver_noCD_FLOAT *lubysu, double_integrator_QP_solver_noCD_FLOAT *llbysl)
+void double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_4_4(double_integrator_QP_solver_noCD_FLOAT *lu, double_integrator_QP_solver_noCD_FLOAT *su, double_integrator_QP_solver_noCD_FLOAT *ru, double_integrator_QP_solver_noCD_FLOAT *ll, double_integrator_QP_solver_noCD_FLOAT *sl, double_integrator_QP_solver_noCD_FLOAT *rl, int* lbIdx, int* ubIdx, double_integrator_QP_solver_noCD_FLOAT *grad, double_integrator_QP_solver_noCD_FLOAT *lubysu, double_integrator_QP_solver_noCD_FLOAT *llbysl)
 {
 	int i;
 	for( i=0; i<17; i++ ){
 		grad[i] = 0;
 	}
-	for( i=0; i<6; i++ ){		
+	for( i=0; i<4; i++ ){		
 		llbysl[i] = ll[i] / sl[i];
 		grad[lbIdx[i]] -= llbysl[i]*rl[i];
 	}
-	for( i=0; i<6; i++ ){
+	for( i=0; i<4; i++ ){
 		lubysu[i] = lu[i] / su[i];
 		grad[ubIdx[i]] += lubysu[i]*ru[i];
 	}
@@ -864,17 +834,17 @@ void double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_6_6(double_integrator_QP
  * Special function for box constraints of length 15
  * Returns also L/S, a value that is often used elsewhere.
  */
-void double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_15_6_6(double_integrator_QP_solver_noCD_FLOAT *lu, double_integrator_QP_solver_noCD_FLOAT *su, double_integrator_QP_solver_noCD_FLOAT *ru, double_integrator_QP_solver_noCD_FLOAT *ll, double_integrator_QP_solver_noCD_FLOAT *sl, double_integrator_QP_solver_noCD_FLOAT *rl, int* lbIdx, int* ubIdx, double_integrator_QP_solver_noCD_FLOAT *grad, double_integrator_QP_solver_noCD_FLOAT *lubysu, double_integrator_QP_solver_noCD_FLOAT *llbysl)
+void double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_15_4_4(double_integrator_QP_solver_noCD_FLOAT *lu, double_integrator_QP_solver_noCD_FLOAT *su, double_integrator_QP_solver_noCD_FLOAT *ru, double_integrator_QP_solver_noCD_FLOAT *ll, double_integrator_QP_solver_noCD_FLOAT *sl, double_integrator_QP_solver_noCD_FLOAT *rl, int* lbIdx, int* ubIdx, double_integrator_QP_solver_noCD_FLOAT *grad, double_integrator_QP_solver_noCD_FLOAT *lubysu, double_integrator_QP_solver_noCD_FLOAT *llbysl)
 {
 	int i;
 	for( i=0; i<15; i++ ){
 		grad[i] = 0;
 	}
-	for( i=0; i<6; i++ ){		
+	for( i=0; i<4; i++ ){		
 		llbysl[i] = ll[i] / sl[i];
 		grad[lbIdx[i]] -= llbysl[i]*rl[i];
 	}
-	for( i=0; i<6; i++ ){
+	for( i=0; i<4; i++ ){
 		lubysu[i] = lu[i] / su[i];
 		grad[ubIdx[i]] += lubysu[i]*ru[i];
 	}
@@ -1160,7 +1130,7 @@ void double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_Q
  * Output: Phi = H + diag(llbysl) + diag(lubysu)
  * where Phi is stored in lower triangular row major format
  */
-void double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_6_6(double_integrator_QP_solver_noCD_FLOAT *H, double_integrator_QP_solver_noCD_FLOAT *llbysl, int* lbIdx, double_integrator_QP_solver_noCD_FLOAT *lubysu, int* ubIdx, double_integrator_QP_solver_noCD_FLOAT *Phi)
+void double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_4_4(double_integrator_QP_solver_noCD_FLOAT *H, double_integrator_QP_solver_noCD_FLOAT *llbysl, int* lbIdx, double_integrator_QP_solver_noCD_FLOAT *lubysu, int* ubIdx, double_integrator_QP_solver_noCD_FLOAT *Phi)
 {
 	int i;
 	int j;
@@ -1176,13 +1146,13 @@ void double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_6_6(double_inte
 	}
 
 	/* add llbysl onto Phi where necessary */
-	for( i=0; i<6; i++ ){
+	for( i=0; i<4; i++ ){
 		j = lbIdx[i];
 		Phi[((j+1)*(j+2))/2-1] += llbysl[i];
 	}
 
 	/* add lubysu onto Phi where necessary */
-	for( i=0; i<6; i++){
+	for( i=0; i<4; i++){
 		j = ubIdx[i];
 		Phi[((j+1)*(j+2))/2-1] +=  lubysu[i];
 	}
@@ -1229,7 +1199,7 @@ void double_integrator_QP_solver_noCD_LA_DENSE_MMTM_7_17_7(double_integrator_QP_
  * Output: Phi = H + diag(llbysl) + diag(lubysu)
  * where Phi is stored in lower triangular row major format
  */
-void double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_15_6_6(double_integrator_QP_solver_noCD_FLOAT *H, double_integrator_QP_solver_noCD_FLOAT *llbysl, int* lbIdx, double_integrator_QP_solver_noCD_FLOAT *lubysu, int* ubIdx, double_integrator_QP_solver_noCD_FLOAT *Phi)
+void double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_15_4_4(double_integrator_QP_solver_noCD_FLOAT *H, double_integrator_QP_solver_noCD_FLOAT *llbysl, int* lbIdx, double_integrator_QP_solver_noCD_FLOAT *lubysu, int* ubIdx, double_integrator_QP_solver_noCD_FLOAT *Phi)
 {
 	int i;
 	int j;
@@ -1245,13 +1215,13 @@ void double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_15_6_6(double_inte
 	}
 
 	/* add llbysl onto Phi where necessary */
-	for( i=0; i<6; i++ ){
+	for( i=0; i<4; i++ ){
 		j = lbIdx[i];
 		Phi[((j+1)*(j+2))/2-1] += llbysl[i];
 	}
 
 	/* add lubysu onto Phi where necessary */
-	for( i=0; i<6; i++){
+	for( i=0; i<4; i++){
 		j = ubIdx[i];
 		Phi[((j+1)*(j+2))/2-1] +=  lubysu[i];
 	}
@@ -2534,42 +2504,8 @@ void double_integrator_QP_solver_noCD_LA_VSUB3_22(double_integrator_QP_solver_no
 
 
 /*
- * Vector subtraction z = x(xidx) - y where y, z and xidx are of length 6,
- * and x has length 17 and is indexed through yidx.
- */
-void double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_6(double_integrator_QP_solver_noCD_FLOAT *x, int* xidx, double_integrator_QP_solver_noCD_FLOAT *y, double_integrator_QP_solver_noCD_FLOAT *z)
-{
-	int i;
-	for( i=0; i<6; i++){
-		z[i] = x[xidx[i]] - y[i];
-	}
-}
-
-
-/* 
- * Computes r = -b - A*x
- * where A is stored in column major format
- */
-void double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB4_22_15(double_integrator_QP_solver_noCD_FLOAT *A, double_integrator_QP_solver_noCD_FLOAT *x, double_integrator_QP_solver_noCD_FLOAT *b, double_integrator_QP_solver_noCD_FLOAT *r)
-{
-	int i;
-	int j;
-	int k = 0;
-
-	for( i=0; i<22; i++ ){
-		r[i] = -b[i] - A[k++]*x[0];
-	}	
-	for( j=1; j<15; j++ ){		
-		for( i=0; i<22; i++ ){
-			r[i] -= A[k++]*x[j];
-		}
-	}
-}
-
-
-/*
  * Vector subtraction z = x(xidx) - y where y, z and xidx are of length 4,
- * and x has length 4 and is indexed through yidx.
+ * and x has length 17 and is indexed through yidx.
  */
 void double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_4(double_integrator_QP_solver_noCD_FLOAT *x, int* xidx, double_integrator_QP_solver_noCD_FLOAT *y, double_integrator_QP_solver_noCD_FLOAT *z)
 {
@@ -2593,7 +2529,7 @@ void double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noC
 
 
 /*
- * Vector subtraction z = -x - y(yidx) where y is of length 4
+ * Vector subtraction z = -x - y(yidx) where y is of length 17
  * and z, x and yidx are of length 4.
  */
 void double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_4(double_integrator_QP_solver_noCD_FLOAT *x, double_integrator_QP_solver_noCD_FLOAT *y, int* yidx, double_integrator_QP_solver_noCD_FLOAT *z)
@@ -2601,6 +2537,27 @@ void double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_4(double_integrator_QP_so
 	int i;
 	for( i=0; i<4; i++){
 		z[i] = -x[i] - y[yidx[i]];
+	}
+}
+
+
+/* 
+ * Computes r = -b - A*x
+ * where A is stored in column major format
+ */
+void double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB4_22_15(double_integrator_QP_solver_noCD_FLOAT *A, double_integrator_QP_solver_noCD_FLOAT *x, double_integrator_QP_solver_noCD_FLOAT *b, double_integrator_QP_solver_noCD_FLOAT *r)
+{
+	int i;
+	int j;
+	int k = 0;
+
+	for( i=0; i<22; i++ ){
+		r[i] = -b[i] - A[k++]*x[0];
+	}	
+	for( j=1; j<15; j++ ){		
+		for( i=0; i<22; i++ ){
+			r[i] -= A[k++]*x[j];
+		}
 	}
 }
 
@@ -2664,7 +2621,7 @@ int double_integrator_QP_solver_noCD_LINESEARCH_BACKTRACKING_AFFINE(double_integ
          * values might be in registers, so it should be cheaper.
          */
         mymu = 0;
-        for( i=0; i<391; i++ ){
+        for( i=0; i<351; i++ ){
             dltemp = l[i] + mya*dl[i];
             dstemp = s[i] + mya*ds[i];
             if( dltemp < 0 || dstemp < 0 ){
@@ -2679,7 +2636,7 @@ int double_integrator_QP_solver_noCD_LINESEARCH_BACKTRACKING_AFFINE(double_integ
          * If no early termination of the for-loop above occurred, we
          * found the required value of a and we can quit the while loop.
          */
-        if( i == 391 ){
+        if( i == 351 ){
             break;
         } else {
             mya *= double_integrator_QP_solver_noCD_SET_LS_SCALE_AFF;
@@ -2691,19 +2648,19 @@ int double_integrator_QP_solver_noCD_LINESEARCH_BACKTRACKING_AFFINE(double_integ
     
     /* return new values and iteration counter */
     *a = mya;
-    *mu_aff = mymu / (double_integrator_QP_solver_noCD_FLOAT)391;
+    *mu_aff = mymu / (double_integrator_QP_solver_noCD_FLOAT)351;
     return lsIt;
 }
 
 
 /*
  * Vector subtraction x = (u.*v - mu)*sigma where a is a scalar
-*  and x,u,v are vectors of length 391.
+*  and x,u,v are vectors of length 351.
  */
-void double_integrator_QP_solver_noCD_LA_VSUB5_391(double_integrator_QP_solver_noCD_FLOAT *u, double_integrator_QP_solver_noCD_FLOAT *v, double_integrator_QP_solver_noCD_FLOAT mu,  double_integrator_QP_solver_noCD_FLOAT sigma, double_integrator_QP_solver_noCD_FLOAT *x)
+void double_integrator_QP_solver_noCD_LA_VSUB5_351(double_integrator_QP_solver_noCD_FLOAT *u, double_integrator_QP_solver_noCD_FLOAT *v, double_integrator_QP_solver_noCD_FLOAT mu,  double_integrator_QP_solver_noCD_FLOAT sigma, double_integrator_QP_solver_noCD_FLOAT *x)
 {
 	int i;
-	for( i=0; i<391; i++){
+	for( i=0; i<351; i++){
 		x[i] = u[i]*v[i] - mu;
 		x[i] *= sigma;
 	}
@@ -2731,18 +2688,18 @@ void double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_6_7(double_integrator_
 
 /*
  * Computes x=0; x(uidx) += u/su; x(vidx) -= v/sv where x is of length 17,
- * u, su, uidx are of length 6 and v, sv, vidx are of length 6.
+ * u, su, uidx are of length 4 and v, sv, vidx are of length 4.
  */
-void double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_6_6(double_integrator_QP_solver_noCD_FLOAT *u, double_integrator_QP_solver_noCD_FLOAT *su, int* uidx, double_integrator_QP_solver_noCD_FLOAT *v, double_integrator_QP_solver_noCD_FLOAT *sv, int* vidx, double_integrator_QP_solver_noCD_FLOAT *x)
+void double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_4_4(double_integrator_QP_solver_noCD_FLOAT *u, double_integrator_QP_solver_noCD_FLOAT *su, int* uidx, double_integrator_QP_solver_noCD_FLOAT *v, double_integrator_QP_solver_noCD_FLOAT *sv, int* vidx, double_integrator_QP_solver_noCD_FLOAT *x)
 {
 	int i;
 	for( i=0; i<17; i++ ){
 		x[i] = 0;
 	}
-	for( i=0; i<6; i++){
+	for( i=0; i<4; i++){
 		x[uidx[i]] += u[i]/su[i];
 	}
-	for( i=0; i<6; i++){
+	for( i=0; i<4; i++){
 		x[vidx[i]] -= v[i]/sv[i];
 	}
 }
@@ -2803,18 +2760,18 @@ void double_integrator_QP_solver_noCD_LA_DENSE_2MVMADD_7_17_17(double_integrator
 
 /*
  * Computes x=0; x(uidx) += u/su; x(vidx) -= v/sv where x is of length 15,
- * u, su, uidx are of length 6 and v, sv, vidx are of length 6.
+ * u, su, uidx are of length 4 and v, sv, vidx are of length 4.
  */
-void double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_15_6_6(double_integrator_QP_solver_noCD_FLOAT *u, double_integrator_QP_solver_noCD_FLOAT *su, int* uidx, double_integrator_QP_solver_noCD_FLOAT *v, double_integrator_QP_solver_noCD_FLOAT *sv, int* vidx, double_integrator_QP_solver_noCD_FLOAT *x)
+void double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_15_4_4(double_integrator_QP_solver_noCD_FLOAT *u, double_integrator_QP_solver_noCD_FLOAT *su, int* uidx, double_integrator_QP_solver_noCD_FLOAT *v, double_integrator_QP_solver_noCD_FLOAT *sv, int* vidx, double_integrator_QP_solver_noCD_FLOAT *x)
 {
 	int i;
 	for( i=0; i<15; i++ ){
 		x[i] = 0;
 	}
-	for( i=0; i<6; i++){
+	for( i=0; i<4; i++){
 		x[uidx[i]] += u[i]/su[i];
 	}
-	for( i=0; i<6; i++){
+	for( i=0; i<4; i++){
 		x[vidx[i]] -= v[i]/sv[i];
 	}
 }
@@ -3016,13 +2973,26 @@ void double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_22_17(double_integrator_Q
 
 /** 
  * Computes z = -r./s - u.*y(y)
- * where all vectors except of y are of length 6 (length of y >= 6).
+ * where all vectors except of y are of length 4 (length of y >= 4).
  */
-void double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_6(double_integrator_QP_solver_noCD_FLOAT *r, double_integrator_QP_solver_noCD_FLOAT *s, double_integrator_QP_solver_noCD_FLOAT *u, double_integrator_QP_solver_noCD_FLOAT *y, int* yidx, double_integrator_QP_solver_noCD_FLOAT *z)
+void double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_4(double_integrator_QP_solver_noCD_FLOAT *r, double_integrator_QP_solver_noCD_FLOAT *s, double_integrator_QP_solver_noCD_FLOAT *u, double_integrator_QP_solver_noCD_FLOAT *y, int* yidx, double_integrator_QP_solver_noCD_FLOAT *z)
 {
 	int i;
-	for( i=0; i<6; i++ ){
+	for( i=0; i<4; i++ ){
 		z[i] = -r[i]/s[i] - u[i]*y[yidx[i]];
+	}
+}
+
+
+/** 
+ * Computes z = -r./s + u.*y(y)
+ * where all vectors except of y are of length 4 (length of y >= 4).
+ */
+void double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_4(double_integrator_QP_solver_noCD_FLOAT *r, double_integrator_QP_solver_noCD_FLOAT *s, double_integrator_QP_solver_noCD_FLOAT *u, double_integrator_QP_solver_noCD_FLOAT *y, int* yidx, double_integrator_QP_solver_noCD_FLOAT *z)
+{
+	int i;
+	for( i=0; i<4; i++ ){
+		z[i] = -r[i]/s[i] + u[i]*y[yidx[i]];
 	}
 }
 
@@ -3058,32 +3028,6 @@ void double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_22_15(double_integrator_Q
 }
 
 
-/** 
- * Computes z = -r./s - u.*y(y)
- * where all vectors except of y are of length 4 (length of y >= 4).
- */
-void double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_4(double_integrator_QP_solver_noCD_FLOAT *r, double_integrator_QP_solver_noCD_FLOAT *s, double_integrator_QP_solver_noCD_FLOAT *u, double_integrator_QP_solver_noCD_FLOAT *y, int* yidx, double_integrator_QP_solver_noCD_FLOAT *z)
-{
-	int i;
-	for( i=0; i<4; i++ ){
-		z[i] = -r[i]/s[i] - u[i]*y[yidx[i]];
-	}
-}
-
-
-/** 
- * Computes z = -r./s + u.*y(y)
- * where all vectors except of y are of length 4 (length of y >= 4).
- */
-void double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_4(double_integrator_QP_solver_noCD_FLOAT *r, double_integrator_QP_solver_noCD_FLOAT *s, double_integrator_QP_solver_noCD_FLOAT *u, double_integrator_QP_solver_noCD_FLOAT *y, int* yidx, double_integrator_QP_solver_noCD_FLOAT *z)
-{
-	int i;
-	for( i=0; i<4; i++ ){
-		z[i] = -r[i]/s[i] + u[i]*y[yidx[i]];
-	}
-}
-
-
 /* 
  * Computes r = (-b + l.*(A*x))./s
  * where A is stored in column major format
@@ -3116,12 +3060,12 @@ void double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_8_4(double_integrator_QP_
 
 
 /*
- * Computes ds = -l.\(r + s.*dl) for vectors of length 391.
+ * Computes ds = -l.\(r + s.*dl) for vectors of length 351.
  */
-void double_integrator_QP_solver_noCD_LA_VSUB7_391(double_integrator_QP_solver_noCD_FLOAT *l, double_integrator_QP_solver_noCD_FLOAT *r, double_integrator_QP_solver_noCD_FLOAT *s, double_integrator_QP_solver_noCD_FLOAT *dl, double_integrator_QP_solver_noCD_FLOAT *ds)
+void double_integrator_QP_solver_noCD_LA_VSUB7_351(double_integrator_QP_solver_noCD_FLOAT *l, double_integrator_QP_solver_noCD_FLOAT *r, double_integrator_QP_solver_noCD_FLOAT *s, double_integrator_QP_solver_noCD_FLOAT *dl, double_integrator_QP_solver_noCD_FLOAT *ds)
 {
 	int i;
-	for( i=0; i<391; i++){
+	for( i=0; i<351; i++){
 		ds[i] = -(r[i] + s[i]*dl[i])/l[i];
 	}
 }
@@ -3152,12 +3096,12 @@ void double_integrator_QP_solver_noCD_LA_VADD_74(double_integrator_QP_solver_noC
 
 
 /*
- * Vector addition x = x + y for vectors of length 391.
+ * Vector addition x = x + y for vectors of length 351.
  */
-void double_integrator_QP_solver_noCD_LA_VADD_391(double_integrator_QP_solver_noCD_FLOAT *x, double_integrator_QP_solver_noCD_FLOAT *y)
+void double_integrator_QP_solver_noCD_LA_VADD_351(double_integrator_QP_solver_noCD_FLOAT *x, double_integrator_QP_solver_noCD_FLOAT *y)
 {
 	int i;
-	for( i=0; i<391; i++){
+	for( i=0; i<351; i++){
 		x[i] += y[i];
 	}
 }
@@ -3179,7 +3123,7 @@ int double_integrator_QP_solver_noCD_LINESEARCH_BACKTRACKING_COMBINED(double_int
     while( 1 ){                        
 
         /* check whether search criterion is fulfilled */
-        for( i=0; i<391; i++ ){
+        for( i=0; i<351; i++ ){
             dltemp = l[i] + (*a)*dl[i];
             dstemp = s[i] + (*a)*ds[i];
             if( dltemp < 0 || dstemp < 0 ){
@@ -3192,7 +3136,7 @@ int double_integrator_QP_solver_noCD_LINESEARCH_BACKTRACKING_COMBINED(double_int
          * If no early termination of the for-loop above occurred, we
          * found the required value of a and we can quit the while loop.
          */
-        if( i == 391 ){
+        if( i == 351 ){
             break;
         } else {
             *a *= double_integrator_QP_solver_noCD_SET_LS_SCALE;
@@ -3217,14 +3161,14 @@ int double_integrator_QP_solver_noCD_LINESEARCH_BACKTRACKING_COMBINED(double_int
     
     /* inequality constraint multipliers & slacks, also update mu */
     *mu = 0;
-    for( i=0; i<391; i++ ){
+    for( i=0; i<351; i++ ){
         dltemp = l[i] + a_gamma*dl[i]; l[i] = dltemp;
         dstemp = s[i] + a_gamma*ds[i]; s[i] = dstemp;
         *mu += dltemp*dstemp;
     }
     
     *a = a_gamma;
-    *mu /= (double_integrator_QP_solver_noCD_FLOAT)391;
+    *mu /= (double_integrator_QP_solver_noCD_FLOAT)351;
     return lsIt;
 }
 
@@ -3239,16 +3183,16 @@ double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_dv_aff[7
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_grad_cost[189];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_grad_eq[189];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rd[189];
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_l[391];
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_s[391];
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_lbys[391];
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_dl_aff[391];
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_ds_aff[391];
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_l[351];
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_s[351];
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_lbys[351];
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_dl_aff[351];
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_ds_aff[351];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_dz_cc[189];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_dv_cc[74];
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_dl_cc[391];
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_ds_cc[391];
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_ccrhs[391];
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_dl_cc[351];
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_ds_cc[351];
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_ccrhs[351];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_grad_ineq[189];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_H00[17] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
 double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_z00 = double_integrator_QP_solver_noCD_z + 0;
@@ -3340,34 +3284,34 @@ double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Ld01[28]
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_yy01[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_bmy01[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_c01[7] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
-int double_integrator_QP_solver_noCD_lbIdx01[6] = {0, 1, 2, 3, 4, 5};
+int double_integrator_QP_solver_noCD_lbIdx01[4] = {2, 3, 4, 5};
 double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb01 = double_integrator_QP_solver_noCD_l + 35;
 double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb01 = double_integrator_QP_solver_noCD_s + 35;
 double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb01 = double_integrator_QP_solver_noCD_lbys + 35;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb01[6];
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb01[4];
 double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff01 = double_integrator_QP_solver_noCD_dl_aff + 35;
 double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff01 = double_integrator_QP_solver_noCD_ds_aff + 35;
 double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc01 = double_integrator_QP_solver_noCD_dl_cc + 35;
 double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc01 = double_integrator_QP_solver_noCD_ds_cc + 35;
 double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl01 = double_integrator_QP_solver_noCD_ccrhs + 35;
-int double_integrator_QP_solver_noCD_ubIdx01[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub01 = double_integrator_QP_solver_noCD_l + 41;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub01 = double_integrator_QP_solver_noCD_s + 41;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub01 = double_integrator_QP_solver_noCD_lbys + 41;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub01[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff01 = double_integrator_QP_solver_noCD_dl_aff + 41;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff01 = double_integrator_QP_solver_noCD_ds_aff + 41;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc01 = double_integrator_QP_solver_noCD_dl_cc + 41;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc01 = double_integrator_QP_solver_noCD_ds_cc + 41;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub01 = double_integrator_QP_solver_noCD_ccrhs + 41;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp01 = double_integrator_QP_solver_noCD_s + 47;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp01 = double_integrator_QP_solver_noCD_l + 47;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp01 = double_integrator_QP_solver_noCD_lbys + 47;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff01 = double_integrator_QP_solver_noCD_dl_aff + 47;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff01 = double_integrator_QP_solver_noCD_ds_aff + 47;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc01 = double_integrator_QP_solver_noCD_dl_cc + 47;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc01 = double_integrator_QP_solver_noCD_ds_cc + 47;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp01 = double_integrator_QP_solver_noCD_ccrhs + 47;
+int double_integrator_QP_solver_noCD_ubIdx01[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub01 = double_integrator_QP_solver_noCD_l + 39;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub01 = double_integrator_QP_solver_noCD_s + 39;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub01 = double_integrator_QP_solver_noCD_lbys + 39;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub01[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff01 = double_integrator_QP_solver_noCD_dl_aff + 39;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff01 = double_integrator_QP_solver_noCD_ds_aff + 39;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc01 = double_integrator_QP_solver_noCD_dl_cc + 39;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc01 = double_integrator_QP_solver_noCD_ds_cc + 39;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub01 = double_integrator_QP_solver_noCD_ccrhs + 39;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp01 = double_integrator_QP_solver_noCD_s + 43;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp01 = double_integrator_QP_solver_noCD_l + 43;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp01 = double_integrator_QP_solver_noCD_lbys + 43;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff01 = double_integrator_QP_solver_noCD_dl_aff + 43;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff01 = double_integrator_QP_solver_noCD_ds_aff + 43;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc01 = double_integrator_QP_solver_noCD_dl_cc + 43;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc01 = double_integrator_QP_solver_noCD_ds_cc + 43;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp01 = double_integrator_QP_solver_noCD_ccrhs + 43;
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rip01[22];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Phi01[153];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_D01[119] = {-1.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 
@@ -3411,34 +3355,34 @@ double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Ld02[28]
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_yy02[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_bmy02[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_c02[7] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
-int double_integrator_QP_solver_noCD_lbIdx02[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb02 = double_integrator_QP_solver_noCD_l + 69;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb02 = double_integrator_QP_solver_noCD_s + 69;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb02 = double_integrator_QP_solver_noCD_lbys + 69;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb02[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff02 = double_integrator_QP_solver_noCD_dl_aff + 69;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff02 = double_integrator_QP_solver_noCD_ds_aff + 69;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc02 = double_integrator_QP_solver_noCD_dl_cc + 69;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc02 = double_integrator_QP_solver_noCD_ds_cc + 69;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl02 = double_integrator_QP_solver_noCD_ccrhs + 69;
-int double_integrator_QP_solver_noCD_ubIdx02[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub02 = double_integrator_QP_solver_noCD_l + 75;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub02 = double_integrator_QP_solver_noCD_s + 75;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub02 = double_integrator_QP_solver_noCD_lbys + 75;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub02[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff02 = double_integrator_QP_solver_noCD_dl_aff + 75;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff02 = double_integrator_QP_solver_noCD_ds_aff + 75;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc02 = double_integrator_QP_solver_noCD_dl_cc + 75;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc02 = double_integrator_QP_solver_noCD_ds_cc + 75;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub02 = double_integrator_QP_solver_noCD_ccrhs + 75;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp02 = double_integrator_QP_solver_noCD_s + 81;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp02 = double_integrator_QP_solver_noCD_l + 81;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp02 = double_integrator_QP_solver_noCD_lbys + 81;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff02 = double_integrator_QP_solver_noCD_dl_aff + 81;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff02 = double_integrator_QP_solver_noCD_ds_aff + 81;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc02 = double_integrator_QP_solver_noCD_dl_cc + 81;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc02 = double_integrator_QP_solver_noCD_ds_cc + 81;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp02 = double_integrator_QP_solver_noCD_ccrhs + 81;
+int double_integrator_QP_solver_noCD_lbIdx02[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb02 = double_integrator_QP_solver_noCD_l + 65;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb02 = double_integrator_QP_solver_noCD_s + 65;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb02 = double_integrator_QP_solver_noCD_lbys + 65;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb02[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff02 = double_integrator_QP_solver_noCD_dl_aff + 65;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff02 = double_integrator_QP_solver_noCD_ds_aff + 65;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc02 = double_integrator_QP_solver_noCD_dl_cc + 65;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc02 = double_integrator_QP_solver_noCD_ds_cc + 65;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl02 = double_integrator_QP_solver_noCD_ccrhs + 65;
+int double_integrator_QP_solver_noCD_ubIdx02[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub02 = double_integrator_QP_solver_noCD_l + 69;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub02 = double_integrator_QP_solver_noCD_s + 69;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub02 = double_integrator_QP_solver_noCD_lbys + 69;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub02[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff02 = double_integrator_QP_solver_noCD_dl_aff + 69;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff02 = double_integrator_QP_solver_noCD_ds_aff + 69;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc02 = double_integrator_QP_solver_noCD_dl_cc + 69;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc02 = double_integrator_QP_solver_noCD_ds_cc + 69;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub02 = double_integrator_QP_solver_noCD_ccrhs + 69;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp02 = double_integrator_QP_solver_noCD_s + 73;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp02 = double_integrator_QP_solver_noCD_l + 73;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp02 = double_integrator_QP_solver_noCD_lbys + 73;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff02 = double_integrator_QP_solver_noCD_dl_aff + 73;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff02 = double_integrator_QP_solver_noCD_ds_aff + 73;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc02 = double_integrator_QP_solver_noCD_dl_cc + 73;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc02 = double_integrator_QP_solver_noCD_ds_cc + 73;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp02 = double_integrator_QP_solver_noCD_ccrhs + 73;
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rip02[22];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Phi02[153];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_W02[119];
@@ -3465,34 +3409,34 @@ double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Ld03[28]
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_yy03[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_bmy03[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_c03[7] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
-int double_integrator_QP_solver_noCD_lbIdx03[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb03 = double_integrator_QP_solver_noCD_l + 103;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb03 = double_integrator_QP_solver_noCD_s + 103;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb03 = double_integrator_QP_solver_noCD_lbys + 103;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb03[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff03 = double_integrator_QP_solver_noCD_dl_aff + 103;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff03 = double_integrator_QP_solver_noCD_ds_aff + 103;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc03 = double_integrator_QP_solver_noCD_dl_cc + 103;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc03 = double_integrator_QP_solver_noCD_ds_cc + 103;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl03 = double_integrator_QP_solver_noCD_ccrhs + 103;
-int double_integrator_QP_solver_noCD_ubIdx03[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub03 = double_integrator_QP_solver_noCD_l + 109;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub03 = double_integrator_QP_solver_noCD_s + 109;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub03 = double_integrator_QP_solver_noCD_lbys + 109;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub03[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff03 = double_integrator_QP_solver_noCD_dl_aff + 109;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff03 = double_integrator_QP_solver_noCD_ds_aff + 109;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc03 = double_integrator_QP_solver_noCD_dl_cc + 109;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc03 = double_integrator_QP_solver_noCD_ds_cc + 109;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub03 = double_integrator_QP_solver_noCD_ccrhs + 109;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp03 = double_integrator_QP_solver_noCD_s + 115;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp03 = double_integrator_QP_solver_noCD_l + 115;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp03 = double_integrator_QP_solver_noCD_lbys + 115;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff03 = double_integrator_QP_solver_noCD_dl_aff + 115;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff03 = double_integrator_QP_solver_noCD_ds_aff + 115;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc03 = double_integrator_QP_solver_noCD_dl_cc + 115;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc03 = double_integrator_QP_solver_noCD_ds_cc + 115;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp03 = double_integrator_QP_solver_noCD_ccrhs + 115;
+int double_integrator_QP_solver_noCD_lbIdx03[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb03 = double_integrator_QP_solver_noCD_l + 95;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb03 = double_integrator_QP_solver_noCD_s + 95;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb03 = double_integrator_QP_solver_noCD_lbys + 95;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb03[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff03 = double_integrator_QP_solver_noCD_dl_aff + 95;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff03 = double_integrator_QP_solver_noCD_ds_aff + 95;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc03 = double_integrator_QP_solver_noCD_dl_cc + 95;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc03 = double_integrator_QP_solver_noCD_ds_cc + 95;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl03 = double_integrator_QP_solver_noCD_ccrhs + 95;
+int double_integrator_QP_solver_noCD_ubIdx03[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub03 = double_integrator_QP_solver_noCD_l + 99;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub03 = double_integrator_QP_solver_noCD_s + 99;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub03 = double_integrator_QP_solver_noCD_lbys + 99;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub03[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff03 = double_integrator_QP_solver_noCD_dl_aff + 99;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff03 = double_integrator_QP_solver_noCD_ds_aff + 99;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc03 = double_integrator_QP_solver_noCD_dl_cc + 99;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc03 = double_integrator_QP_solver_noCD_ds_cc + 99;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub03 = double_integrator_QP_solver_noCD_ccrhs + 99;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp03 = double_integrator_QP_solver_noCD_s + 103;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp03 = double_integrator_QP_solver_noCD_l + 103;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp03 = double_integrator_QP_solver_noCD_lbys + 103;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff03 = double_integrator_QP_solver_noCD_dl_aff + 103;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff03 = double_integrator_QP_solver_noCD_ds_aff + 103;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc03 = double_integrator_QP_solver_noCD_dl_cc + 103;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc03 = double_integrator_QP_solver_noCD_ds_cc + 103;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp03 = double_integrator_QP_solver_noCD_ccrhs + 103;
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rip03[22];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Phi03[153];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_W03[119];
@@ -3519,34 +3463,34 @@ double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Ld04[28]
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_yy04[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_bmy04[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_c04[7] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
-int double_integrator_QP_solver_noCD_lbIdx04[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb04 = double_integrator_QP_solver_noCD_l + 137;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb04 = double_integrator_QP_solver_noCD_s + 137;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb04 = double_integrator_QP_solver_noCD_lbys + 137;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb04[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff04 = double_integrator_QP_solver_noCD_dl_aff + 137;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff04 = double_integrator_QP_solver_noCD_ds_aff + 137;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc04 = double_integrator_QP_solver_noCD_dl_cc + 137;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc04 = double_integrator_QP_solver_noCD_ds_cc + 137;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl04 = double_integrator_QP_solver_noCD_ccrhs + 137;
-int double_integrator_QP_solver_noCD_ubIdx04[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub04 = double_integrator_QP_solver_noCD_l + 143;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub04 = double_integrator_QP_solver_noCD_s + 143;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub04 = double_integrator_QP_solver_noCD_lbys + 143;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub04[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff04 = double_integrator_QP_solver_noCD_dl_aff + 143;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff04 = double_integrator_QP_solver_noCD_ds_aff + 143;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc04 = double_integrator_QP_solver_noCD_dl_cc + 143;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc04 = double_integrator_QP_solver_noCD_ds_cc + 143;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub04 = double_integrator_QP_solver_noCD_ccrhs + 143;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp04 = double_integrator_QP_solver_noCD_s + 149;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp04 = double_integrator_QP_solver_noCD_l + 149;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp04 = double_integrator_QP_solver_noCD_lbys + 149;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff04 = double_integrator_QP_solver_noCD_dl_aff + 149;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff04 = double_integrator_QP_solver_noCD_ds_aff + 149;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc04 = double_integrator_QP_solver_noCD_dl_cc + 149;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc04 = double_integrator_QP_solver_noCD_ds_cc + 149;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp04 = double_integrator_QP_solver_noCD_ccrhs + 149;
+int double_integrator_QP_solver_noCD_lbIdx04[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb04 = double_integrator_QP_solver_noCD_l + 125;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb04 = double_integrator_QP_solver_noCD_s + 125;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb04 = double_integrator_QP_solver_noCD_lbys + 125;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb04[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff04 = double_integrator_QP_solver_noCD_dl_aff + 125;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff04 = double_integrator_QP_solver_noCD_ds_aff + 125;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc04 = double_integrator_QP_solver_noCD_dl_cc + 125;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc04 = double_integrator_QP_solver_noCD_ds_cc + 125;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl04 = double_integrator_QP_solver_noCD_ccrhs + 125;
+int double_integrator_QP_solver_noCD_ubIdx04[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub04 = double_integrator_QP_solver_noCD_l + 129;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub04 = double_integrator_QP_solver_noCD_s + 129;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub04 = double_integrator_QP_solver_noCD_lbys + 129;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub04[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff04 = double_integrator_QP_solver_noCD_dl_aff + 129;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff04 = double_integrator_QP_solver_noCD_ds_aff + 129;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc04 = double_integrator_QP_solver_noCD_dl_cc + 129;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc04 = double_integrator_QP_solver_noCD_ds_cc + 129;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub04 = double_integrator_QP_solver_noCD_ccrhs + 129;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp04 = double_integrator_QP_solver_noCD_s + 133;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp04 = double_integrator_QP_solver_noCD_l + 133;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp04 = double_integrator_QP_solver_noCD_lbys + 133;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff04 = double_integrator_QP_solver_noCD_dl_aff + 133;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff04 = double_integrator_QP_solver_noCD_ds_aff + 133;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc04 = double_integrator_QP_solver_noCD_dl_cc + 133;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc04 = double_integrator_QP_solver_noCD_ds_cc + 133;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp04 = double_integrator_QP_solver_noCD_ccrhs + 133;
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rip04[22];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Phi04[153];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_W04[119];
@@ -3573,34 +3517,34 @@ double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Ld05[28]
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_yy05[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_bmy05[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_c05[7] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
-int double_integrator_QP_solver_noCD_lbIdx05[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb05 = double_integrator_QP_solver_noCD_l + 171;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb05 = double_integrator_QP_solver_noCD_s + 171;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb05 = double_integrator_QP_solver_noCD_lbys + 171;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb05[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff05 = double_integrator_QP_solver_noCD_dl_aff + 171;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff05 = double_integrator_QP_solver_noCD_ds_aff + 171;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc05 = double_integrator_QP_solver_noCD_dl_cc + 171;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc05 = double_integrator_QP_solver_noCD_ds_cc + 171;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl05 = double_integrator_QP_solver_noCD_ccrhs + 171;
-int double_integrator_QP_solver_noCD_ubIdx05[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub05 = double_integrator_QP_solver_noCD_l + 177;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub05 = double_integrator_QP_solver_noCD_s + 177;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub05 = double_integrator_QP_solver_noCD_lbys + 177;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub05[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff05 = double_integrator_QP_solver_noCD_dl_aff + 177;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff05 = double_integrator_QP_solver_noCD_ds_aff + 177;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc05 = double_integrator_QP_solver_noCD_dl_cc + 177;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc05 = double_integrator_QP_solver_noCD_ds_cc + 177;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub05 = double_integrator_QP_solver_noCD_ccrhs + 177;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp05 = double_integrator_QP_solver_noCD_s + 183;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp05 = double_integrator_QP_solver_noCD_l + 183;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp05 = double_integrator_QP_solver_noCD_lbys + 183;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff05 = double_integrator_QP_solver_noCD_dl_aff + 183;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff05 = double_integrator_QP_solver_noCD_ds_aff + 183;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc05 = double_integrator_QP_solver_noCD_dl_cc + 183;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc05 = double_integrator_QP_solver_noCD_ds_cc + 183;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp05 = double_integrator_QP_solver_noCD_ccrhs + 183;
+int double_integrator_QP_solver_noCD_lbIdx05[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb05 = double_integrator_QP_solver_noCD_l + 155;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb05 = double_integrator_QP_solver_noCD_s + 155;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb05 = double_integrator_QP_solver_noCD_lbys + 155;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb05[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff05 = double_integrator_QP_solver_noCD_dl_aff + 155;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff05 = double_integrator_QP_solver_noCD_ds_aff + 155;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc05 = double_integrator_QP_solver_noCD_dl_cc + 155;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc05 = double_integrator_QP_solver_noCD_ds_cc + 155;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl05 = double_integrator_QP_solver_noCD_ccrhs + 155;
+int double_integrator_QP_solver_noCD_ubIdx05[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub05 = double_integrator_QP_solver_noCD_l + 159;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub05 = double_integrator_QP_solver_noCD_s + 159;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub05 = double_integrator_QP_solver_noCD_lbys + 159;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub05[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff05 = double_integrator_QP_solver_noCD_dl_aff + 159;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff05 = double_integrator_QP_solver_noCD_ds_aff + 159;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc05 = double_integrator_QP_solver_noCD_dl_cc + 159;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc05 = double_integrator_QP_solver_noCD_ds_cc + 159;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub05 = double_integrator_QP_solver_noCD_ccrhs + 159;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp05 = double_integrator_QP_solver_noCD_s + 163;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp05 = double_integrator_QP_solver_noCD_l + 163;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp05 = double_integrator_QP_solver_noCD_lbys + 163;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff05 = double_integrator_QP_solver_noCD_dl_aff + 163;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff05 = double_integrator_QP_solver_noCD_ds_aff + 163;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc05 = double_integrator_QP_solver_noCD_dl_cc + 163;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc05 = double_integrator_QP_solver_noCD_ds_cc + 163;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp05 = double_integrator_QP_solver_noCD_ccrhs + 163;
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rip05[22];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Phi05[153];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_W05[119];
@@ -3627,34 +3571,34 @@ double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Ld06[28]
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_yy06[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_bmy06[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_c06[7] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
-int double_integrator_QP_solver_noCD_lbIdx06[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb06 = double_integrator_QP_solver_noCD_l + 205;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb06 = double_integrator_QP_solver_noCD_s + 205;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb06 = double_integrator_QP_solver_noCD_lbys + 205;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb06[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff06 = double_integrator_QP_solver_noCD_dl_aff + 205;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff06 = double_integrator_QP_solver_noCD_ds_aff + 205;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc06 = double_integrator_QP_solver_noCD_dl_cc + 205;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc06 = double_integrator_QP_solver_noCD_ds_cc + 205;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl06 = double_integrator_QP_solver_noCD_ccrhs + 205;
-int double_integrator_QP_solver_noCD_ubIdx06[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub06 = double_integrator_QP_solver_noCD_l + 211;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub06 = double_integrator_QP_solver_noCD_s + 211;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub06 = double_integrator_QP_solver_noCD_lbys + 211;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub06[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff06 = double_integrator_QP_solver_noCD_dl_aff + 211;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff06 = double_integrator_QP_solver_noCD_ds_aff + 211;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc06 = double_integrator_QP_solver_noCD_dl_cc + 211;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc06 = double_integrator_QP_solver_noCD_ds_cc + 211;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub06 = double_integrator_QP_solver_noCD_ccrhs + 211;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp06 = double_integrator_QP_solver_noCD_s + 217;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp06 = double_integrator_QP_solver_noCD_l + 217;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp06 = double_integrator_QP_solver_noCD_lbys + 217;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff06 = double_integrator_QP_solver_noCD_dl_aff + 217;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff06 = double_integrator_QP_solver_noCD_ds_aff + 217;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc06 = double_integrator_QP_solver_noCD_dl_cc + 217;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc06 = double_integrator_QP_solver_noCD_ds_cc + 217;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp06 = double_integrator_QP_solver_noCD_ccrhs + 217;
+int double_integrator_QP_solver_noCD_lbIdx06[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb06 = double_integrator_QP_solver_noCD_l + 185;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb06 = double_integrator_QP_solver_noCD_s + 185;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb06 = double_integrator_QP_solver_noCD_lbys + 185;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb06[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff06 = double_integrator_QP_solver_noCD_dl_aff + 185;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff06 = double_integrator_QP_solver_noCD_ds_aff + 185;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc06 = double_integrator_QP_solver_noCD_dl_cc + 185;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc06 = double_integrator_QP_solver_noCD_ds_cc + 185;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl06 = double_integrator_QP_solver_noCD_ccrhs + 185;
+int double_integrator_QP_solver_noCD_ubIdx06[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub06 = double_integrator_QP_solver_noCD_l + 189;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub06 = double_integrator_QP_solver_noCD_s + 189;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub06 = double_integrator_QP_solver_noCD_lbys + 189;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub06[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff06 = double_integrator_QP_solver_noCD_dl_aff + 189;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff06 = double_integrator_QP_solver_noCD_ds_aff + 189;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc06 = double_integrator_QP_solver_noCD_dl_cc + 189;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc06 = double_integrator_QP_solver_noCD_ds_cc + 189;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub06 = double_integrator_QP_solver_noCD_ccrhs + 189;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp06 = double_integrator_QP_solver_noCD_s + 193;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp06 = double_integrator_QP_solver_noCD_l + 193;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp06 = double_integrator_QP_solver_noCD_lbys + 193;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff06 = double_integrator_QP_solver_noCD_dl_aff + 193;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff06 = double_integrator_QP_solver_noCD_ds_aff + 193;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc06 = double_integrator_QP_solver_noCD_dl_cc + 193;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc06 = double_integrator_QP_solver_noCD_ds_cc + 193;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp06 = double_integrator_QP_solver_noCD_ccrhs + 193;
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rip06[22];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Phi06[153];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_W06[119];
@@ -3681,34 +3625,34 @@ double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Ld07[28]
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_yy07[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_bmy07[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_c07[7] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
-int double_integrator_QP_solver_noCD_lbIdx07[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb07 = double_integrator_QP_solver_noCD_l + 239;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb07 = double_integrator_QP_solver_noCD_s + 239;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb07 = double_integrator_QP_solver_noCD_lbys + 239;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb07[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff07 = double_integrator_QP_solver_noCD_dl_aff + 239;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff07 = double_integrator_QP_solver_noCD_ds_aff + 239;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc07 = double_integrator_QP_solver_noCD_dl_cc + 239;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc07 = double_integrator_QP_solver_noCD_ds_cc + 239;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl07 = double_integrator_QP_solver_noCD_ccrhs + 239;
-int double_integrator_QP_solver_noCD_ubIdx07[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub07 = double_integrator_QP_solver_noCD_l + 245;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub07 = double_integrator_QP_solver_noCD_s + 245;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub07 = double_integrator_QP_solver_noCD_lbys + 245;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub07[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff07 = double_integrator_QP_solver_noCD_dl_aff + 245;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff07 = double_integrator_QP_solver_noCD_ds_aff + 245;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc07 = double_integrator_QP_solver_noCD_dl_cc + 245;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc07 = double_integrator_QP_solver_noCD_ds_cc + 245;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub07 = double_integrator_QP_solver_noCD_ccrhs + 245;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp07 = double_integrator_QP_solver_noCD_s + 251;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp07 = double_integrator_QP_solver_noCD_l + 251;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp07 = double_integrator_QP_solver_noCD_lbys + 251;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff07 = double_integrator_QP_solver_noCD_dl_aff + 251;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff07 = double_integrator_QP_solver_noCD_ds_aff + 251;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc07 = double_integrator_QP_solver_noCD_dl_cc + 251;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc07 = double_integrator_QP_solver_noCD_ds_cc + 251;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp07 = double_integrator_QP_solver_noCD_ccrhs + 251;
+int double_integrator_QP_solver_noCD_lbIdx07[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb07 = double_integrator_QP_solver_noCD_l + 215;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb07 = double_integrator_QP_solver_noCD_s + 215;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb07 = double_integrator_QP_solver_noCD_lbys + 215;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb07[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff07 = double_integrator_QP_solver_noCD_dl_aff + 215;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff07 = double_integrator_QP_solver_noCD_ds_aff + 215;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc07 = double_integrator_QP_solver_noCD_dl_cc + 215;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc07 = double_integrator_QP_solver_noCD_ds_cc + 215;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl07 = double_integrator_QP_solver_noCD_ccrhs + 215;
+int double_integrator_QP_solver_noCD_ubIdx07[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub07 = double_integrator_QP_solver_noCD_l + 219;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub07 = double_integrator_QP_solver_noCD_s + 219;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub07 = double_integrator_QP_solver_noCD_lbys + 219;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub07[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff07 = double_integrator_QP_solver_noCD_dl_aff + 219;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff07 = double_integrator_QP_solver_noCD_ds_aff + 219;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc07 = double_integrator_QP_solver_noCD_dl_cc + 219;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc07 = double_integrator_QP_solver_noCD_ds_cc + 219;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub07 = double_integrator_QP_solver_noCD_ccrhs + 219;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp07 = double_integrator_QP_solver_noCD_s + 223;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp07 = double_integrator_QP_solver_noCD_l + 223;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp07 = double_integrator_QP_solver_noCD_lbys + 223;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff07 = double_integrator_QP_solver_noCD_dl_aff + 223;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff07 = double_integrator_QP_solver_noCD_ds_aff + 223;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc07 = double_integrator_QP_solver_noCD_dl_cc + 223;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc07 = double_integrator_QP_solver_noCD_ds_cc + 223;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp07 = double_integrator_QP_solver_noCD_ccrhs + 223;
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rip07[22];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Phi07[153];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_W07[119];
@@ -3735,34 +3679,34 @@ double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Ld08[28]
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_yy08[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_bmy08[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_c08[7] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
-int double_integrator_QP_solver_noCD_lbIdx08[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb08 = double_integrator_QP_solver_noCD_l + 273;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb08 = double_integrator_QP_solver_noCD_s + 273;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb08 = double_integrator_QP_solver_noCD_lbys + 273;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb08[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff08 = double_integrator_QP_solver_noCD_dl_aff + 273;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff08 = double_integrator_QP_solver_noCD_ds_aff + 273;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc08 = double_integrator_QP_solver_noCD_dl_cc + 273;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc08 = double_integrator_QP_solver_noCD_ds_cc + 273;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl08 = double_integrator_QP_solver_noCD_ccrhs + 273;
-int double_integrator_QP_solver_noCD_ubIdx08[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub08 = double_integrator_QP_solver_noCD_l + 279;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub08 = double_integrator_QP_solver_noCD_s + 279;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub08 = double_integrator_QP_solver_noCD_lbys + 279;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub08[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff08 = double_integrator_QP_solver_noCD_dl_aff + 279;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff08 = double_integrator_QP_solver_noCD_ds_aff + 279;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc08 = double_integrator_QP_solver_noCD_dl_cc + 279;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc08 = double_integrator_QP_solver_noCD_ds_cc + 279;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub08 = double_integrator_QP_solver_noCD_ccrhs + 279;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp08 = double_integrator_QP_solver_noCD_s + 285;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp08 = double_integrator_QP_solver_noCD_l + 285;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp08 = double_integrator_QP_solver_noCD_lbys + 285;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff08 = double_integrator_QP_solver_noCD_dl_aff + 285;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff08 = double_integrator_QP_solver_noCD_ds_aff + 285;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc08 = double_integrator_QP_solver_noCD_dl_cc + 285;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc08 = double_integrator_QP_solver_noCD_ds_cc + 285;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp08 = double_integrator_QP_solver_noCD_ccrhs + 285;
+int double_integrator_QP_solver_noCD_lbIdx08[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb08 = double_integrator_QP_solver_noCD_l + 245;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb08 = double_integrator_QP_solver_noCD_s + 245;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb08 = double_integrator_QP_solver_noCD_lbys + 245;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb08[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff08 = double_integrator_QP_solver_noCD_dl_aff + 245;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff08 = double_integrator_QP_solver_noCD_ds_aff + 245;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc08 = double_integrator_QP_solver_noCD_dl_cc + 245;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc08 = double_integrator_QP_solver_noCD_ds_cc + 245;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl08 = double_integrator_QP_solver_noCD_ccrhs + 245;
+int double_integrator_QP_solver_noCD_ubIdx08[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub08 = double_integrator_QP_solver_noCD_l + 249;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub08 = double_integrator_QP_solver_noCD_s + 249;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub08 = double_integrator_QP_solver_noCD_lbys + 249;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub08[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff08 = double_integrator_QP_solver_noCD_dl_aff + 249;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff08 = double_integrator_QP_solver_noCD_ds_aff + 249;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc08 = double_integrator_QP_solver_noCD_dl_cc + 249;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc08 = double_integrator_QP_solver_noCD_ds_cc + 249;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub08 = double_integrator_QP_solver_noCD_ccrhs + 249;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp08 = double_integrator_QP_solver_noCD_s + 253;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp08 = double_integrator_QP_solver_noCD_l + 253;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp08 = double_integrator_QP_solver_noCD_lbys + 253;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff08 = double_integrator_QP_solver_noCD_dl_aff + 253;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff08 = double_integrator_QP_solver_noCD_ds_aff + 253;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc08 = double_integrator_QP_solver_noCD_dl_cc + 253;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc08 = double_integrator_QP_solver_noCD_ds_cc + 253;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp08 = double_integrator_QP_solver_noCD_ccrhs + 253;
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rip08[22];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Phi08[153];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_W08[119];
@@ -3789,34 +3733,34 @@ double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Ld09[28]
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_yy09[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_bmy09[7];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_c09[7] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
-int double_integrator_QP_solver_noCD_lbIdx09[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb09 = double_integrator_QP_solver_noCD_l + 307;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb09 = double_integrator_QP_solver_noCD_s + 307;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb09 = double_integrator_QP_solver_noCD_lbys + 307;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb09[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff09 = double_integrator_QP_solver_noCD_dl_aff + 307;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff09 = double_integrator_QP_solver_noCD_ds_aff + 307;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc09 = double_integrator_QP_solver_noCD_dl_cc + 307;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc09 = double_integrator_QP_solver_noCD_ds_cc + 307;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl09 = double_integrator_QP_solver_noCD_ccrhs + 307;
-int double_integrator_QP_solver_noCD_ubIdx09[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub09 = double_integrator_QP_solver_noCD_l + 313;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub09 = double_integrator_QP_solver_noCD_s + 313;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub09 = double_integrator_QP_solver_noCD_lbys + 313;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub09[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff09 = double_integrator_QP_solver_noCD_dl_aff + 313;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff09 = double_integrator_QP_solver_noCD_ds_aff + 313;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc09 = double_integrator_QP_solver_noCD_dl_cc + 313;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc09 = double_integrator_QP_solver_noCD_ds_cc + 313;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub09 = double_integrator_QP_solver_noCD_ccrhs + 313;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp09 = double_integrator_QP_solver_noCD_s + 319;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp09 = double_integrator_QP_solver_noCD_l + 319;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp09 = double_integrator_QP_solver_noCD_lbys + 319;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff09 = double_integrator_QP_solver_noCD_dl_aff + 319;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff09 = double_integrator_QP_solver_noCD_ds_aff + 319;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc09 = double_integrator_QP_solver_noCD_dl_cc + 319;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc09 = double_integrator_QP_solver_noCD_ds_cc + 319;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp09 = double_integrator_QP_solver_noCD_ccrhs + 319;
+int double_integrator_QP_solver_noCD_lbIdx09[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb09 = double_integrator_QP_solver_noCD_l + 275;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb09 = double_integrator_QP_solver_noCD_s + 275;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb09 = double_integrator_QP_solver_noCD_lbys + 275;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb09[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff09 = double_integrator_QP_solver_noCD_dl_aff + 275;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff09 = double_integrator_QP_solver_noCD_ds_aff + 275;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc09 = double_integrator_QP_solver_noCD_dl_cc + 275;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc09 = double_integrator_QP_solver_noCD_ds_cc + 275;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl09 = double_integrator_QP_solver_noCD_ccrhs + 275;
+int double_integrator_QP_solver_noCD_ubIdx09[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub09 = double_integrator_QP_solver_noCD_l + 279;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub09 = double_integrator_QP_solver_noCD_s + 279;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub09 = double_integrator_QP_solver_noCD_lbys + 279;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub09[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff09 = double_integrator_QP_solver_noCD_dl_aff + 279;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff09 = double_integrator_QP_solver_noCD_ds_aff + 279;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc09 = double_integrator_QP_solver_noCD_dl_cc + 279;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc09 = double_integrator_QP_solver_noCD_ds_cc + 279;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub09 = double_integrator_QP_solver_noCD_ccrhs + 279;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp09 = double_integrator_QP_solver_noCD_s + 283;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp09 = double_integrator_QP_solver_noCD_l + 283;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp09 = double_integrator_QP_solver_noCD_lbys + 283;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff09 = double_integrator_QP_solver_noCD_dl_aff + 283;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff09 = double_integrator_QP_solver_noCD_ds_aff + 283;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc09 = double_integrator_QP_solver_noCD_dl_cc + 283;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc09 = double_integrator_QP_solver_noCD_ds_cc + 283;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp09 = double_integrator_QP_solver_noCD_ccrhs + 283;
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rip09[22];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Phi09[153];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_W09[119];
@@ -3859,34 +3803,34 @@ double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Ld10[10]
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_yy10[4];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_bmy10[4];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_c10[4] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
-int double_integrator_QP_solver_noCD_lbIdx10[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb10 = double_integrator_QP_solver_noCD_l + 341;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb10 = double_integrator_QP_solver_noCD_s + 341;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb10 = double_integrator_QP_solver_noCD_lbys + 341;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb10[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff10 = double_integrator_QP_solver_noCD_dl_aff + 341;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff10 = double_integrator_QP_solver_noCD_ds_aff + 341;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc10 = double_integrator_QP_solver_noCD_dl_cc + 341;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc10 = double_integrator_QP_solver_noCD_ds_cc + 341;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl10 = double_integrator_QP_solver_noCD_ccrhs + 341;
-int double_integrator_QP_solver_noCD_ubIdx10[6] = {0, 1, 2, 3, 4, 5};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub10 = double_integrator_QP_solver_noCD_l + 347;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub10 = double_integrator_QP_solver_noCD_s + 347;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub10 = double_integrator_QP_solver_noCD_lbys + 347;
-double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub10[6];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff10 = double_integrator_QP_solver_noCD_dl_aff + 347;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff10 = double_integrator_QP_solver_noCD_ds_aff + 347;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc10 = double_integrator_QP_solver_noCD_dl_cc + 347;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc10 = double_integrator_QP_solver_noCD_ds_cc + 347;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub10 = double_integrator_QP_solver_noCD_ccrhs + 347;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp10 = double_integrator_QP_solver_noCD_s + 353;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp10 = double_integrator_QP_solver_noCD_l + 353;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp10 = double_integrator_QP_solver_noCD_lbys + 353;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff10 = double_integrator_QP_solver_noCD_dl_aff + 353;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff10 = double_integrator_QP_solver_noCD_ds_aff + 353;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc10 = double_integrator_QP_solver_noCD_dl_cc + 353;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc10 = double_integrator_QP_solver_noCD_ds_cc + 353;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp10 = double_integrator_QP_solver_noCD_ccrhs + 353;
+int double_integrator_QP_solver_noCD_lbIdx10[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb10 = double_integrator_QP_solver_noCD_l + 305;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb10 = double_integrator_QP_solver_noCD_s + 305;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb10 = double_integrator_QP_solver_noCD_lbys + 305;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb10[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff10 = double_integrator_QP_solver_noCD_dl_aff + 305;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff10 = double_integrator_QP_solver_noCD_ds_aff + 305;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc10 = double_integrator_QP_solver_noCD_dl_cc + 305;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc10 = double_integrator_QP_solver_noCD_ds_cc + 305;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl10 = double_integrator_QP_solver_noCD_ccrhs + 305;
+int double_integrator_QP_solver_noCD_ubIdx10[4] = {2, 3, 4, 5};
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub10 = double_integrator_QP_solver_noCD_l + 309;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub10 = double_integrator_QP_solver_noCD_s + 309;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub10 = double_integrator_QP_solver_noCD_lbys + 309;
+double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub10[4];
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff10 = double_integrator_QP_solver_noCD_dl_aff + 309;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff10 = double_integrator_QP_solver_noCD_ds_aff + 309;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc10 = double_integrator_QP_solver_noCD_dl_cc + 309;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc10 = double_integrator_QP_solver_noCD_ds_cc + 309;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub10 = double_integrator_QP_solver_noCD_ccrhs + 309;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp10 = double_integrator_QP_solver_noCD_s + 313;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp10 = double_integrator_QP_solver_noCD_l + 313;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp10 = double_integrator_QP_solver_noCD_lbys + 313;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff10 = double_integrator_QP_solver_noCD_dl_aff + 313;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff10 = double_integrator_QP_solver_noCD_ds_aff + 313;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc10 = double_integrator_QP_solver_noCD_dl_cc + 313;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc10 = double_integrator_QP_solver_noCD_ds_cc + 313;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp10 = double_integrator_QP_solver_noCD_ccrhs + 313;
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rip10[22];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Phi10[120];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_D10[105] = {-1.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 
@@ -3918,33 +3862,33 @@ double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_grad_eq
 double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_grad_ineq11 = double_integrator_QP_solver_noCD_grad_ineq + 185;
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_ctv11[4];
 int double_integrator_QP_solver_noCD_lbIdx11[4] = {0, 1, 2, 3};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb11 = double_integrator_QP_solver_noCD_l + 375;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb11 = double_integrator_QP_solver_noCD_s + 375;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb11 = double_integrator_QP_solver_noCD_lbys + 375;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llb11 = double_integrator_QP_solver_noCD_l + 335;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_slb11 = double_integrator_QP_solver_noCD_s + 335;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_llbbyslb11 = double_integrator_QP_solver_noCD_lbys + 335;
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rilb11[4];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff11 = double_integrator_QP_solver_noCD_dl_aff + 375;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff11 = double_integrator_QP_solver_noCD_ds_aff + 375;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc11 = double_integrator_QP_solver_noCD_dl_cc + 375;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc11 = double_integrator_QP_solver_noCD_ds_cc + 375;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl11 = double_integrator_QP_solver_noCD_ccrhs + 375;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbaff11 = double_integrator_QP_solver_noCD_dl_aff + 335;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbaff11 = double_integrator_QP_solver_noCD_ds_aff + 335;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dllbcc11 = double_integrator_QP_solver_noCD_dl_cc + 335;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dslbcc11 = double_integrator_QP_solver_noCD_ds_cc + 335;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsl11 = double_integrator_QP_solver_noCD_ccrhs + 335;
 int double_integrator_QP_solver_noCD_ubIdx11[4] = {0, 1, 2, 3};
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub11 = double_integrator_QP_solver_noCD_l + 379;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub11 = double_integrator_QP_solver_noCD_s + 379;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub11 = double_integrator_QP_solver_noCD_lbys + 379;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lub11 = double_integrator_QP_solver_noCD_l + 339;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sub11 = double_integrator_QP_solver_noCD_s + 339;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lubbysub11 = double_integrator_QP_solver_noCD_lbys + 339;
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_riub11[4];
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff11 = double_integrator_QP_solver_noCD_dl_aff + 379;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff11 = double_integrator_QP_solver_noCD_ds_aff + 379;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc11 = double_integrator_QP_solver_noCD_dl_cc + 379;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc11 = double_integrator_QP_solver_noCD_ds_cc + 379;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub11 = double_integrator_QP_solver_noCD_ccrhs + 379;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp11 = double_integrator_QP_solver_noCD_s + 383;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp11 = double_integrator_QP_solver_noCD_l + 383;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp11 = double_integrator_QP_solver_noCD_lbys + 383;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff11 = double_integrator_QP_solver_noCD_dl_aff + 383;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff11 = double_integrator_QP_solver_noCD_ds_aff + 383;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc11 = double_integrator_QP_solver_noCD_dl_cc + 383;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc11 = double_integrator_QP_solver_noCD_ds_cc + 383;
-double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp11 = double_integrator_QP_solver_noCD_ccrhs + 383;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubaff11 = double_integrator_QP_solver_noCD_dl_aff + 339;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubaff11 = double_integrator_QP_solver_noCD_ds_aff + 339;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlubcc11 = double_integrator_QP_solver_noCD_dl_cc + 339;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsubcc11 = double_integrator_QP_solver_noCD_ds_cc + 339;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsub11 = double_integrator_QP_solver_noCD_ccrhs + 339;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_sp11 = double_integrator_QP_solver_noCD_s + 343;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lp11 = double_integrator_QP_solver_noCD_l + 343;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_lpbysp11 = double_integrator_QP_solver_noCD_lbys + 343;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_aff11 = double_integrator_QP_solver_noCD_dl_aff + 343;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_aff11 = double_integrator_QP_solver_noCD_ds_aff + 343;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dlp_cc11 = double_integrator_QP_solver_noCD_dl_cc + 343;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_dsp_cc11 = double_integrator_QP_solver_noCD_ds_cc + 343;
+double_integrator_QP_solver_noCD_FLOAT* double_integrator_QP_solver_noCD_ccrhsp11 = double_integrator_QP_solver_noCD_ccrhs + 343;
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_rip11[8];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_Phi11[10];
 double_integrator_QP_solver_noCD_FLOAT double_integrator_QP_solver_noCD_D11[4] = {-1.0000000000000000E+000, 
@@ -3971,11 +3915,11 @@ int exitcode;
 info->it = 0;
 double_integrator_QP_solver_noCD_LA_INITIALIZEVECTOR_189(double_integrator_QP_solver_noCD_z, 0);
 double_integrator_QP_solver_noCD_LA_INITIALIZEVECTOR_74(double_integrator_QP_solver_noCD_v, 1);
-double_integrator_QP_solver_noCD_LA_INITIALIZEVECTOR_391(double_integrator_QP_solver_noCD_l, 10);
-double_integrator_QP_solver_noCD_LA_INITIALIZEVECTOR_391(double_integrator_QP_solver_noCD_s, 10);
+double_integrator_QP_solver_noCD_LA_INITIALIZEVECTOR_351(double_integrator_QP_solver_noCD_l, 10);
+double_integrator_QP_solver_noCD_LA_INITIALIZEVECTOR_351(double_integrator_QP_solver_noCD_s, 10);
 info->mu = 0;
-double_integrator_QP_solver_noCD_LA_DOTACC_391(double_integrator_QP_solver_noCD_l, double_integrator_QP_solver_noCD_s, &info->mu);
-info->mu /= 391;
+double_integrator_QP_solver_noCD_LA_DOTACC_351(double_integrator_QP_solver_noCD_l, double_integrator_QP_solver_noCD_s, &info->mu);
+info->mu /= 351;
 while( 1 ){
 info->pobj = 0;
 double_integrator_QP_solver_noCD_LA_DIAG_QUADFCN_17(double_integrator_QP_solver_noCD_H00, params->f1, double_integrator_QP_solver_noCD_z00, double_integrator_QP_solver_noCD_grad_cost00, &info->pobj);
@@ -4019,60 +3963,60 @@ info->res_ineq = 0;
 double_integrator_QP_solver_noCD_LA_VSUBADD3_7(params->lb1, double_integrator_QP_solver_noCD_z00, double_integrator_QP_solver_noCD_lbIdx00, double_integrator_QP_solver_noCD_llb00, double_integrator_QP_solver_noCD_slb00, double_integrator_QP_solver_noCD_rilb00, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_VSUBADD2_6(double_integrator_QP_solver_noCD_z00, double_integrator_QP_solver_noCD_ubIdx00, params->ub1, double_integrator_QP_solver_noCD_lub00, double_integrator_QP_solver_noCD_sub00, double_integrator_QP_solver_noCD_riub00, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_MVSUBADD_22_17(params->A1, double_integrator_QP_solver_noCD_z00, params->b1, double_integrator_QP_solver_noCD_sp00, double_integrator_QP_solver_noCD_lp00, double_integrator_QP_solver_noCD_rip00, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD3_6(params->lb2, double_integrator_QP_solver_noCD_z01, double_integrator_QP_solver_noCD_lbIdx01, double_integrator_QP_solver_noCD_llb01, double_integrator_QP_solver_noCD_slb01, double_integrator_QP_solver_noCD_rilb01, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD2_6(double_integrator_QP_solver_noCD_z01, double_integrator_QP_solver_noCD_ubIdx01, params->ub2, double_integrator_QP_solver_noCD_lub01, double_integrator_QP_solver_noCD_sub01, double_integrator_QP_solver_noCD_riub01, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD3_4(params->lb2, double_integrator_QP_solver_noCD_z01, double_integrator_QP_solver_noCD_lbIdx01, double_integrator_QP_solver_noCD_llb01, double_integrator_QP_solver_noCD_slb01, double_integrator_QP_solver_noCD_rilb01, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD2_4(double_integrator_QP_solver_noCD_z01, double_integrator_QP_solver_noCD_ubIdx01, params->ub2, double_integrator_QP_solver_noCD_lub01, double_integrator_QP_solver_noCD_sub01, double_integrator_QP_solver_noCD_riub01, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_MVSUBADD_22_17(params->A2, double_integrator_QP_solver_noCD_z01, params->b2, double_integrator_QP_solver_noCD_sp01, double_integrator_QP_solver_noCD_lp01, double_integrator_QP_solver_noCD_rip01, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD3_6(params->lb3, double_integrator_QP_solver_noCD_z02, double_integrator_QP_solver_noCD_lbIdx02, double_integrator_QP_solver_noCD_llb02, double_integrator_QP_solver_noCD_slb02, double_integrator_QP_solver_noCD_rilb02, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD2_6(double_integrator_QP_solver_noCD_z02, double_integrator_QP_solver_noCD_ubIdx02, params->ub3, double_integrator_QP_solver_noCD_lub02, double_integrator_QP_solver_noCD_sub02, double_integrator_QP_solver_noCD_riub02, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD3_4(params->lb3, double_integrator_QP_solver_noCD_z02, double_integrator_QP_solver_noCD_lbIdx02, double_integrator_QP_solver_noCD_llb02, double_integrator_QP_solver_noCD_slb02, double_integrator_QP_solver_noCD_rilb02, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD2_4(double_integrator_QP_solver_noCD_z02, double_integrator_QP_solver_noCD_ubIdx02, params->ub3, double_integrator_QP_solver_noCD_lub02, double_integrator_QP_solver_noCD_sub02, double_integrator_QP_solver_noCD_riub02, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_MVSUBADD_22_17(params->A3, double_integrator_QP_solver_noCD_z02, params->b3, double_integrator_QP_solver_noCD_sp02, double_integrator_QP_solver_noCD_lp02, double_integrator_QP_solver_noCD_rip02, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD3_6(params->lb4, double_integrator_QP_solver_noCD_z03, double_integrator_QP_solver_noCD_lbIdx03, double_integrator_QP_solver_noCD_llb03, double_integrator_QP_solver_noCD_slb03, double_integrator_QP_solver_noCD_rilb03, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD2_6(double_integrator_QP_solver_noCD_z03, double_integrator_QP_solver_noCD_ubIdx03, params->ub4, double_integrator_QP_solver_noCD_lub03, double_integrator_QP_solver_noCD_sub03, double_integrator_QP_solver_noCD_riub03, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD3_4(params->lb4, double_integrator_QP_solver_noCD_z03, double_integrator_QP_solver_noCD_lbIdx03, double_integrator_QP_solver_noCD_llb03, double_integrator_QP_solver_noCD_slb03, double_integrator_QP_solver_noCD_rilb03, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD2_4(double_integrator_QP_solver_noCD_z03, double_integrator_QP_solver_noCD_ubIdx03, params->ub4, double_integrator_QP_solver_noCD_lub03, double_integrator_QP_solver_noCD_sub03, double_integrator_QP_solver_noCD_riub03, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_MVSUBADD_22_17(params->A4, double_integrator_QP_solver_noCD_z03, params->b4, double_integrator_QP_solver_noCD_sp03, double_integrator_QP_solver_noCD_lp03, double_integrator_QP_solver_noCD_rip03, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD3_6(params->lb5, double_integrator_QP_solver_noCD_z04, double_integrator_QP_solver_noCD_lbIdx04, double_integrator_QP_solver_noCD_llb04, double_integrator_QP_solver_noCD_slb04, double_integrator_QP_solver_noCD_rilb04, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD2_6(double_integrator_QP_solver_noCD_z04, double_integrator_QP_solver_noCD_ubIdx04, params->ub5, double_integrator_QP_solver_noCD_lub04, double_integrator_QP_solver_noCD_sub04, double_integrator_QP_solver_noCD_riub04, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD3_4(params->lb5, double_integrator_QP_solver_noCD_z04, double_integrator_QP_solver_noCD_lbIdx04, double_integrator_QP_solver_noCD_llb04, double_integrator_QP_solver_noCD_slb04, double_integrator_QP_solver_noCD_rilb04, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD2_4(double_integrator_QP_solver_noCD_z04, double_integrator_QP_solver_noCD_ubIdx04, params->ub5, double_integrator_QP_solver_noCD_lub04, double_integrator_QP_solver_noCD_sub04, double_integrator_QP_solver_noCD_riub04, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_MVSUBADD_22_17(params->A5, double_integrator_QP_solver_noCD_z04, params->b5, double_integrator_QP_solver_noCD_sp04, double_integrator_QP_solver_noCD_lp04, double_integrator_QP_solver_noCD_rip04, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD3_6(params->lb6, double_integrator_QP_solver_noCD_z05, double_integrator_QP_solver_noCD_lbIdx05, double_integrator_QP_solver_noCD_llb05, double_integrator_QP_solver_noCD_slb05, double_integrator_QP_solver_noCD_rilb05, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD2_6(double_integrator_QP_solver_noCD_z05, double_integrator_QP_solver_noCD_ubIdx05, params->ub6, double_integrator_QP_solver_noCD_lub05, double_integrator_QP_solver_noCD_sub05, double_integrator_QP_solver_noCD_riub05, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD3_4(params->lb6, double_integrator_QP_solver_noCD_z05, double_integrator_QP_solver_noCD_lbIdx05, double_integrator_QP_solver_noCD_llb05, double_integrator_QP_solver_noCD_slb05, double_integrator_QP_solver_noCD_rilb05, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD2_4(double_integrator_QP_solver_noCD_z05, double_integrator_QP_solver_noCD_ubIdx05, params->ub6, double_integrator_QP_solver_noCD_lub05, double_integrator_QP_solver_noCD_sub05, double_integrator_QP_solver_noCD_riub05, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_MVSUBADD_22_17(params->A6, double_integrator_QP_solver_noCD_z05, params->b6, double_integrator_QP_solver_noCD_sp05, double_integrator_QP_solver_noCD_lp05, double_integrator_QP_solver_noCD_rip05, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD3_6(params->lb7, double_integrator_QP_solver_noCD_z06, double_integrator_QP_solver_noCD_lbIdx06, double_integrator_QP_solver_noCD_llb06, double_integrator_QP_solver_noCD_slb06, double_integrator_QP_solver_noCD_rilb06, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD2_6(double_integrator_QP_solver_noCD_z06, double_integrator_QP_solver_noCD_ubIdx06, params->ub7, double_integrator_QP_solver_noCD_lub06, double_integrator_QP_solver_noCD_sub06, double_integrator_QP_solver_noCD_riub06, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD3_4(params->lb7, double_integrator_QP_solver_noCD_z06, double_integrator_QP_solver_noCD_lbIdx06, double_integrator_QP_solver_noCD_llb06, double_integrator_QP_solver_noCD_slb06, double_integrator_QP_solver_noCD_rilb06, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD2_4(double_integrator_QP_solver_noCD_z06, double_integrator_QP_solver_noCD_ubIdx06, params->ub7, double_integrator_QP_solver_noCD_lub06, double_integrator_QP_solver_noCD_sub06, double_integrator_QP_solver_noCD_riub06, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_MVSUBADD_22_17(params->A7, double_integrator_QP_solver_noCD_z06, params->b7, double_integrator_QP_solver_noCD_sp06, double_integrator_QP_solver_noCD_lp06, double_integrator_QP_solver_noCD_rip06, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD3_6(params->lb8, double_integrator_QP_solver_noCD_z07, double_integrator_QP_solver_noCD_lbIdx07, double_integrator_QP_solver_noCD_llb07, double_integrator_QP_solver_noCD_slb07, double_integrator_QP_solver_noCD_rilb07, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD2_6(double_integrator_QP_solver_noCD_z07, double_integrator_QP_solver_noCD_ubIdx07, params->ub8, double_integrator_QP_solver_noCD_lub07, double_integrator_QP_solver_noCD_sub07, double_integrator_QP_solver_noCD_riub07, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD3_4(params->lb8, double_integrator_QP_solver_noCD_z07, double_integrator_QP_solver_noCD_lbIdx07, double_integrator_QP_solver_noCD_llb07, double_integrator_QP_solver_noCD_slb07, double_integrator_QP_solver_noCD_rilb07, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD2_4(double_integrator_QP_solver_noCD_z07, double_integrator_QP_solver_noCD_ubIdx07, params->ub8, double_integrator_QP_solver_noCD_lub07, double_integrator_QP_solver_noCD_sub07, double_integrator_QP_solver_noCD_riub07, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_MVSUBADD_22_17(params->A8, double_integrator_QP_solver_noCD_z07, params->b8, double_integrator_QP_solver_noCD_sp07, double_integrator_QP_solver_noCD_lp07, double_integrator_QP_solver_noCD_rip07, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD3_6(params->lb9, double_integrator_QP_solver_noCD_z08, double_integrator_QP_solver_noCD_lbIdx08, double_integrator_QP_solver_noCD_llb08, double_integrator_QP_solver_noCD_slb08, double_integrator_QP_solver_noCD_rilb08, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD2_6(double_integrator_QP_solver_noCD_z08, double_integrator_QP_solver_noCD_ubIdx08, params->ub9, double_integrator_QP_solver_noCD_lub08, double_integrator_QP_solver_noCD_sub08, double_integrator_QP_solver_noCD_riub08, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD3_4(params->lb9, double_integrator_QP_solver_noCD_z08, double_integrator_QP_solver_noCD_lbIdx08, double_integrator_QP_solver_noCD_llb08, double_integrator_QP_solver_noCD_slb08, double_integrator_QP_solver_noCD_rilb08, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD2_4(double_integrator_QP_solver_noCD_z08, double_integrator_QP_solver_noCD_ubIdx08, params->ub9, double_integrator_QP_solver_noCD_lub08, double_integrator_QP_solver_noCD_sub08, double_integrator_QP_solver_noCD_riub08, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_MVSUBADD_22_17(params->A9, double_integrator_QP_solver_noCD_z08, params->b9, double_integrator_QP_solver_noCD_sp08, double_integrator_QP_solver_noCD_lp08, double_integrator_QP_solver_noCD_rip08, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD3_6(params->lb10, double_integrator_QP_solver_noCD_z09, double_integrator_QP_solver_noCD_lbIdx09, double_integrator_QP_solver_noCD_llb09, double_integrator_QP_solver_noCD_slb09, double_integrator_QP_solver_noCD_rilb09, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD2_6(double_integrator_QP_solver_noCD_z09, double_integrator_QP_solver_noCD_ubIdx09, params->ub10, double_integrator_QP_solver_noCD_lub09, double_integrator_QP_solver_noCD_sub09, double_integrator_QP_solver_noCD_riub09, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD3_4(params->lb10, double_integrator_QP_solver_noCD_z09, double_integrator_QP_solver_noCD_lbIdx09, double_integrator_QP_solver_noCD_llb09, double_integrator_QP_solver_noCD_slb09, double_integrator_QP_solver_noCD_rilb09, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD2_4(double_integrator_QP_solver_noCD_z09, double_integrator_QP_solver_noCD_ubIdx09, params->ub10, double_integrator_QP_solver_noCD_lub09, double_integrator_QP_solver_noCD_sub09, double_integrator_QP_solver_noCD_riub09, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_MVSUBADD_22_17(params->A10, double_integrator_QP_solver_noCD_z09, params->b10, double_integrator_QP_solver_noCD_sp09, double_integrator_QP_solver_noCD_lp09, double_integrator_QP_solver_noCD_rip09, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD3_6(params->lb11, double_integrator_QP_solver_noCD_z10, double_integrator_QP_solver_noCD_lbIdx10, double_integrator_QP_solver_noCD_llb10, double_integrator_QP_solver_noCD_slb10, double_integrator_QP_solver_noCD_rilb10, &info->dgap, &info->res_ineq);
-double_integrator_QP_solver_noCD_LA_VSUBADD2_6(double_integrator_QP_solver_noCD_z10, double_integrator_QP_solver_noCD_ubIdx10, params->ub11, double_integrator_QP_solver_noCD_lub10, double_integrator_QP_solver_noCD_sub10, double_integrator_QP_solver_noCD_riub10, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD3_4(params->lb11, double_integrator_QP_solver_noCD_z10, double_integrator_QP_solver_noCD_lbIdx10, double_integrator_QP_solver_noCD_llb10, double_integrator_QP_solver_noCD_slb10, double_integrator_QP_solver_noCD_rilb10, &info->dgap, &info->res_ineq);
+double_integrator_QP_solver_noCD_LA_VSUBADD2_4(double_integrator_QP_solver_noCD_z10, double_integrator_QP_solver_noCD_ubIdx10, params->ub11, double_integrator_QP_solver_noCD_lub10, double_integrator_QP_solver_noCD_sub10, double_integrator_QP_solver_noCD_riub10, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_MVSUBADD_22_15(params->A11, double_integrator_QP_solver_noCD_z10, params->b11, double_integrator_QP_solver_noCD_sp10, double_integrator_QP_solver_noCD_lp10, double_integrator_QP_solver_noCD_rip10, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_VSUBADD3_4(params->lb12, double_integrator_QP_solver_noCD_z11, double_integrator_QP_solver_noCD_lbIdx11, double_integrator_QP_solver_noCD_llb11, double_integrator_QP_solver_noCD_slb11, double_integrator_QP_solver_noCD_rilb11, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_VSUBADD2_4(double_integrator_QP_solver_noCD_z11, double_integrator_QP_solver_noCD_ubIdx11, params->ub12, double_integrator_QP_solver_noCD_lub11, double_integrator_QP_solver_noCD_sub11, double_integrator_QP_solver_noCD_riub11, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_MVSUBADD_8_4(params->A12, double_integrator_QP_solver_noCD_z11, params->b12, double_integrator_QP_solver_noCD_sp11, double_integrator_QP_solver_noCD_lp11, double_integrator_QP_solver_noCD_rip11, &info->dgap, &info->res_ineq);
 double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_7_6(double_integrator_QP_solver_noCD_lub00, double_integrator_QP_solver_noCD_sub00, double_integrator_QP_solver_noCD_riub00, double_integrator_QP_solver_noCD_llb00, double_integrator_QP_solver_noCD_slb00, double_integrator_QP_solver_noCD_rilb00, double_integrator_QP_solver_noCD_lbIdx00, double_integrator_QP_solver_noCD_ubIdx00, double_integrator_QP_solver_noCD_grad_ineq00, double_integrator_QP_solver_noCD_lubbysub00, double_integrator_QP_solver_noCD_llbbyslb00);
 double_integrator_QP_solver_noCD_LA_INEQ_P_22_17(params->A1, double_integrator_QP_solver_noCD_lp00, double_integrator_QP_solver_noCD_sp00, double_integrator_QP_solver_noCD_rip00, double_integrator_QP_solver_noCD_grad_ineq00, double_integrator_QP_solver_noCD_lpbysp00);
-double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_6_6(double_integrator_QP_solver_noCD_lub01, double_integrator_QP_solver_noCD_sub01, double_integrator_QP_solver_noCD_riub01, double_integrator_QP_solver_noCD_llb01, double_integrator_QP_solver_noCD_slb01, double_integrator_QP_solver_noCD_rilb01, double_integrator_QP_solver_noCD_lbIdx01, double_integrator_QP_solver_noCD_ubIdx01, double_integrator_QP_solver_noCD_grad_ineq01, double_integrator_QP_solver_noCD_lubbysub01, double_integrator_QP_solver_noCD_llbbyslb01);
+double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_4_4(double_integrator_QP_solver_noCD_lub01, double_integrator_QP_solver_noCD_sub01, double_integrator_QP_solver_noCD_riub01, double_integrator_QP_solver_noCD_llb01, double_integrator_QP_solver_noCD_slb01, double_integrator_QP_solver_noCD_rilb01, double_integrator_QP_solver_noCD_lbIdx01, double_integrator_QP_solver_noCD_ubIdx01, double_integrator_QP_solver_noCD_grad_ineq01, double_integrator_QP_solver_noCD_lubbysub01, double_integrator_QP_solver_noCD_llbbyslb01);
 double_integrator_QP_solver_noCD_LA_INEQ_P_22_17(params->A2, double_integrator_QP_solver_noCD_lp01, double_integrator_QP_solver_noCD_sp01, double_integrator_QP_solver_noCD_rip01, double_integrator_QP_solver_noCD_grad_ineq01, double_integrator_QP_solver_noCD_lpbysp01);
-double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_6_6(double_integrator_QP_solver_noCD_lub02, double_integrator_QP_solver_noCD_sub02, double_integrator_QP_solver_noCD_riub02, double_integrator_QP_solver_noCD_llb02, double_integrator_QP_solver_noCD_slb02, double_integrator_QP_solver_noCD_rilb02, double_integrator_QP_solver_noCD_lbIdx02, double_integrator_QP_solver_noCD_ubIdx02, double_integrator_QP_solver_noCD_grad_ineq02, double_integrator_QP_solver_noCD_lubbysub02, double_integrator_QP_solver_noCD_llbbyslb02);
+double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_4_4(double_integrator_QP_solver_noCD_lub02, double_integrator_QP_solver_noCD_sub02, double_integrator_QP_solver_noCD_riub02, double_integrator_QP_solver_noCD_llb02, double_integrator_QP_solver_noCD_slb02, double_integrator_QP_solver_noCD_rilb02, double_integrator_QP_solver_noCD_lbIdx02, double_integrator_QP_solver_noCD_ubIdx02, double_integrator_QP_solver_noCD_grad_ineq02, double_integrator_QP_solver_noCD_lubbysub02, double_integrator_QP_solver_noCD_llbbyslb02);
 double_integrator_QP_solver_noCD_LA_INEQ_P_22_17(params->A3, double_integrator_QP_solver_noCD_lp02, double_integrator_QP_solver_noCD_sp02, double_integrator_QP_solver_noCD_rip02, double_integrator_QP_solver_noCD_grad_ineq02, double_integrator_QP_solver_noCD_lpbysp02);
-double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_6_6(double_integrator_QP_solver_noCD_lub03, double_integrator_QP_solver_noCD_sub03, double_integrator_QP_solver_noCD_riub03, double_integrator_QP_solver_noCD_llb03, double_integrator_QP_solver_noCD_slb03, double_integrator_QP_solver_noCD_rilb03, double_integrator_QP_solver_noCD_lbIdx03, double_integrator_QP_solver_noCD_ubIdx03, double_integrator_QP_solver_noCD_grad_ineq03, double_integrator_QP_solver_noCD_lubbysub03, double_integrator_QP_solver_noCD_llbbyslb03);
+double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_4_4(double_integrator_QP_solver_noCD_lub03, double_integrator_QP_solver_noCD_sub03, double_integrator_QP_solver_noCD_riub03, double_integrator_QP_solver_noCD_llb03, double_integrator_QP_solver_noCD_slb03, double_integrator_QP_solver_noCD_rilb03, double_integrator_QP_solver_noCD_lbIdx03, double_integrator_QP_solver_noCD_ubIdx03, double_integrator_QP_solver_noCD_grad_ineq03, double_integrator_QP_solver_noCD_lubbysub03, double_integrator_QP_solver_noCD_llbbyslb03);
 double_integrator_QP_solver_noCD_LA_INEQ_P_22_17(params->A4, double_integrator_QP_solver_noCD_lp03, double_integrator_QP_solver_noCD_sp03, double_integrator_QP_solver_noCD_rip03, double_integrator_QP_solver_noCD_grad_ineq03, double_integrator_QP_solver_noCD_lpbysp03);
-double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_6_6(double_integrator_QP_solver_noCD_lub04, double_integrator_QP_solver_noCD_sub04, double_integrator_QP_solver_noCD_riub04, double_integrator_QP_solver_noCD_llb04, double_integrator_QP_solver_noCD_slb04, double_integrator_QP_solver_noCD_rilb04, double_integrator_QP_solver_noCD_lbIdx04, double_integrator_QP_solver_noCD_ubIdx04, double_integrator_QP_solver_noCD_grad_ineq04, double_integrator_QP_solver_noCD_lubbysub04, double_integrator_QP_solver_noCD_llbbyslb04);
+double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_4_4(double_integrator_QP_solver_noCD_lub04, double_integrator_QP_solver_noCD_sub04, double_integrator_QP_solver_noCD_riub04, double_integrator_QP_solver_noCD_llb04, double_integrator_QP_solver_noCD_slb04, double_integrator_QP_solver_noCD_rilb04, double_integrator_QP_solver_noCD_lbIdx04, double_integrator_QP_solver_noCD_ubIdx04, double_integrator_QP_solver_noCD_grad_ineq04, double_integrator_QP_solver_noCD_lubbysub04, double_integrator_QP_solver_noCD_llbbyslb04);
 double_integrator_QP_solver_noCD_LA_INEQ_P_22_17(params->A5, double_integrator_QP_solver_noCD_lp04, double_integrator_QP_solver_noCD_sp04, double_integrator_QP_solver_noCD_rip04, double_integrator_QP_solver_noCD_grad_ineq04, double_integrator_QP_solver_noCD_lpbysp04);
-double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_6_6(double_integrator_QP_solver_noCD_lub05, double_integrator_QP_solver_noCD_sub05, double_integrator_QP_solver_noCD_riub05, double_integrator_QP_solver_noCD_llb05, double_integrator_QP_solver_noCD_slb05, double_integrator_QP_solver_noCD_rilb05, double_integrator_QP_solver_noCD_lbIdx05, double_integrator_QP_solver_noCD_ubIdx05, double_integrator_QP_solver_noCD_grad_ineq05, double_integrator_QP_solver_noCD_lubbysub05, double_integrator_QP_solver_noCD_llbbyslb05);
+double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_4_4(double_integrator_QP_solver_noCD_lub05, double_integrator_QP_solver_noCD_sub05, double_integrator_QP_solver_noCD_riub05, double_integrator_QP_solver_noCD_llb05, double_integrator_QP_solver_noCD_slb05, double_integrator_QP_solver_noCD_rilb05, double_integrator_QP_solver_noCD_lbIdx05, double_integrator_QP_solver_noCD_ubIdx05, double_integrator_QP_solver_noCD_grad_ineq05, double_integrator_QP_solver_noCD_lubbysub05, double_integrator_QP_solver_noCD_llbbyslb05);
 double_integrator_QP_solver_noCD_LA_INEQ_P_22_17(params->A6, double_integrator_QP_solver_noCD_lp05, double_integrator_QP_solver_noCD_sp05, double_integrator_QP_solver_noCD_rip05, double_integrator_QP_solver_noCD_grad_ineq05, double_integrator_QP_solver_noCD_lpbysp05);
-double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_6_6(double_integrator_QP_solver_noCD_lub06, double_integrator_QP_solver_noCD_sub06, double_integrator_QP_solver_noCD_riub06, double_integrator_QP_solver_noCD_llb06, double_integrator_QP_solver_noCD_slb06, double_integrator_QP_solver_noCD_rilb06, double_integrator_QP_solver_noCD_lbIdx06, double_integrator_QP_solver_noCD_ubIdx06, double_integrator_QP_solver_noCD_grad_ineq06, double_integrator_QP_solver_noCD_lubbysub06, double_integrator_QP_solver_noCD_llbbyslb06);
+double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_4_4(double_integrator_QP_solver_noCD_lub06, double_integrator_QP_solver_noCD_sub06, double_integrator_QP_solver_noCD_riub06, double_integrator_QP_solver_noCD_llb06, double_integrator_QP_solver_noCD_slb06, double_integrator_QP_solver_noCD_rilb06, double_integrator_QP_solver_noCD_lbIdx06, double_integrator_QP_solver_noCD_ubIdx06, double_integrator_QP_solver_noCD_grad_ineq06, double_integrator_QP_solver_noCD_lubbysub06, double_integrator_QP_solver_noCD_llbbyslb06);
 double_integrator_QP_solver_noCD_LA_INEQ_P_22_17(params->A7, double_integrator_QP_solver_noCD_lp06, double_integrator_QP_solver_noCD_sp06, double_integrator_QP_solver_noCD_rip06, double_integrator_QP_solver_noCD_grad_ineq06, double_integrator_QP_solver_noCD_lpbysp06);
-double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_6_6(double_integrator_QP_solver_noCD_lub07, double_integrator_QP_solver_noCD_sub07, double_integrator_QP_solver_noCD_riub07, double_integrator_QP_solver_noCD_llb07, double_integrator_QP_solver_noCD_slb07, double_integrator_QP_solver_noCD_rilb07, double_integrator_QP_solver_noCD_lbIdx07, double_integrator_QP_solver_noCD_ubIdx07, double_integrator_QP_solver_noCD_grad_ineq07, double_integrator_QP_solver_noCD_lubbysub07, double_integrator_QP_solver_noCD_llbbyslb07);
+double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_4_4(double_integrator_QP_solver_noCD_lub07, double_integrator_QP_solver_noCD_sub07, double_integrator_QP_solver_noCD_riub07, double_integrator_QP_solver_noCD_llb07, double_integrator_QP_solver_noCD_slb07, double_integrator_QP_solver_noCD_rilb07, double_integrator_QP_solver_noCD_lbIdx07, double_integrator_QP_solver_noCD_ubIdx07, double_integrator_QP_solver_noCD_grad_ineq07, double_integrator_QP_solver_noCD_lubbysub07, double_integrator_QP_solver_noCD_llbbyslb07);
 double_integrator_QP_solver_noCD_LA_INEQ_P_22_17(params->A8, double_integrator_QP_solver_noCD_lp07, double_integrator_QP_solver_noCD_sp07, double_integrator_QP_solver_noCD_rip07, double_integrator_QP_solver_noCD_grad_ineq07, double_integrator_QP_solver_noCD_lpbysp07);
-double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_6_6(double_integrator_QP_solver_noCD_lub08, double_integrator_QP_solver_noCD_sub08, double_integrator_QP_solver_noCD_riub08, double_integrator_QP_solver_noCD_llb08, double_integrator_QP_solver_noCD_slb08, double_integrator_QP_solver_noCD_rilb08, double_integrator_QP_solver_noCD_lbIdx08, double_integrator_QP_solver_noCD_ubIdx08, double_integrator_QP_solver_noCD_grad_ineq08, double_integrator_QP_solver_noCD_lubbysub08, double_integrator_QP_solver_noCD_llbbyslb08);
+double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_4_4(double_integrator_QP_solver_noCD_lub08, double_integrator_QP_solver_noCD_sub08, double_integrator_QP_solver_noCD_riub08, double_integrator_QP_solver_noCD_llb08, double_integrator_QP_solver_noCD_slb08, double_integrator_QP_solver_noCD_rilb08, double_integrator_QP_solver_noCD_lbIdx08, double_integrator_QP_solver_noCD_ubIdx08, double_integrator_QP_solver_noCD_grad_ineq08, double_integrator_QP_solver_noCD_lubbysub08, double_integrator_QP_solver_noCD_llbbyslb08);
 double_integrator_QP_solver_noCD_LA_INEQ_P_22_17(params->A9, double_integrator_QP_solver_noCD_lp08, double_integrator_QP_solver_noCD_sp08, double_integrator_QP_solver_noCD_rip08, double_integrator_QP_solver_noCD_grad_ineq08, double_integrator_QP_solver_noCD_lpbysp08);
-double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_6_6(double_integrator_QP_solver_noCD_lub09, double_integrator_QP_solver_noCD_sub09, double_integrator_QP_solver_noCD_riub09, double_integrator_QP_solver_noCD_llb09, double_integrator_QP_solver_noCD_slb09, double_integrator_QP_solver_noCD_rilb09, double_integrator_QP_solver_noCD_lbIdx09, double_integrator_QP_solver_noCD_ubIdx09, double_integrator_QP_solver_noCD_grad_ineq09, double_integrator_QP_solver_noCD_lubbysub09, double_integrator_QP_solver_noCD_llbbyslb09);
+double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_17_4_4(double_integrator_QP_solver_noCD_lub09, double_integrator_QP_solver_noCD_sub09, double_integrator_QP_solver_noCD_riub09, double_integrator_QP_solver_noCD_llb09, double_integrator_QP_solver_noCD_slb09, double_integrator_QP_solver_noCD_rilb09, double_integrator_QP_solver_noCD_lbIdx09, double_integrator_QP_solver_noCD_ubIdx09, double_integrator_QP_solver_noCD_grad_ineq09, double_integrator_QP_solver_noCD_lubbysub09, double_integrator_QP_solver_noCD_llbbyslb09);
 double_integrator_QP_solver_noCD_LA_INEQ_P_22_17(params->A10, double_integrator_QP_solver_noCD_lp09, double_integrator_QP_solver_noCD_sp09, double_integrator_QP_solver_noCD_rip09, double_integrator_QP_solver_noCD_grad_ineq09, double_integrator_QP_solver_noCD_lpbysp09);
-double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_15_6_6(double_integrator_QP_solver_noCD_lub10, double_integrator_QP_solver_noCD_sub10, double_integrator_QP_solver_noCD_riub10, double_integrator_QP_solver_noCD_llb10, double_integrator_QP_solver_noCD_slb10, double_integrator_QP_solver_noCD_rilb10, double_integrator_QP_solver_noCD_lbIdx10, double_integrator_QP_solver_noCD_ubIdx10, double_integrator_QP_solver_noCD_grad_ineq10, double_integrator_QP_solver_noCD_lubbysub10, double_integrator_QP_solver_noCD_llbbyslb10);
+double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_15_4_4(double_integrator_QP_solver_noCD_lub10, double_integrator_QP_solver_noCD_sub10, double_integrator_QP_solver_noCD_riub10, double_integrator_QP_solver_noCD_llb10, double_integrator_QP_solver_noCD_slb10, double_integrator_QP_solver_noCD_rilb10, double_integrator_QP_solver_noCD_lbIdx10, double_integrator_QP_solver_noCD_ubIdx10, double_integrator_QP_solver_noCD_grad_ineq10, double_integrator_QP_solver_noCD_lubbysub10, double_integrator_QP_solver_noCD_llbbyslb10);
 double_integrator_QP_solver_noCD_LA_INEQ_P_22_15(params->A11, double_integrator_QP_solver_noCD_lp10, double_integrator_QP_solver_noCD_sp10, double_integrator_QP_solver_noCD_rip10, double_integrator_QP_solver_noCD_grad_ineq10, double_integrator_QP_solver_noCD_lpbysp10);
 double_integrator_QP_solver_noCD_LA_INEQ_B_GRAD_4_4_4(double_integrator_QP_solver_noCD_lub11, double_integrator_QP_solver_noCD_sub11, double_integrator_QP_solver_noCD_riub11, double_integrator_QP_solver_noCD_llb11, double_integrator_QP_solver_noCD_slb11, double_integrator_QP_solver_noCD_rilb11, double_integrator_QP_solver_noCD_lbIdx11, double_integrator_QP_solver_noCD_ubIdx11, double_integrator_QP_solver_noCD_grad_ineq11, double_integrator_QP_solver_noCD_lubbysub11, double_integrator_QP_solver_noCD_llbbyslb11);
 double_integrator_QP_solver_noCD_LA_INEQ_P_8_4(params->A12, double_integrator_QP_solver_noCD_lp11, double_integrator_QP_solver_noCD_sp11, double_integrator_QP_solver_noCD_rip11, double_integrator_QP_solver_noCD_grad_ineq11, double_integrator_QP_solver_noCD_lpbysp11);
@@ -4092,70 +4036,70 @@ double_integrator_QP_solver_noCD_LA_DENSE_ADDMTDM_22_17(params->A1, double_integ
 double_integrator_QP_solver_noCD_LA_DENSE_CHOL2_17(double_integrator_QP_solver_noCD_Phi00);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi00, double_integrator_QP_solver_noCD_C00, double_integrator_QP_solver_noCD_V00);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi00, double_integrator_QP_solver_noCD_rd00, double_integrator_QP_solver_noCD_Lbyrd00);
-double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_6_6(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb01, double_integrator_QP_solver_noCD_lbIdx01, double_integrator_QP_solver_noCD_lubbysub01, double_integrator_QP_solver_noCD_ubIdx01, double_integrator_QP_solver_noCD_Phi01);
+double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_4_4(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb01, double_integrator_QP_solver_noCD_lbIdx01, double_integrator_QP_solver_noCD_lubbysub01, double_integrator_QP_solver_noCD_ubIdx01, double_integrator_QP_solver_noCD_Phi01);
 double_integrator_QP_solver_noCD_LA_DENSE_ADDMTDM_22_17(params->A2, double_integrator_QP_solver_noCD_lpbysp01, double_integrator_QP_solver_noCD_Phi01);
 double_integrator_QP_solver_noCD_LA_DENSE_CHOL2_17(double_integrator_QP_solver_noCD_Phi01);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi01, double_integrator_QP_solver_noCD_C00, double_integrator_QP_solver_noCD_V01);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi01, double_integrator_QP_solver_noCD_D01, double_integrator_QP_solver_noCD_W01);
 double_integrator_QP_solver_noCD_LA_DENSE_MMTM_7_17_7(double_integrator_QP_solver_noCD_W01, double_integrator_QP_solver_noCD_V01, double_integrator_QP_solver_noCD_Ysd01);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi01, double_integrator_QP_solver_noCD_rd01, double_integrator_QP_solver_noCD_Lbyrd01);
-double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_6_6(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb02, double_integrator_QP_solver_noCD_lbIdx02, double_integrator_QP_solver_noCD_lubbysub02, double_integrator_QP_solver_noCD_ubIdx02, double_integrator_QP_solver_noCD_Phi02);
+double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_4_4(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb02, double_integrator_QP_solver_noCD_lbIdx02, double_integrator_QP_solver_noCD_lubbysub02, double_integrator_QP_solver_noCD_ubIdx02, double_integrator_QP_solver_noCD_Phi02);
 double_integrator_QP_solver_noCD_LA_DENSE_ADDMTDM_22_17(params->A3, double_integrator_QP_solver_noCD_lpbysp02, double_integrator_QP_solver_noCD_Phi02);
 double_integrator_QP_solver_noCD_LA_DENSE_CHOL2_17(double_integrator_QP_solver_noCD_Phi02);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi02, double_integrator_QP_solver_noCD_C00, double_integrator_QP_solver_noCD_V02);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi02, double_integrator_QP_solver_noCD_D01, double_integrator_QP_solver_noCD_W02);
 double_integrator_QP_solver_noCD_LA_DENSE_MMTM_7_17_7(double_integrator_QP_solver_noCD_W02, double_integrator_QP_solver_noCD_V02, double_integrator_QP_solver_noCD_Ysd02);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi02, double_integrator_QP_solver_noCD_rd02, double_integrator_QP_solver_noCD_Lbyrd02);
-double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_6_6(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb03, double_integrator_QP_solver_noCD_lbIdx03, double_integrator_QP_solver_noCD_lubbysub03, double_integrator_QP_solver_noCD_ubIdx03, double_integrator_QP_solver_noCD_Phi03);
+double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_4_4(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb03, double_integrator_QP_solver_noCD_lbIdx03, double_integrator_QP_solver_noCD_lubbysub03, double_integrator_QP_solver_noCD_ubIdx03, double_integrator_QP_solver_noCD_Phi03);
 double_integrator_QP_solver_noCD_LA_DENSE_ADDMTDM_22_17(params->A4, double_integrator_QP_solver_noCD_lpbysp03, double_integrator_QP_solver_noCD_Phi03);
 double_integrator_QP_solver_noCD_LA_DENSE_CHOL2_17(double_integrator_QP_solver_noCD_Phi03);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi03, double_integrator_QP_solver_noCD_C00, double_integrator_QP_solver_noCD_V03);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi03, double_integrator_QP_solver_noCD_D01, double_integrator_QP_solver_noCD_W03);
 double_integrator_QP_solver_noCD_LA_DENSE_MMTM_7_17_7(double_integrator_QP_solver_noCD_W03, double_integrator_QP_solver_noCD_V03, double_integrator_QP_solver_noCD_Ysd03);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi03, double_integrator_QP_solver_noCD_rd03, double_integrator_QP_solver_noCD_Lbyrd03);
-double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_6_6(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb04, double_integrator_QP_solver_noCD_lbIdx04, double_integrator_QP_solver_noCD_lubbysub04, double_integrator_QP_solver_noCD_ubIdx04, double_integrator_QP_solver_noCD_Phi04);
+double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_4_4(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb04, double_integrator_QP_solver_noCD_lbIdx04, double_integrator_QP_solver_noCD_lubbysub04, double_integrator_QP_solver_noCD_ubIdx04, double_integrator_QP_solver_noCD_Phi04);
 double_integrator_QP_solver_noCD_LA_DENSE_ADDMTDM_22_17(params->A5, double_integrator_QP_solver_noCD_lpbysp04, double_integrator_QP_solver_noCD_Phi04);
 double_integrator_QP_solver_noCD_LA_DENSE_CHOL2_17(double_integrator_QP_solver_noCD_Phi04);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi04, double_integrator_QP_solver_noCD_C00, double_integrator_QP_solver_noCD_V04);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi04, double_integrator_QP_solver_noCD_D01, double_integrator_QP_solver_noCD_W04);
 double_integrator_QP_solver_noCD_LA_DENSE_MMTM_7_17_7(double_integrator_QP_solver_noCD_W04, double_integrator_QP_solver_noCD_V04, double_integrator_QP_solver_noCD_Ysd04);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi04, double_integrator_QP_solver_noCD_rd04, double_integrator_QP_solver_noCD_Lbyrd04);
-double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_6_6(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb05, double_integrator_QP_solver_noCD_lbIdx05, double_integrator_QP_solver_noCD_lubbysub05, double_integrator_QP_solver_noCD_ubIdx05, double_integrator_QP_solver_noCD_Phi05);
+double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_4_4(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb05, double_integrator_QP_solver_noCD_lbIdx05, double_integrator_QP_solver_noCD_lubbysub05, double_integrator_QP_solver_noCD_ubIdx05, double_integrator_QP_solver_noCD_Phi05);
 double_integrator_QP_solver_noCD_LA_DENSE_ADDMTDM_22_17(params->A6, double_integrator_QP_solver_noCD_lpbysp05, double_integrator_QP_solver_noCD_Phi05);
 double_integrator_QP_solver_noCD_LA_DENSE_CHOL2_17(double_integrator_QP_solver_noCD_Phi05);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi05, double_integrator_QP_solver_noCD_C00, double_integrator_QP_solver_noCD_V05);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi05, double_integrator_QP_solver_noCD_D01, double_integrator_QP_solver_noCD_W05);
 double_integrator_QP_solver_noCD_LA_DENSE_MMTM_7_17_7(double_integrator_QP_solver_noCD_W05, double_integrator_QP_solver_noCD_V05, double_integrator_QP_solver_noCD_Ysd05);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi05, double_integrator_QP_solver_noCD_rd05, double_integrator_QP_solver_noCD_Lbyrd05);
-double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_6_6(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb06, double_integrator_QP_solver_noCD_lbIdx06, double_integrator_QP_solver_noCD_lubbysub06, double_integrator_QP_solver_noCD_ubIdx06, double_integrator_QP_solver_noCD_Phi06);
+double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_4_4(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb06, double_integrator_QP_solver_noCD_lbIdx06, double_integrator_QP_solver_noCD_lubbysub06, double_integrator_QP_solver_noCD_ubIdx06, double_integrator_QP_solver_noCD_Phi06);
 double_integrator_QP_solver_noCD_LA_DENSE_ADDMTDM_22_17(params->A7, double_integrator_QP_solver_noCD_lpbysp06, double_integrator_QP_solver_noCD_Phi06);
 double_integrator_QP_solver_noCD_LA_DENSE_CHOL2_17(double_integrator_QP_solver_noCD_Phi06);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi06, double_integrator_QP_solver_noCD_C00, double_integrator_QP_solver_noCD_V06);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi06, double_integrator_QP_solver_noCD_D01, double_integrator_QP_solver_noCD_W06);
 double_integrator_QP_solver_noCD_LA_DENSE_MMTM_7_17_7(double_integrator_QP_solver_noCD_W06, double_integrator_QP_solver_noCD_V06, double_integrator_QP_solver_noCD_Ysd06);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi06, double_integrator_QP_solver_noCD_rd06, double_integrator_QP_solver_noCD_Lbyrd06);
-double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_6_6(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb07, double_integrator_QP_solver_noCD_lbIdx07, double_integrator_QP_solver_noCD_lubbysub07, double_integrator_QP_solver_noCD_ubIdx07, double_integrator_QP_solver_noCD_Phi07);
+double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_4_4(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb07, double_integrator_QP_solver_noCD_lbIdx07, double_integrator_QP_solver_noCD_lubbysub07, double_integrator_QP_solver_noCD_ubIdx07, double_integrator_QP_solver_noCD_Phi07);
 double_integrator_QP_solver_noCD_LA_DENSE_ADDMTDM_22_17(params->A8, double_integrator_QP_solver_noCD_lpbysp07, double_integrator_QP_solver_noCD_Phi07);
 double_integrator_QP_solver_noCD_LA_DENSE_CHOL2_17(double_integrator_QP_solver_noCD_Phi07);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi07, double_integrator_QP_solver_noCD_C00, double_integrator_QP_solver_noCD_V07);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi07, double_integrator_QP_solver_noCD_D01, double_integrator_QP_solver_noCD_W07);
 double_integrator_QP_solver_noCD_LA_DENSE_MMTM_7_17_7(double_integrator_QP_solver_noCD_W07, double_integrator_QP_solver_noCD_V07, double_integrator_QP_solver_noCD_Ysd07);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi07, double_integrator_QP_solver_noCD_rd07, double_integrator_QP_solver_noCD_Lbyrd07);
-double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_6_6(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb08, double_integrator_QP_solver_noCD_lbIdx08, double_integrator_QP_solver_noCD_lubbysub08, double_integrator_QP_solver_noCD_ubIdx08, double_integrator_QP_solver_noCD_Phi08);
+double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_4_4(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb08, double_integrator_QP_solver_noCD_lbIdx08, double_integrator_QP_solver_noCD_lubbysub08, double_integrator_QP_solver_noCD_ubIdx08, double_integrator_QP_solver_noCD_Phi08);
 double_integrator_QP_solver_noCD_LA_DENSE_ADDMTDM_22_17(params->A9, double_integrator_QP_solver_noCD_lpbysp08, double_integrator_QP_solver_noCD_Phi08);
 double_integrator_QP_solver_noCD_LA_DENSE_CHOL2_17(double_integrator_QP_solver_noCD_Phi08);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi08, double_integrator_QP_solver_noCD_C00, double_integrator_QP_solver_noCD_V08);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi08, double_integrator_QP_solver_noCD_D01, double_integrator_QP_solver_noCD_W08);
 double_integrator_QP_solver_noCD_LA_DENSE_MMTM_7_17_7(double_integrator_QP_solver_noCD_W08, double_integrator_QP_solver_noCD_V08, double_integrator_QP_solver_noCD_Ysd08);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi08, double_integrator_QP_solver_noCD_rd08, double_integrator_QP_solver_noCD_Lbyrd08);
-double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_6_6(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb09, double_integrator_QP_solver_noCD_lbIdx09, double_integrator_QP_solver_noCD_lubbysub09, double_integrator_QP_solver_noCD_ubIdx09, double_integrator_QP_solver_noCD_Phi09);
+double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_17_4_4(double_integrator_QP_solver_noCD_H00, double_integrator_QP_solver_noCD_llbbyslb09, double_integrator_QP_solver_noCD_lbIdx09, double_integrator_QP_solver_noCD_lubbysub09, double_integrator_QP_solver_noCD_ubIdx09, double_integrator_QP_solver_noCD_Phi09);
 double_integrator_QP_solver_noCD_LA_DENSE_ADDMTDM_22_17(params->A10, double_integrator_QP_solver_noCD_lpbysp09, double_integrator_QP_solver_noCD_Phi09);
 double_integrator_QP_solver_noCD_LA_DENSE_CHOL2_17(double_integrator_QP_solver_noCD_Phi09);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi09, double_integrator_QP_solver_noCD_C00, double_integrator_QP_solver_noCD_V09);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_7_17(double_integrator_QP_solver_noCD_Phi09, double_integrator_QP_solver_noCD_D01, double_integrator_QP_solver_noCD_W09);
 double_integrator_QP_solver_noCD_LA_DENSE_MMTM_7_17_7(double_integrator_QP_solver_noCD_W09, double_integrator_QP_solver_noCD_V09, double_integrator_QP_solver_noCD_Ysd09);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi09, double_integrator_QP_solver_noCD_rd09, double_integrator_QP_solver_noCD_Lbyrd09);
-double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_15_6_6(double_integrator_QP_solver_noCD_H10, double_integrator_QP_solver_noCD_llbbyslb10, double_integrator_QP_solver_noCD_lbIdx10, double_integrator_QP_solver_noCD_lubbysub10, double_integrator_QP_solver_noCD_ubIdx10, double_integrator_QP_solver_noCD_Phi10);
+double_integrator_QP_solver_noCD_LA_INEQ_DENSE_DIAG_HESS_15_4_4(double_integrator_QP_solver_noCD_H10, double_integrator_QP_solver_noCD_llbbyslb10, double_integrator_QP_solver_noCD_lbIdx10, double_integrator_QP_solver_noCD_lubbysub10, double_integrator_QP_solver_noCD_ubIdx10, double_integrator_QP_solver_noCD_Phi10);
 double_integrator_QP_solver_noCD_LA_DENSE_ADDMTDM_22_15(params->A11, double_integrator_QP_solver_noCD_lpbysp10, double_integrator_QP_solver_noCD_Phi10);
 double_integrator_QP_solver_noCD_LA_DENSE_CHOL2_15(double_integrator_QP_solver_noCD_Phi10);
 double_integrator_QP_solver_noCD_LA_DENSE_MATRIXFORWARDSUB_4_15(double_integrator_QP_solver_noCD_Phi10, double_integrator_QP_solver_noCD_C10, double_integrator_QP_solver_noCD_V10);
@@ -4293,64 +4237,64 @@ double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_6(double_integrator_QP_solver_
 double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_lubbysub00, double_integrator_QP_solver_noCD_dsubaff00, double_integrator_QP_solver_noCD_lub00, double_integrator_QP_solver_noCD_dlubaff00);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB4_22_17(params->A1, double_integrator_QP_solver_noCD_dzaff00, double_integrator_QP_solver_noCD_rip00, double_integrator_QP_solver_noCD_dsp_aff00);
 double_integrator_QP_solver_noCD_LA_VSUB3_22(double_integrator_QP_solver_noCD_lpbysp00, double_integrator_QP_solver_noCD_dsp_aff00, double_integrator_QP_solver_noCD_lp00, double_integrator_QP_solver_noCD_dlp_aff00);
-double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_6(double_integrator_QP_solver_noCD_dzaff01, double_integrator_QP_solver_noCD_lbIdx01, double_integrator_QP_solver_noCD_rilb01, double_integrator_QP_solver_noCD_dslbaff01);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_llbbyslb01, double_integrator_QP_solver_noCD_dslbaff01, double_integrator_QP_solver_noCD_llb01, double_integrator_QP_solver_noCD_dllbaff01);
-double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_6(double_integrator_QP_solver_noCD_riub01, double_integrator_QP_solver_noCD_dzaff01, double_integrator_QP_solver_noCD_ubIdx01, double_integrator_QP_solver_noCD_dsubaff01);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_lubbysub01, double_integrator_QP_solver_noCD_dsubaff01, double_integrator_QP_solver_noCD_lub01, double_integrator_QP_solver_noCD_dlubaff01);
+double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_4(double_integrator_QP_solver_noCD_dzaff01, double_integrator_QP_solver_noCD_lbIdx01, double_integrator_QP_solver_noCD_rilb01, double_integrator_QP_solver_noCD_dslbaff01);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_llbbyslb01, double_integrator_QP_solver_noCD_dslbaff01, double_integrator_QP_solver_noCD_llb01, double_integrator_QP_solver_noCD_dllbaff01);
+double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_4(double_integrator_QP_solver_noCD_riub01, double_integrator_QP_solver_noCD_dzaff01, double_integrator_QP_solver_noCD_ubIdx01, double_integrator_QP_solver_noCD_dsubaff01);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_lubbysub01, double_integrator_QP_solver_noCD_dsubaff01, double_integrator_QP_solver_noCD_lub01, double_integrator_QP_solver_noCD_dlubaff01);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB4_22_17(params->A2, double_integrator_QP_solver_noCD_dzaff01, double_integrator_QP_solver_noCD_rip01, double_integrator_QP_solver_noCD_dsp_aff01);
 double_integrator_QP_solver_noCD_LA_VSUB3_22(double_integrator_QP_solver_noCD_lpbysp01, double_integrator_QP_solver_noCD_dsp_aff01, double_integrator_QP_solver_noCD_lp01, double_integrator_QP_solver_noCD_dlp_aff01);
-double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_6(double_integrator_QP_solver_noCD_dzaff02, double_integrator_QP_solver_noCD_lbIdx02, double_integrator_QP_solver_noCD_rilb02, double_integrator_QP_solver_noCD_dslbaff02);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_llbbyslb02, double_integrator_QP_solver_noCD_dslbaff02, double_integrator_QP_solver_noCD_llb02, double_integrator_QP_solver_noCD_dllbaff02);
-double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_6(double_integrator_QP_solver_noCD_riub02, double_integrator_QP_solver_noCD_dzaff02, double_integrator_QP_solver_noCD_ubIdx02, double_integrator_QP_solver_noCD_dsubaff02);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_lubbysub02, double_integrator_QP_solver_noCD_dsubaff02, double_integrator_QP_solver_noCD_lub02, double_integrator_QP_solver_noCD_dlubaff02);
+double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_4(double_integrator_QP_solver_noCD_dzaff02, double_integrator_QP_solver_noCD_lbIdx02, double_integrator_QP_solver_noCD_rilb02, double_integrator_QP_solver_noCD_dslbaff02);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_llbbyslb02, double_integrator_QP_solver_noCD_dslbaff02, double_integrator_QP_solver_noCD_llb02, double_integrator_QP_solver_noCD_dllbaff02);
+double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_4(double_integrator_QP_solver_noCD_riub02, double_integrator_QP_solver_noCD_dzaff02, double_integrator_QP_solver_noCD_ubIdx02, double_integrator_QP_solver_noCD_dsubaff02);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_lubbysub02, double_integrator_QP_solver_noCD_dsubaff02, double_integrator_QP_solver_noCD_lub02, double_integrator_QP_solver_noCD_dlubaff02);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB4_22_17(params->A3, double_integrator_QP_solver_noCD_dzaff02, double_integrator_QP_solver_noCD_rip02, double_integrator_QP_solver_noCD_dsp_aff02);
 double_integrator_QP_solver_noCD_LA_VSUB3_22(double_integrator_QP_solver_noCD_lpbysp02, double_integrator_QP_solver_noCD_dsp_aff02, double_integrator_QP_solver_noCD_lp02, double_integrator_QP_solver_noCD_dlp_aff02);
-double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_6(double_integrator_QP_solver_noCD_dzaff03, double_integrator_QP_solver_noCD_lbIdx03, double_integrator_QP_solver_noCD_rilb03, double_integrator_QP_solver_noCD_dslbaff03);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_llbbyslb03, double_integrator_QP_solver_noCD_dslbaff03, double_integrator_QP_solver_noCD_llb03, double_integrator_QP_solver_noCD_dllbaff03);
-double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_6(double_integrator_QP_solver_noCD_riub03, double_integrator_QP_solver_noCD_dzaff03, double_integrator_QP_solver_noCD_ubIdx03, double_integrator_QP_solver_noCD_dsubaff03);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_lubbysub03, double_integrator_QP_solver_noCD_dsubaff03, double_integrator_QP_solver_noCD_lub03, double_integrator_QP_solver_noCD_dlubaff03);
+double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_4(double_integrator_QP_solver_noCD_dzaff03, double_integrator_QP_solver_noCD_lbIdx03, double_integrator_QP_solver_noCD_rilb03, double_integrator_QP_solver_noCD_dslbaff03);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_llbbyslb03, double_integrator_QP_solver_noCD_dslbaff03, double_integrator_QP_solver_noCD_llb03, double_integrator_QP_solver_noCD_dllbaff03);
+double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_4(double_integrator_QP_solver_noCD_riub03, double_integrator_QP_solver_noCD_dzaff03, double_integrator_QP_solver_noCD_ubIdx03, double_integrator_QP_solver_noCD_dsubaff03);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_lubbysub03, double_integrator_QP_solver_noCD_dsubaff03, double_integrator_QP_solver_noCD_lub03, double_integrator_QP_solver_noCD_dlubaff03);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB4_22_17(params->A4, double_integrator_QP_solver_noCD_dzaff03, double_integrator_QP_solver_noCD_rip03, double_integrator_QP_solver_noCD_dsp_aff03);
 double_integrator_QP_solver_noCD_LA_VSUB3_22(double_integrator_QP_solver_noCD_lpbysp03, double_integrator_QP_solver_noCD_dsp_aff03, double_integrator_QP_solver_noCD_lp03, double_integrator_QP_solver_noCD_dlp_aff03);
-double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_6(double_integrator_QP_solver_noCD_dzaff04, double_integrator_QP_solver_noCD_lbIdx04, double_integrator_QP_solver_noCD_rilb04, double_integrator_QP_solver_noCD_dslbaff04);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_llbbyslb04, double_integrator_QP_solver_noCD_dslbaff04, double_integrator_QP_solver_noCD_llb04, double_integrator_QP_solver_noCD_dllbaff04);
-double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_6(double_integrator_QP_solver_noCD_riub04, double_integrator_QP_solver_noCD_dzaff04, double_integrator_QP_solver_noCD_ubIdx04, double_integrator_QP_solver_noCD_dsubaff04);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_lubbysub04, double_integrator_QP_solver_noCD_dsubaff04, double_integrator_QP_solver_noCD_lub04, double_integrator_QP_solver_noCD_dlubaff04);
+double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_4(double_integrator_QP_solver_noCD_dzaff04, double_integrator_QP_solver_noCD_lbIdx04, double_integrator_QP_solver_noCD_rilb04, double_integrator_QP_solver_noCD_dslbaff04);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_llbbyslb04, double_integrator_QP_solver_noCD_dslbaff04, double_integrator_QP_solver_noCD_llb04, double_integrator_QP_solver_noCD_dllbaff04);
+double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_4(double_integrator_QP_solver_noCD_riub04, double_integrator_QP_solver_noCD_dzaff04, double_integrator_QP_solver_noCD_ubIdx04, double_integrator_QP_solver_noCD_dsubaff04);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_lubbysub04, double_integrator_QP_solver_noCD_dsubaff04, double_integrator_QP_solver_noCD_lub04, double_integrator_QP_solver_noCD_dlubaff04);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB4_22_17(params->A5, double_integrator_QP_solver_noCD_dzaff04, double_integrator_QP_solver_noCD_rip04, double_integrator_QP_solver_noCD_dsp_aff04);
 double_integrator_QP_solver_noCD_LA_VSUB3_22(double_integrator_QP_solver_noCD_lpbysp04, double_integrator_QP_solver_noCD_dsp_aff04, double_integrator_QP_solver_noCD_lp04, double_integrator_QP_solver_noCD_dlp_aff04);
-double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_6(double_integrator_QP_solver_noCD_dzaff05, double_integrator_QP_solver_noCD_lbIdx05, double_integrator_QP_solver_noCD_rilb05, double_integrator_QP_solver_noCD_dslbaff05);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_llbbyslb05, double_integrator_QP_solver_noCD_dslbaff05, double_integrator_QP_solver_noCD_llb05, double_integrator_QP_solver_noCD_dllbaff05);
-double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_6(double_integrator_QP_solver_noCD_riub05, double_integrator_QP_solver_noCD_dzaff05, double_integrator_QP_solver_noCD_ubIdx05, double_integrator_QP_solver_noCD_dsubaff05);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_lubbysub05, double_integrator_QP_solver_noCD_dsubaff05, double_integrator_QP_solver_noCD_lub05, double_integrator_QP_solver_noCD_dlubaff05);
+double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_4(double_integrator_QP_solver_noCD_dzaff05, double_integrator_QP_solver_noCD_lbIdx05, double_integrator_QP_solver_noCD_rilb05, double_integrator_QP_solver_noCD_dslbaff05);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_llbbyslb05, double_integrator_QP_solver_noCD_dslbaff05, double_integrator_QP_solver_noCD_llb05, double_integrator_QP_solver_noCD_dllbaff05);
+double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_4(double_integrator_QP_solver_noCD_riub05, double_integrator_QP_solver_noCD_dzaff05, double_integrator_QP_solver_noCD_ubIdx05, double_integrator_QP_solver_noCD_dsubaff05);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_lubbysub05, double_integrator_QP_solver_noCD_dsubaff05, double_integrator_QP_solver_noCD_lub05, double_integrator_QP_solver_noCD_dlubaff05);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB4_22_17(params->A6, double_integrator_QP_solver_noCD_dzaff05, double_integrator_QP_solver_noCD_rip05, double_integrator_QP_solver_noCD_dsp_aff05);
 double_integrator_QP_solver_noCD_LA_VSUB3_22(double_integrator_QP_solver_noCD_lpbysp05, double_integrator_QP_solver_noCD_dsp_aff05, double_integrator_QP_solver_noCD_lp05, double_integrator_QP_solver_noCD_dlp_aff05);
-double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_6(double_integrator_QP_solver_noCD_dzaff06, double_integrator_QP_solver_noCD_lbIdx06, double_integrator_QP_solver_noCD_rilb06, double_integrator_QP_solver_noCD_dslbaff06);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_llbbyslb06, double_integrator_QP_solver_noCD_dslbaff06, double_integrator_QP_solver_noCD_llb06, double_integrator_QP_solver_noCD_dllbaff06);
-double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_6(double_integrator_QP_solver_noCD_riub06, double_integrator_QP_solver_noCD_dzaff06, double_integrator_QP_solver_noCD_ubIdx06, double_integrator_QP_solver_noCD_dsubaff06);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_lubbysub06, double_integrator_QP_solver_noCD_dsubaff06, double_integrator_QP_solver_noCD_lub06, double_integrator_QP_solver_noCD_dlubaff06);
+double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_4(double_integrator_QP_solver_noCD_dzaff06, double_integrator_QP_solver_noCD_lbIdx06, double_integrator_QP_solver_noCD_rilb06, double_integrator_QP_solver_noCD_dslbaff06);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_llbbyslb06, double_integrator_QP_solver_noCD_dslbaff06, double_integrator_QP_solver_noCD_llb06, double_integrator_QP_solver_noCD_dllbaff06);
+double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_4(double_integrator_QP_solver_noCD_riub06, double_integrator_QP_solver_noCD_dzaff06, double_integrator_QP_solver_noCD_ubIdx06, double_integrator_QP_solver_noCD_dsubaff06);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_lubbysub06, double_integrator_QP_solver_noCD_dsubaff06, double_integrator_QP_solver_noCD_lub06, double_integrator_QP_solver_noCD_dlubaff06);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB4_22_17(params->A7, double_integrator_QP_solver_noCD_dzaff06, double_integrator_QP_solver_noCD_rip06, double_integrator_QP_solver_noCD_dsp_aff06);
 double_integrator_QP_solver_noCD_LA_VSUB3_22(double_integrator_QP_solver_noCD_lpbysp06, double_integrator_QP_solver_noCD_dsp_aff06, double_integrator_QP_solver_noCD_lp06, double_integrator_QP_solver_noCD_dlp_aff06);
-double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_6(double_integrator_QP_solver_noCD_dzaff07, double_integrator_QP_solver_noCD_lbIdx07, double_integrator_QP_solver_noCD_rilb07, double_integrator_QP_solver_noCD_dslbaff07);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_llbbyslb07, double_integrator_QP_solver_noCD_dslbaff07, double_integrator_QP_solver_noCD_llb07, double_integrator_QP_solver_noCD_dllbaff07);
-double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_6(double_integrator_QP_solver_noCD_riub07, double_integrator_QP_solver_noCD_dzaff07, double_integrator_QP_solver_noCD_ubIdx07, double_integrator_QP_solver_noCD_dsubaff07);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_lubbysub07, double_integrator_QP_solver_noCD_dsubaff07, double_integrator_QP_solver_noCD_lub07, double_integrator_QP_solver_noCD_dlubaff07);
+double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_4(double_integrator_QP_solver_noCD_dzaff07, double_integrator_QP_solver_noCD_lbIdx07, double_integrator_QP_solver_noCD_rilb07, double_integrator_QP_solver_noCD_dslbaff07);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_llbbyslb07, double_integrator_QP_solver_noCD_dslbaff07, double_integrator_QP_solver_noCD_llb07, double_integrator_QP_solver_noCD_dllbaff07);
+double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_4(double_integrator_QP_solver_noCD_riub07, double_integrator_QP_solver_noCD_dzaff07, double_integrator_QP_solver_noCD_ubIdx07, double_integrator_QP_solver_noCD_dsubaff07);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_lubbysub07, double_integrator_QP_solver_noCD_dsubaff07, double_integrator_QP_solver_noCD_lub07, double_integrator_QP_solver_noCD_dlubaff07);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB4_22_17(params->A8, double_integrator_QP_solver_noCD_dzaff07, double_integrator_QP_solver_noCD_rip07, double_integrator_QP_solver_noCD_dsp_aff07);
 double_integrator_QP_solver_noCD_LA_VSUB3_22(double_integrator_QP_solver_noCD_lpbysp07, double_integrator_QP_solver_noCD_dsp_aff07, double_integrator_QP_solver_noCD_lp07, double_integrator_QP_solver_noCD_dlp_aff07);
-double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_6(double_integrator_QP_solver_noCD_dzaff08, double_integrator_QP_solver_noCD_lbIdx08, double_integrator_QP_solver_noCD_rilb08, double_integrator_QP_solver_noCD_dslbaff08);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_llbbyslb08, double_integrator_QP_solver_noCD_dslbaff08, double_integrator_QP_solver_noCD_llb08, double_integrator_QP_solver_noCD_dllbaff08);
-double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_6(double_integrator_QP_solver_noCD_riub08, double_integrator_QP_solver_noCD_dzaff08, double_integrator_QP_solver_noCD_ubIdx08, double_integrator_QP_solver_noCD_dsubaff08);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_lubbysub08, double_integrator_QP_solver_noCD_dsubaff08, double_integrator_QP_solver_noCD_lub08, double_integrator_QP_solver_noCD_dlubaff08);
+double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_4(double_integrator_QP_solver_noCD_dzaff08, double_integrator_QP_solver_noCD_lbIdx08, double_integrator_QP_solver_noCD_rilb08, double_integrator_QP_solver_noCD_dslbaff08);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_llbbyslb08, double_integrator_QP_solver_noCD_dslbaff08, double_integrator_QP_solver_noCD_llb08, double_integrator_QP_solver_noCD_dllbaff08);
+double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_4(double_integrator_QP_solver_noCD_riub08, double_integrator_QP_solver_noCD_dzaff08, double_integrator_QP_solver_noCD_ubIdx08, double_integrator_QP_solver_noCD_dsubaff08);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_lubbysub08, double_integrator_QP_solver_noCD_dsubaff08, double_integrator_QP_solver_noCD_lub08, double_integrator_QP_solver_noCD_dlubaff08);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB4_22_17(params->A9, double_integrator_QP_solver_noCD_dzaff08, double_integrator_QP_solver_noCD_rip08, double_integrator_QP_solver_noCD_dsp_aff08);
 double_integrator_QP_solver_noCD_LA_VSUB3_22(double_integrator_QP_solver_noCD_lpbysp08, double_integrator_QP_solver_noCD_dsp_aff08, double_integrator_QP_solver_noCD_lp08, double_integrator_QP_solver_noCD_dlp_aff08);
-double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_6(double_integrator_QP_solver_noCD_dzaff09, double_integrator_QP_solver_noCD_lbIdx09, double_integrator_QP_solver_noCD_rilb09, double_integrator_QP_solver_noCD_dslbaff09);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_llbbyslb09, double_integrator_QP_solver_noCD_dslbaff09, double_integrator_QP_solver_noCD_llb09, double_integrator_QP_solver_noCD_dllbaff09);
-double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_6(double_integrator_QP_solver_noCD_riub09, double_integrator_QP_solver_noCD_dzaff09, double_integrator_QP_solver_noCD_ubIdx09, double_integrator_QP_solver_noCD_dsubaff09);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_lubbysub09, double_integrator_QP_solver_noCD_dsubaff09, double_integrator_QP_solver_noCD_lub09, double_integrator_QP_solver_noCD_dlubaff09);
+double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_4(double_integrator_QP_solver_noCD_dzaff09, double_integrator_QP_solver_noCD_lbIdx09, double_integrator_QP_solver_noCD_rilb09, double_integrator_QP_solver_noCD_dslbaff09);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_llbbyslb09, double_integrator_QP_solver_noCD_dslbaff09, double_integrator_QP_solver_noCD_llb09, double_integrator_QP_solver_noCD_dllbaff09);
+double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_4(double_integrator_QP_solver_noCD_riub09, double_integrator_QP_solver_noCD_dzaff09, double_integrator_QP_solver_noCD_ubIdx09, double_integrator_QP_solver_noCD_dsubaff09);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_lubbysub09, double_integrator_QP_solver_noCD_dsubaff09, double_integrator_QP_solver_noCD_lub09, double_integrator_QP_solver_noCD_dlubaff09);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB4_22_17(params->A10, double_integrator_QP_solver_noCD_dzaff09, double_integrator_QP_solver_noCD_rip09, double_integrator_QP_solver_noCD_dsp_aff09);
 double_integrator_QP_solver_noCD_LA_VSUB3_22(double_integrator_QP_solver_noCD_lpbysp09, double_integrator_QP_solver_noCD_dsp_aff09, double_integrator_QP_solver_noCD_lp09, double_integrator_QP_solver_noCD_dlp_aff09);
-double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_6(double_integrator_QP_solver_noCD_dzaff10, double_integrator_QP_solver_noCD_lbIdx10, double_integrator_QP_solver_noCD_rilb10, double_integrator_QP_solver_noCD_dslbaff10);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_llbbyslb10, double_integrator_QP_solver_noCD_dslbaff10, double_integrator_QP_solver_noCD_llb10, double_integrator_QP_solver_noCD_dllbaff10);
-double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_6(double_integrator_QP_solver_noCD_riub10, double_integrator_QP_solver_noCD_dzaff10, double_integrator_QP_solver_noCD_ubIdx10, double_integrator_QP_solver_noCD_dsubaff10);
-double_integrator_QP_solver_noCD_LA_VSUB3_6(double_integrator_QP_solver_noCD_lubbysub10, double_integrator_QP_solver_noCD_dsubaff10, double_integrator_QP_solver_noCD_lub10, double_integrator_QP_solver_noCD_dlubaff10);
+double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_4(double_integrator_QP_solver_noCD_dzaff10, double_integrator_QP_solver_noCD_lbIdx10, double_integrator_QP_solver_noCD_rilb10, double_integrator_QP_solver_noCD_dslbaff10);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_llbbyslb10, double_integrator_QP_solver_noCD_dslbaff10, double_integrator_QP_solver_noCD_llb10, double_integrator_QP_solver_noCD_dllbaff10);
+double_integrator_QP_solver_noCD_LA_VSUB2_INDEXED_4(double_integrator_QP_solver_noCD_riub10, double_integrator_QP_solver_noCD_dzaff10, double_integrator_QP_solver_noCD_ubIdx10, double_integrator_QP_solver_noCD_dsubaff10);
+double_integrator_QP_solver_noCD_LA_VSUB3_4(double_integrator_QP_solver_noCD_lubbysub10, double_integrator_QP_solver_noCD_dsubaff10, double_integrator_QP_solver_noCD_lub10, double_integrator_QP_solver_noCD_dlubaff10);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB4_22_15(params->A11, double_integrator_QP_solver_noCD_dzaff10, double_integrator_QP_solver_noCD_rip10, double_integrator_QP_solver_noCD_dsp_aff10);
 double_integrator_QP_solver_noCD_LA_VSUB3_22(double_integrator_QP_solver_noCD_lpbysp10, double_integrator_QP_solver_noCD_dsp_aff10, double_integrator_QP_solver_noCD_lp10, double_integrator_QP_solver_noCD_dlp_aff10);
 double_integrator_QP_solver_noCD_LA_VSUB_INDEXED_4(double_integrator_QP_solver_noCD_dzaff11, double_integrator_QP_solver_noCD_lbIdx11, double_integrator_QP_solver_noCD_rilb11, double_integrator_QP_solver_noCD_dslbaff11);
@@ -4366,64 +4310,64 @@ exitcode = double_integrator_QP_solver_noCD_NOPROGRESS; break;
 sigma_3rdroot = info->mu_aff / info->mu;
 info->sigma = sigma_3rdroot*sigma_3rdroot*sigma_3rdroot;
 musigma = info->mu * info->sigma;
-double_integrator_QP_solver_noCD_LA_VSUB5_391(double_integrator_QP_solver_noCD_ds_aff, double_integrator_QP_solver_noCD_dl_aff, info->mu, info->sigma, double_integrator_QP_solver_noCD_ccrhs);
+double_integrator_QP_solver_noCD_LA_VSUB5_351(double_integrator_QP_solver_noCD_ds_aff, double_integrator_QP_solver_noCD_dl_aff, info->mu, info->sigma, double_integrator_QP_solver_noCD_ccrhs);
 double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_6_7(double_integrator_QP_solver_noCD_ccrhsub00, double_integrator_QP_solver_noCD_sub00, double_integrator_QP_solver_noCD_ubIdx00, double_integrator_QP_solver_noCD_ccrhsl00, double_integrator_QP_solver_noCD_slb00, double_integrator_QP_solver_noCD_lbIdx00, double_integrator_QP_solver_noCD_rd00);
-double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_6_6(double_integrator_QP_solver_noCD_ccrhsub01, double_integrator_QP_solver_noCD_sub01, double_integrator_QP_solver_noCD_ubIdx01, double_integrator_QP_solver_noCD_ccrhsl01, double_integrator_QP_solver_noCD_slb01, double_integrator_QP_solver_noCD_lbIdx01, double_integrator_QP_solver_noCD_rd01);
+double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_4_4(double_integrator_QP_solver_noCD_ccrhsub01, double_integrator_QP_solver_noCD_sub01, double_integrator_QP_solver_noCD_ubIdx01, double_integrator_QP_solver_noCD_ccrhsl01, double_integrator_QP_solver_noCD_slb01, double_integrator_QP_solver_noCD_lbIdx01, double_integrator_QP_solver_noCD_rd01);
 double_integrator_QP_solver_noCD_LA_DENSE_MTVMADD2_22_17(params->A1, double_integrator_QP_solver_noCD_ccrhsp00, double_integrator_QP_solver_noCD_sp00, double_integrator_QP_solver_noCD_rd00);
 double_integrator_QP_solver_noCD_LA_DENSE_MTVMADD2_22_17(params->A2, double_integrator_QP_solver_noCD_ccrhsp01, double_integrator_QP_solver_noCD_sp01, double_integrator_QP_solver_noCD_rd01);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi00, double_integrator_QP_solver_noCD_rd00, double_integrator_QP_solver_noCD_Lbyrd00);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi01, double_integrator_QP_solver_noCD_rd01, double_integrator_QP_solver_noCD_Lbyrd01);
 double_integrator_QP_solver_noCD_LA_DENSE_2MVMADD_7_17_17(double_integrator_QP_solver_noCD_V00, double_integrator_QP_solver_noCD_Lbyrd00, double_integrator_QP_solver_noCD_W01, double_integrator_QP_solver_noCD_Lbyrd01, double_integrator_QP_solver_noCD_beta00);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_7(double_integrator_QP_solver_noCD_Ld00, double_integrator_QP_solver_noCD_beta00, double_integrator_QP_solver_noCD_yy00);
-double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_6_6(double_integrator_QP_solver_noCD_ccrhsub02, double_integrator_QP_solver_noCD_sub02, double_integrator_QP_solver_noCD_ubIdx02, double_integrator_QP_solver_noCD_ccrhsl02, double_integrator_QP_solver_noCD_slb02, double_integrator_QP_solver_noCD_lbIdx02, double_integrator_QP_solver_noCD_rd02);
+double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_4_4(double_integrator_QP_solver_noCD_ccrhsub02, double_integrator_QP_solver_noCD_sub02, double_integrator_QP_solver_noCD_ubIdx02, double_integrator_QP_solver_noCD_ccrhsl02, double_integrator_QP_solver_noCD_slb02, double_integrator_QP_solver_noCD_lbIdx02, double_integrator_QP_solver_noCD_rd02);
 double_integrator_QP_solver_noCD_LA_DENSE_MTVMADD2_22_17(params->A3, double_integrator_QP_solver_noCD_ccrhsp02, double_integrator_QP_solver_noCD_sp02, double_integrator_QP_solver_noCD_rd02);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi02, double_integrator_QP_solver_noCD_rd02, double_integrator_QP_solver_noCD_Lbyrd02);
 double_integrator_QP_solver_noCD_LA_DENSE_2MVMADD_7_17_17(double_integrator_QP_solver_noCD_V01, double_integrator_QP_solver_noCD_Lbyrd01, double_integrator_QP_solver_noCD_W02, double_integrator_QP_solver_noCD_Lbyrd02, double_integrator_QP_solver_noCD_beta01);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB1_7_7(double_integrator_QP_solver_noCD_Lsd01, double_integrator_QP_solver_noCD_yy00, double_integrator_QP_solver_noCD_beta01, double_integrator_QP_solver_noCD_bmy01);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_7(double_integrator_QP_solver_noCD_Ld01, double_integrator_QP_solver_noCD_bmy01, double_integrator_QP_solver_noCD_yy01);
-double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_6_6(double_integrator_QP_solver_noCD_ccrhsub03, double_integrator_QP_solver_noCD_sub03, double_integrator_QP_solver_noCD_ubIdx03, double_integrator_QP_solver_noCD_ccrhsl03, double_integrator_QP_solver_noCD_slb03, double_integrator_QP_solver_noCD_lbIdx03, double_integrator_QP_solver_noCD_rd03);
+double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_4_4(double_integrator_QP_solver_noCD_ccrhsub03, double_integrator_QP_solver_noCD_sub03, double_integrator_QP_solver_noCD_ubIdx03, double_integrator_QP_solver_noCD_ccrhsl03, double_integrator_QP_solver_noCD_slb03, double_integrator_QP_solver_noCD_lbIdx03, double_integrator_QP_solver_noCD_rd03);
 double_integrator_QP_solver_noCD_LA_DENSE_MTVMADD2_22_17(params->A4, double_integrator_QP_solver_noCD_ccrhsp03, double_integrator_QP_solver_noCD_sp03, double_integrator_QP_solver_noCD_rd03);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi03, double_integrator_QP_solver_noCD_rd03, double_integrator_QP_solver_noCD_Lbyrd03);
 double_integrator_QP_solver_noCD_LA_DENSE_2MVMADD_7_17_17(double_integrator_QP_solver_noCD_V02, double_integrator_QP_solver_noCD_Lbyrd02, double_integrator_QP_solver_noCD_W03, double_integrator_QP_solver_noCD_Lbyrd03, double_integrator_QP_solver_noCD_beta02);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB1_7_7(double_integrator_QP_solver_noCD_Lsd02, double_integrator_QP_solver_noCD_yy01, double_integrator_QP_solver_noCD_beta02, double_integrator_QP_solver_noCD_bmy02);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_7(double_integrator_QP_solver_noCD_Ld02, double_integrator_QP_solver_noCD_bmy02, double_integrator_QP_solver_noCD_yy02);
-double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_6_6(double_integrator_QP_solver_noCD_ccrhsub04, double_integrator_QP_solver_noCD_sub04, double_integrator_QP_solver_noCD_ubIdx04, double_integrator_QP_solver_noCD_ccrhsl04, double_integrator_QP_solver_noCD_slb04, double_integrator_QP_solver_noCD_lbIdx04, double_integrator_QP_solver_noCD_rd04);
+double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_4_4(double_integrator_QP_solver_noCD_ccrhsub04, double_integrator_QP_solver_noCD_sub04, double_integrator_QP_solver_noCD_ubIdx04, double_integrator_QP_solver_noCD_ccrhsl04, double_integrator_QP_solver_noCD_slb04, double_integrator_QP_solver_noCD_lbIdx04, double_integrator_QP_solver_noCD_rd04);
 double_integrator_QP_solver_noCD_LA_DENSE_MTVMADD2_22_17(params->A5, double_integrator_QP_solver_noCD_ccrhsp04, double_integrator_QP_solver_noCD_sp04, double_integrator_QP_solver_noCD_rd04);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi04, double_integrator_QP_solver_noCD_rd04, double_integrator_QP_solver_noCD_Lbyrd04);
 double_integrator_QP_solver_noCD_LA_DENSE_2MVMADD_7_17_17(double_integrator_QP_solver_noCD_V03, double_integrator_QP_solver_noCD_Lbyrd03, double_integrator_QP_solver_noCD_W04, double_integrator_QP_solver_noCD_Lbyrd04, double_integrator_QP_solver_noCD_beta03);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB1_7_7(double_integrator_QP_solver_noCD_Lsd03, double_integrator_QP_solver_noCD_yy02, double_integrator_QP_solver_noCD_beta03, double_integrator_QP_solver_noCD_bmy03);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_7(double_integrator_QP_solver_noCD_Ld03, double_integrator_QP_solver_noCD_bmy03, double_integrator_QP_solver_noCD_yy03);
-double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_6_6(double_integrator_QP_solver_noCD_ccrhsub05, double_integrator_QP_solver_noCD_sub05, double_integrator_QP_solver_noCD_ubIdx05, double_integrator_QP_solver_noCD_ccrhsl05, double_integrator_QP_solver_noCD_slb05, double_integrator_QP_solver_noCD_lbIdx05, double_integrator_QP_solver_noCD_rd05);
+double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_4_4(double_integrator_QP_solver_noCD_ccrhsub05, double_integrator_QP_solver_noCD_sub05, double_integrator_QP_solver_noCD_ubIdx05, double_integrator_QP_solver_noCD_ccrhsl05, double_integrator_QP_solver_noCD_slb05, double_integrator_QP_solver_noCD_lbIdx05, double_integrator_QP_solver_noCD_rd05);
 double_integrator_QP_solver_noCD_LA_DENSE_MTVMADD2_22_17(params->A6, double_integrator_QP_solver_noCD_ccrhsp05, double_integrator_QP_solver_noCD_sp05, double_integrator_QP_solver_noCD_rd05);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi05, double_integrator_QP_solver_noCD_rd05, double_integrator_QP_solver_noCD_Lbyrd05);
 double_integrator_QP_solver_noCD_LA_DENSE_2MVMADD_7_17_17(double_integrator_QP_solver_noCD_V04, double_integrator_QP_solver_noCD_Lbyrd04, double_integrator_QP_solver_noCD_W05, double_integrator_QP_solver_noCD_Lbyrd05, double_integrator_QP_solver_noCD_beta04);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB1_7_7(double_integrator_QP_solver_noCD_Lsd04, double_integrator_QP_solver_noCD_yy03, double_integrator_QP_solver_noCD_beta04, double_integrator_QP_solver_noCD_bmy04);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_7(double_integrator_QP_solver_noCD_Ld04, double_integrator_QP_solver_noCD_bmy04, double_integrator_QP_solver_noCD_yy04);
-double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_6_6(double_integrator_QP_solver_noCD_ccrhsub06, double_integrator_QP_solver_noCD_sub06, double_integrator_QP_solver_noCD_ubIdx06, double_integrator_QP_solver_noCD_ccrhsl06, double_integrator_QP_solver_noCD_slb06, double_integrator_QP_solver_noCD_lbIdx06, double_integrator_QP_solver_noCD_rd06);
+double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_4_4(double_integrator_QP_solver_noCD_ccrhsub06, double_integrator_QP_solver_noCD_sub06, double_integrator_QP_solver_noCD_ubIdx06, double_integrator_QP_solver_noCD_ccrhsl06, double_integrator_QP_solver_noCD_slb06, double_integrator_QP_solver_noCD_lbIdx06, double_integrator_QP_solver_noCD_rd06);
 double_integrator_QP_solver_noCD_LA_DENSE_MTVMADD2_22_17(params->A7, double_integrator_QP_solver_noCD_ccrhsp06, double_integrator_QP_solver_noCD_sp06, double_integrator_QP_solver_noCD_rd06);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi06, double_integrator_QP_solver_noCD_rd06, double_integrator_QP_solver_noCD_Lbyrd06);
 double_integrator_QP_solver_noCD_LA_DENSE_2MVMADD_7_17_17(double_integrator_QP_solver_noCD_V05, double_integrator_QP_solver_noCD_Lbyrd05, double_integrator_QP_solver_noCD_W06, double_integrator_QP_solver_noCD_Lbyrd06, double_integrator_QP_solver_noCD_beta05);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB1_7_7(double_integrator_QP_solver_noCD_Lsd05, double_integrator_QP_solver_noCD_yy04, double_integrator_QP_solver_noCD_beta05, double_integrator_QP_solver_noCD_bmy05);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_7(double_integrator_QP_solver_noCD_Ld05, double_integrator_QP_solver_noCD_bmy05, double_integrator_QP_solver_noCD_yy05);
-double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_6_6(double_integrator_QP_solver_noCD_ccrhsub07, double_integrator_QP_solver_noCD_sub07, double_integrator_QP_solver_noCD_ubIdx07, double_integrator_QP_solver_noCD_ccrhsl07, double_integrator_QP_solver_noCD_slb07, double_integrator_QP_solver_noCD_lbIdx07, double_integrator_QP_solver_noCD_rd07);
+double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_4_4(double_integrator_QP_solver_noCD_ccrhsub07, double_integrator_QP_solver_noCD_sub07, double_integrator_QP_solver_noCD_ubIdx07, double_integrator_QP_solver_noCD_ccrhsl07, double_integrator_QP_solver_noCD_slb07, double_integrator_QP_solver_noCD_lbIdx07, double_integrator_QP_solver_noCD_rd07);
 double_integrator_QP_solver_noCD_LA_DENSE_MTVMADD2_22_17(params->A8, double_integrator_QP_solver_noCD_ccrhsp07, double_integrator_QP_solver_noCD_sp07, double_integrator_QP_solver_noCD_rd07);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi07, double_integrator_QP_solver_noCD_rd07, double_integrator_QP_solver_noCD_Lbyrd07);
 double_integrator_QP_solver_noCD_LA_DENSE_2MVMADD_7_17_17(double_integrator_QP_solver_noCD_V06, double_integrator_QP_solver_noCD_Lbyrd06, double_integrator_QP_solver_noCD_W07, double_integrator_QP_solver_noCD_Lbyrd07, double_integrator_QP_solver_noCD_beta06);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB1_7_7(double_integrator_QP_solver_noCD_Lsd06, double_integrator_QP_solver_noCD_yy05, double_integrator_QP_solver_noCD_beta06, double_integrator_QP_solver_noCD_bmy06);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_7(double_integrator_QP_solver_noCD_Ld06, double_integrator_QP_solver_noCD_bmy06, double_integrator_QP_solver_noCD_yy06);
-double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_6_6(double_integrator_QP_solver_noCD_ccrhsub08, double_integrator_QP_solver_noCD_sub08, double_integrator_QP_solver_noCD_ubIdx08, double_integrator_QP_solver_noCD_ccrhsl08, double_integrator_QP_solver_noCD_slb08, double_integrator_QP_solver_noCD_lbIdx08, double_integrator_QP_solver_noCD_rd08);
+double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_4_4(double_integrator_QP_solver_noCD_ccrhsub08, double_integrator_QP_solver_noCD_sub08, double_integrator_QP_solver_noCD_ubIdx08, double_integrator_QP_solver_noCD_ccrhsl08, double_integrator_QP_solver_noCD_slb08, double_integrator_QP_solver_noCD_lbIdx08, double_integrator_QP_solver_noCD_rd08);
 double_integrator_QP_solver_noCD_LA_DENSE_MTVMADD2_22_17(params->A9, double_integrator_QP_solver_noCD_ccrhsp08, double_integrator_QP_solver_noCD_sp08, double_integrator_QP_solver_noCD_rd08);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi08, double_integrator_QP_solver_noCD_rd08, double_integrator_QP_solver_noCD_Lbyrd08);
 double_integrator_QP_solver_noCD_LA_DENSE_2MVMADD_7_17_17(double_integrator_QP_solver_noCD_V07, double_integrator_QP_solver_noCD_Lbyrd07, double_integrator_QP_solver_noCD_W08, double_integrator_QP_solver_noCD_Lbyrd08, double_integrator_QP_solver_noCD_beta07);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB1_7_7(double_integrator_QP_solver_noCD_Lsd07, double_integrator_QP_solver_noCD_yy06, double_integrator_QP_solver_noCD_beta07, double_integrator_QP_solver_noCD_bmy07);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_7(double_integrator_QP_solver_noCD_Ld07, double_integrator_QP_solver_noCD_bmy07, double_integrator_QP_solver_noCD_yy07);
-double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_6_6(double_integrator_QP_solver_noCD_ccrhsub09, double_integrator_QP_solver_noCD_sub09, double_integrator_QP_solver_noCD_ubIdx09, double_integrator_QP_solver_noCD_ccrhsl09, double_integrator_QP_solver_noCD_slb09, double_integrator_QP_solver_noCD_lbIdx09, double_integrator_QP_solver_noCD_rd09);
+double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_17_4_4(double_integrator_QP_solver_noCD_ccrhsub09, double_integrator_QP_solver_noCD_sub09, double_integrator_QP_solver_noCD_ubIdx09, double_integrator_QP_solver_noCD_ccrhsl09, double_integrator_QP_solver_noCD_slb09, double_integrator_QP_solver_noCD_lbIdx09, double_integrator_QP_solver_noCD_rd09);
 double_integrator_QP_solver_noCD_LA_DENSE_MTVMADD2_22_17(params->A10, double_integrator_QP_solver_noCD_ccrhsp09, double_integrator_QP_solver_noCD_sp09, double_integrator_QP_solver_noCD_rd09);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_17(double_integrator_QP_solver_noCD_Phi09, double_integrator_QP_solver_noCD_rd09, double_integrator_QP_solver_noCD_Lbyrd09);
 double_integrator_QP_solver_noCD_LA_DENSE_2MVMADD_7_17_17(double_integrator_QP_solver_noCD_V08, double_integrator_QP_solver_noCD_Lbyrd08, double_integrator_QP_solver_noCD_W09, double_integrator_QP_solver_noCD_Lbyrd09, double_integrator_QP_solver_noCD_beta08);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB1_7_7(double_integrator_QP_solver_noCD_Lsd08, double_integrator_QP_solver_noCD_yy07, double_integrator_QP_solver_noCD_beta08, double_integrator_QP_solver_noCD_bmy08);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_7(double_integrator_QP_solver_noCD_Ld08, double_integrator_QP_solver_noCD_bmy08, double_integrator_QP_solver_noCD_yy08);
-double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_15_6_6(double_integrator_QP_solver_noCD_ccrhsub10, double_integrator_QP_solver_noCD_sub10, double_integrator_QP_solver_noCD_ubIdx10, double_integrator_QP_solver_noCD_ccrhsl10, double_integrator_QP_solver_noCD_slb10, double_integrator_QP_solver_noCD_lbIdx10, double_integrator_QP_solver_noCD_rd10);
+double_integrator_QP_solver_noCD_LA_VSUB6_INDEXED_15_4_4(double_integrator_QP_solver_noCD_ccrhsub10, double_integrator_QP_solver_noCD_sub10, double_integrator_QP_solver_noCD_ubIdx10, double_integrator_QP_solver_noCD_ccrhsl10, double_integrator_QP_solver_noCD_slb10, double_integrator_QP_solver_noCD_lbIdx10, double_integrator_QP_solver_noCD_rd10);
 double_integrator_QP_solver_noCD_LA_DENSE_MTVMADD2_22_15(params->A11, double_integrator_QP_solver_noCD_ccrhsp10, double_integrator_QP_solver_noCD_sp10, double_integrator_QP_solver_noCD_rd10);
 double_integrator_QP_solver_noCD_LA_DENSE_FORWARDSUB_15(double_integrator_QP_solver_noCD_Phi10, double_integrator_QP_solver_noCD_rd10, double_integrator_QP_solver_noCD_Lbyrd10);
 double_integrator_QP_solver_noCD_LA_DENSE_2MVMADD_7_17_15(double_integrator_QP_solver_noCD_V09, double_integrator_QP_solver_noCD_Lbyrd09, double_integrator_QP_solver_noCD_W10, double_integrator_QP_solver_noCD_Lbyrd10, double_integrator_QP_solver_noCD_beta09);
@@ -4484,44 +4428,44 @@ double_integrator_QP_solver_noCD_LA_DENSE_FORWARDBACKWARDSUB_4(double_integrator
 double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_7(double_integrator_QP_solver_noCD_ccrhsl00, double_integrator_QP_solver_noCD_slb00, double_integrator_QP_solver_noCD_llbbyslb00, double_integrator_QP_solver_noCD_dzcc00, double_integrator_QP_solver_noCD_lbIdx00, double_integrator_QP_solver_noCD_dllbcc00);
 double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsub00, double_integrator_QP_solver_noCD_sub00, double_integrator_QP_solver_noCD_lubbysub00, double_integrator_QP_solver_noCD_dzcc00, double_integrator_QP_solver_noCD_ubIdx00, double_integrator_QP_solver_noCD_dlubcc00);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_22_17(params->A1, double_integrator_QP_solver_noCD_dzcc00, double_integrator_QP_solver_noCD_ccrhsp00, double_integrator_QP_solver_noCD_sp00, double_integrator_QP_solver_noCD_lp00, double_integrator_QP_solver_noCD_dlp_cc00);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsl01, double_integrator_QP_solver_noCD_slb01, double_integrator_QP_solver_noCD_llbbyslb01, double_integrator_QP_solver_noCD_dzcc01, double_integrator_QP_solver_noCD_lbIdx01, double_integrator_QP_solver_noCD_dllbcc01);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsub01, double_integrator_QP_solver_noCD_sub01, double_integrator_QP_solver_noCD_lubbysub01, double_integrator_QP_solver_noCD_dzcc01, double_integrator_QP_solver_noCD_ubIdx01, double_integrator_QP_solver_noCD_dlubcc01);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsl01, double_integrator_QP_solver_noCD_slb01, double_integrator_QP_solver_noCD_llbbyslb01, double_integrator_QP_solver_noCD_dzcc01, double_integrator_QP_solver_noCD_lbIdx01, double_integrator_QP_solver_noCD_dllbcc01);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsub01, double_integrator_QP_solver_noCD_sub01, double_integrator_QP_solver_noCD_lubbysub01, double_integrator_QP_solver_noCD_dzcc01, double_integrator_QP_solver_noCD_ubIdx01, double_integrator_QP_solver_noCD_dlubcc01);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_22_17(params->A2, double_integrator_QP_solver_noCD_dzcc01, double_integrator_QP_solver_noCD_ccrhsp01, double_integrator_QP_solver_noCD_sp01, double_integrator_QP_solver_noCD_lp01, double_integrator_QP_solver_noCD_dlp_cc01);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsl02, double_integrator_QP_solver_noCD_slb02, double_integrator_QP_solver_noCD_llbbyslb02, double_integrator_QP_solver_noCD_dzcc02, double_integrator_QP_solver_noCD_lbIdx02, double_integrator_QP_solver_noCD_dllbcc02);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsub02, double_integrator_QP_solver_noCD_sub02, double_integrator_QP_solver_noCD_lubbysub02, double_integrator_QP_solver_noCD_dzcc02, double_integrator_QP_solver_noCD_ubIdx02, double_integrator_QP_solver_noCD_dlubcc02);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsl02, double_integrator_QP_solver_noCD_slb02, double_integrator_QP_solver_noCD_llbbyslb02, double_integrator_QP_solver_noCD_dzcc02, double_integrator_QP_solver_noCD_lbIdx02, double_integrator_QP_solver_noCD_dllbcc02);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsub02, double_integrator_QP_solver_noCD_sub02, double_integrator_QP_solver_noCD_lubbysub02, double_integrator_QP_solver_noCD_dzcc02, double_integrator_QP_solver_noCD_ubIdx02, double_integrator_QP_solver_noCD_dlubcc02);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_22_17(params->A3, double_integrator_QP_solver_noCD_dzcc02, double_integrator_QP_solver_noCD_ccrhsp02, double_integrator_QP_solver_noCD_sp02, double_integrator_QP_solver_noCD_lp02, double_integrator_QP_solver_noCD_dlp_cc02);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsl03, double_integrator_QP_solver_noCD_slb03, double_integrator_QP_solver_noCD_llbbyslb03, double_integrator_QP_solver_noCD_dzcc03, double_integrator_QP_solver_noCD_lbIdx03, double_integrator_QP_solver_noCD_dllbcc03);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsub03, double_integrator_QP_solver_noCD_sub03, double_integrator_QP_solver_noCD_lubbysub03, double_integrator_QP_solver_noCD_dzcc03, double_integrator_QP_solver_noCD_ubIdx03, double_integrator_QP_solver_noCD_dlubcc03);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsl03, double_integrator_QP_solver_noCD_slb03, double_integrator_QP_solver_noCD_llbbyslb03, double_integrator_QP_solver_noCD_dzcc03, double_integrator_QP_solver_noCD_lbIdx03, double_integrator_QP_solver_noCD_dllbcc03);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsub03, double_integrator_QP_solver_noCD_sub03, double_integrator_QP_solver_noCD_lubbysub03, double_integrator_QP_solver_noCD_dzcc03, double_integrator_QP_solver_noCD_ubIdx03, double_integrator_QP_solver_noCD_dlubcc03);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_22_17(params->A4, double_integrator_QP_solver_noCD_dzcc03, double_integrator_QP_solver_noCD_ccrhsp03, double_integrator_QP_solver_noCD_sp03, double_integrator_QP_solver_noCD_lp03, double_integrator_QP_solver_noCD_dlp_cc03);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsl04, double_integrator_QP_solver_noCD_slb04, double_integrator_QP_solver_noCD_llbbyslb04, double_integrator_QP_solver_noCD_dzcc04, double_integrator_QP_solver_noCD_lbIdx04, double_integrator_QP_solver_noCD_dllbcc04);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsub04, double_integrator_QP_solver_noCD_sub04, double_integrator_QP_solver_noCD_lubbysub04, double_integrator_QP_solver_noCD_dzcc04, double_integrator_QP_solver_noCD_ubIdx04, double_integrator_QP_solver_noCD_dlubcc04);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsl04, double_integrator_QP_solver_noCD_slb04, double_integrator_QP_solver_noCD_llbbyslb04, double_integrator_QP_solver_noCD_dzcc04, double_integrator_QP_solver_noCD_lbIdx04, double_integrator_QP_solver_noCD_dllbcc04);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsub04, double_integrator_QP_solver_noCD_sub04, double_integrator_QP_solver_noCD_lubbysub04, double_integrator_QP_solver_noCD_dzcc04, double_integrator_QP_solver_noCD_ubIdx04, double_integrator_QP_solver_noCD_dlubcc04);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_22_17(params->A5, double_integrator_QP_solver_noCD_dzcc04, double_integrator_QP_solver_noCD_ccrhsp04, double_integrator_QP_solver_noCD_sp04, double_integrator_QP_solver_noCD_lp04, double_integrator_QP_solver_noCD_dlp_cc04);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsl05, double_integrator_QP_solver_noCD_slb05, double_integrator_QP_solver_noCD_llbbyslb05, double_integrator_QP_solver_noCD_dzcc05, double_integrator_QP_solver_noCD_lbIdx05, double_integrator_QP_solver_noCD_dllbcc05);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsub05, double_integrator_QP_solver_noCD_sub05, double_integrator_QP_solver_noCD_lubbysub05, double_integrator_QP_solver_noCD_dzcc05, double_integrator_QP_solver_noCD_ubIdx05, double_integrator_QP_solver_noCD_dlubcc05);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsl05, double_integrator_QP_solver_noCD_slb05, double_integrator_QP_solver_noCD_llbbyslb05, double_integrator_QP_solver_noCD_dzcc05, double_integrator_QP_solver_noCD_lbIdx05, double_integrator_QP_solver_noCD_dllbcc05);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsub05, double_integrator_QP_solver_noCD_sub05, double_integrator_QP_solver_noCD_lubbysub05, double_integrator_QP_solver_noCD_dzcc05, double_integrator_QP_solver_noCD_ubIdx05, double_integrator_QP_solver_noCD_dlubcc05);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_22_17(params->A6, double_integrator_QP_solver_noCD_dzcc05, double_integrator_QP_solver_noCD_ccrhsp05, double_integrator_QP_solver_noCD_sp05, double_integrator_QP_solver_noCD_lp05, double_integrator_QP_solver_noCD_dlp_cc05);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsl06, double_integrator_QP_solver_noCD_slb06, double_integrator_QP_solver_noCD_llbbyslb06, double_integrator_QP_solver_noCD_dzcc06, double_integrator_QP_solver_noCD_lbIdx06, double_integrator_QP_solver_noCD_dllbcc06);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsub06, double_integrator_QP_solver_noCD_sub06, double_integrator_QP_solver_noCD_lubbysub06, double_integrator_QP_solver_noCD_dzcc06, double_integrator_QP_solver_noCD_ubIdx06, double_integrator_QP_solver_noCD_dlubcc06);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsl06, double_integrator_QP_solver_noCD_slb06, double_integrator_QP_solver_noCD_llbbyslb06, double_integrator_QP_solver_noCD_dzcc06, double_integrator_QP_solver_noCD_lbIdx06, double_integrator_QP_solver_noCD_dllbcc06);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsub06, double_integrator_QP_solver_noCD_sub06, double_integrator_QP_solver_noCD_lubbysub06, double_integrator_QP_solver_noCD_dzcc06, double_integrator_QP_solver_noCD_ubIdx06, double_integrator_QP_solver_noCD_dlubcc06);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_22_17(params->A7, double_integrator_QP_solver_noCD_dzcc06, double_integrator_QP_solver_noCD_ccrhsp06, double_integrator_QP_solver_noCD_sp06, double_integrator_QP_solver_noCD_lp06, double_integrator_QP_solver_noCD_dlp_cc06);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsl07, double_integrator_QP_solver_noCD_slb07, double_integrator_QP_solver_noCD_llbbyslb07, double_integrator_QP_solver_noCD_dzcc07, double_integrator_QP_solver_noCD_lbIdx07, double_integrator_QP_solver_noCD_dllbcc07);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsub07, double_integrator_QP_solver_noCD_sub07, double_integrator_QP_solver_noCD_lubbysub07, double_integrator_QP_solver_noCD_dzcc07, double_integrator_QP_solver_noCD_ubIdx07, double_integrator_QP_solver_noCD_dlubcc07);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsl07, double_integrator_QP_solver_noCD_slb07, double_integrator_QP_solver_noCD_llbbyslb07, double_integrator_QP_solver_noCD_dzcc07, double_integrator_QP_solver_noCD_lbIdx07, double_integrator_QP_solver_noCD_dllbcc07);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsub07, double_integrator_QP_solver_noCD_sub07, double_integrator_QP_solver_noCD_lubbysub07, double_integrator_QP_solver_noCD_dzcc07, double_integrator_QP_solver_noCD_ubIdx07, double_integrator_QP_solver_noCD_dlubcc07);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_22_17(params->A8, double_integrator_QP_solver_noCD_dzcc07, double_integrator_QP_solver_noCD_ccrhsp07, double_integrator_QP_solver_noCD_sp07, double_integrator_QP_solver_noCD_lp07, double_integrator_QP_solver_noCD_dlp_cc07);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsl08, double_integrator_QP_solver_noCD_slb08, double_integrator_QP_solver_noCD_llbbyslb08, double_integrator_QP_solver_noCD_dzcc08, double_integrator_QP_solver_noCD_lbIdx08, double_integrator_QP_solver_noCD_dllbcc08);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsub08, double_integrator_QP_solver_noCD_sub08, double_integrator_QP_solver_noCD_lubbysub08, double_integrator_QP_solver_noCD_dzcc08, double_integrator_QP_solver_noCD_ubIdx08, double_integrator_QP_solver_noCD_dlubcc08);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsl08, double_integrator_QP_solver_noCD_slb08, double_integrator_QP_solver_noCD_llbbyslb08, double_integrator_QP_solver_noCD_dzcc08, double_integrator_QP_solver_noCD_lbIdx08, double_integrator_QP_solver_noCD_dllbcc08);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsub08, double_integrator_QP_solver_noCD_sub08, double_integrator_QP_solver_noCD_lubbysub08, double_integrator_QP_solver_noCD_dzcc08, double_integrator_QP_solver_noCD_ubIdx08, double_integrator_QP_solver_noCD_dlubcc08);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_22_17(params->A9, double_integrator_QP_solver_noCD_dzcc08, double_integrator_QP_solver_noCD_ccrhsp08, double_integrator_QP_solver_noCD_sp08, double_integrator_QP_solver_noCD_lp08, double_integrator_QP_solver_noCD_dlp_cc08);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsl09, double_integrator_QP_solver_noCD_slb09, double_integrator_QP_solver_noCD_llbbyslb09, double_integrator_QP_solver_noCD_dzcc09, double_integrator_QP_solver_noCD_lbIdx09, double_integrator_QP_solver_noCD_dllbcc09);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsub09, double_integrator_QP_solver_noCD_sub09, double_integrator_QP_solver_noCD_lubbysub09, double_integrator_QP_solver_noCD_dzcc09, double_integrator_QP_solver_noCD_ubIdx09, double_integrator_QP_solver_noCD_dlubcc09);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsl09, double_integrator_QP_solver_noCD_slb09, double_integrator_QP_solver_noCD_llbbyslb09, double_integrator_QP_solver_noCD_dzcc09, double_integrator_QP_solver_noCD_lbIdx09, double_integrator_QP_solver_noCD_dllbcc09);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsub09, double_integrator_QP_solver_noCD_sub09, double_integrator_QP_solver_noCD_lubbysub09, double_integrator_QP_solver_noCD_dzcc09, double_integrator_QP_solver_noCD_ubIdx09, double_integrator_QP_solver_noCD_dlubcc09);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_22_17(params->A10, double_integrator_QP_solver_noCD_dzcc09, double_integrator_QP_solver_noCD_ccrhsp09, double_integrator_QP_solver_noCD_sp09, double_integrator_QP_solver_noCD_lp09, double_integrator_QP_solver_noCD_dlp_cc09);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsl10, double_integrator_QP_solver_noCD_slb10, double_integrator_QP_solver_noCD_llbbyslb10, double_integrator_QP_solver_noCD_dzcc10, double_integrator_QP_solver_noCD_lbIdx10, double_integrator_QP_solver_noCD_dllbcc10);
-double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_6(double_integrator_QP_solver_noCD_ccrhsub10, double_integrator_QP_solver_noCD_sub10, double_integrator_QP_solver_noCD_lubbysub10, double_integrator_QP_solver_noCD_dzcc10, double_integrator_QP_solver_noCD_ubIdx10, double_integrator_QP_solver_noCD_dlubcc10);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsl10, double_integrator_QP_solver_noCD_slb10, double_integrator_QP_solver_noCD_llbbyslb10, double_integrator_QP_solver_noCD_dzcc10, double_integrator_QP_solver_noCD_lbIdx10, double_integrator_QP_solver_noCD_dllbcc10);
+double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsub10, double_integrator_QP_solver_noCD_sub10, double_integrator_QP_solver_noCD_lubbysub10, double_integrator_QP_solver_noCD_dzcc10, double_integrator_QP_solver_noCD_ubIdx10, double_integrator_QP_solver_noCD_dlubcc10);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_22_15(params->A11, double_integrator_QP_solver_noCD_dzcc10, double_integrator_QP_solver_noCD_ccrhsp10, double_integrator_QP_solver_noCD_sp10, double_integrator_QP_solver_noCD_lp10, double_integrator_QP_solver_noCD_dlp_cc10);
 double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTSUB_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsl11, double_integrator_QP_solver_noCD_slb11, double_integrator_QP_solver_noCD_llbbyslb11, double_integrator_QP_solver_noCD_dzcc11, double_integrator_QP_solver_noCD_lbIdx11, double_integrator_QP_solver_noCD_dllbcc11);
 double_integrator_QP_solver_noCD_LA_VEC_DIVSUB_MULTADD_INDEXED_4(double_integrator_QP_solver_noCD_ccrhsub11, double_integrator_QP_solver_noCD_sub11, double_integrator_QP_solver_noCD_lubbysub11, double_integrator_QP_solver_noCD_dzcc11, double_integrator_QP_solver_noCD_ubIdx11, double_integrator_QP_solver_noCD_dlubcc11);
 double_integrator_QP_solver_noCD_LA_DENSE_MVMSUB5_8_4(params->A12, double_integrator_QP_solver_noCD_dzcc11, double_integrator_QP_solver_noCD_ccrhsp11, double_integrator_QP_solver_noCD_sp11, double_integrator_QP_solver_noCD_lp11, double_integrator_QP_solver_noCD_dlp_cc11);
-double_integrator_QP_solver_noCD_LA_VSUB7_391(double_integrator_QP_solver_noCD_l, double_integrator_QP_solver_noCD_ccrhs, double_integrator_QP_solver_noCD_s, double_integrator_QP_solver_noCD_dl_cc, double_integrator_QP_solver_noCD_ds_cc);
+double_integrator_QP_solver_noCD_LA_VSUB7_351(double_integrator_QP_solver_noCD_l, double_integrator_QP_solver_noCD_ccrhs, double_integrator_QP_solver_noCD_s, double_integrator_QP_solver_noCD_dl_cc, double_integrator_QP_solver_noCD_ds_cc);
 double_integrator_QP_solver_noCD_LA_VADD_189(double_integrator_QP_solver_noCD_dz_cc, double_integrator_QP_solver_noCD_dz_aff);
 double_integrator_QP_solver_noCD_LA_VADD_74(double_integrator_QP_solver_noCD_dv_cc, double_integrator_QP_solver_noCD_dv_aff);
-double_integrator_QP_solver_noCD_LA_VADD_391(double_integrator_QP_solver_noCD_dl_cc, double_integrator_QP_solver_noCD_dl_aff);
-double_integrator_QP_solver_noCD_LA_VADD_391(double_integrator_QP_solver_noCD_ds_cc, double_integrator_QP_solver_noCD_ds_aff);
+double_integrator_QP_solver_noCD_LA_VADD_351(double_integrator_QP_solver_noCD_dl_cc, double_integrator_QP_solver_noCD_dl_aff);
+double_integrator_QP_solver_noCD_LA_VADD_351(double_integrator_QP_solver_noCD_ds_cc, double_integrator_QP_solver_noCD_ds_aff);
 info->lsit_cc = double_integrator_QP_solver_noCD_LINESEARCH_BACKTRACKING_COMBINED(double_integrator_QP_solver_noCD_z, double_integrator_QP_solver_noCD_v, double_integrator_QP_solver_noCD_l, double_integrator_QP_solver_noCD_s, double_integrator_QP_solver_noCD_dz_cc, double_integrator_QP_solver_noCD_dv_cc, double_integrator_QP_solver_noCD_dl_cc, double_integrator_QP_solver_noCD_ds_cc, &info->step_cc, &info->mu);
 if( info->lsit_cc == double_integrator_QP_solver_noCD_NOPROGRESS ){
 exitcode = double_integrator_QP_solver_noCD_NOPROGRESS; break;
