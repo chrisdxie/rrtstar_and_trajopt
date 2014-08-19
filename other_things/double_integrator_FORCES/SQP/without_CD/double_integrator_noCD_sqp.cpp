@@ -2,6 +2,8 @@
 #ifndef DOUBLE_INTEGRATOR_NOCD_SQP_HPP_
 #define DOUBLE_INTEGRATOR_NOCD_SQP_HPP_
 
+#include <stdio.h>
+
 extern "C" {
 #include "double_integrator_QP_solver_noCD.h"
 double_integrator_QP_solver_noCD_FLOAT **f, **lb, **ub, **A, **b, **z;

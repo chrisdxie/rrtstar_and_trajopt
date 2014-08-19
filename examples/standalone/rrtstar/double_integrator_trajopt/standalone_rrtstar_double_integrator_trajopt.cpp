@@ -292,7 +292,7 @@ main (int argc, char* argv[]) {
     planner.iteration ();
     
     if (i%1 == 0){
-      cout << "Iteration : " << i << endl;
+      cout << "Iteration : " << i+1 << endl;
     }
     if ((i+1) % 100 == 0) { // Plot every 100 iterations, and save automatically in a folder called "pics"
 

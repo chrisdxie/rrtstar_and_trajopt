@@ -8,7 +8,8 @@ include ../../../common.mk
 SMP = $(SMP_BIN_PATH)/example_standalone_rrtstar_double_integrator_trajopt
 
 SMP_OBJ_COMPILE = standalone_rrtstar_double_integrator_trajopt.o \
-	$(SMP_SRC_PATH)/smp/external_libraries/kdtree/kdtree.o 
+	$(SMP_SRC_PATH)/smp/external_libraries/kdtree/kdtree.o \
+	double_integrator_QP_solver_noCD.c.o -rdynamic -lboost_system-mt -lboost_program_options-mt -ldl -lrt
 
 SMP_OBJ = standalone_rrtstar_double_integrator_trajopt.o \
 	$(SMP_SRC_PATH)/smp/external_libraries/kdtree/kdtree.o 

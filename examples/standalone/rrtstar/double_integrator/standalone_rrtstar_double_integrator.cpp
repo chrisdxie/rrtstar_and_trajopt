@@ -131,7 +131,6 @@ main (int argc, char* argv[]) {
     NUM_ITERS = atoi(argv[1]);
   }
 
-  int seed = 0; // default random seed
   // Expecting something in the form of: executable <NUM_ITERS> <{"random" or some random seed}>
   int seed = 0;
   if (argc >= 3) {

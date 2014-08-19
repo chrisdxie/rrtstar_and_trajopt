@@ -52,11 +52,11 @@ typedef std::vector<VectorX> StdVectorX;
 typedef std::vector<VectorU> StdVectorU;
 
 namespace cfg { // Taken from matlab implementation
-const double improve_ratio_threshold = .25;
+const double improve_ratio_threshold = .3; // .25
 const double min_approx_improve = 1e-2;
 const double min_trust_box_size = 1e-4;
-const double trust_shrink_ratio = .1;
-const double trust_expand_ratio = 1.5;
+const double trust_shrink_ratio = .75; // .1
+const double trust_expand_ratio = 1.2; // 1.5
 const double cnt_tolerance = 1e-4;
 const double penalty_coeff_increase_ratio = 10;
 const double initial_penalty_coeff = 1;
@@ -453,12 +453,12 @@ bool minimize_merit_function(StdVectorX& X, StdVectorU& U, double* delta, bounds
 	fill_lb_and_ub(bounds);
 
 	for(int sqp_iter=0; true; ++sqp_iter) {
-		std::cout << "  sqp iter: " << sqp_iter << "\n";
+		//std::cout << "  sqp iter: " << sqp_iter << "\n";
 
 		merit = computeMerit(delta, X, U, penalty_coeff);
 
 		for(int trust_iter=0; true; ++trust_iter) {
-			std::cout << "   trust region size: " << trust_box_size << "\n";
+			//std::cout << "   trust region size: " << trust_box_size << "\n";
 
 			// fill in A, b
 			fill_in_A_and_b(X, U, delta, trust_box_size);
@@ -496,14 +496,14 @@ bool minimize_merit_function(StdVectorX& X, StdVectorU& U, double* delta, bounds
 			double exact_merit_improve = merit - new_merit;
 			double merit_improve_ratio = exact_merit_improve/approx_merit_improve;
 
-			printf("\tapprox improve: %.3f. exact improve: %.3f. ratio: %.3f \n", approx_merit_improve, exact_merit_improve, merit_improve_ratio);
+			//printf("\tapprox improve: %.3f. exact improve: %.3f. ratio: %.3f \n", approx_merit_improve, exact_merit_improve, merit_improve_ratio);
 			if (approx_merit_improve < -1e-5) {
-				printf("Approximate merit function got worse (%.3e).\n", approx_merit_improve);
-				printf("Either convexification is wrong to zeroth order, or you're in numerical trouble\n");
+				//printf("Approximate merit function got worse (%.3e).\n", approx_merit_improve);
+				//printf("Either convexification is wrong to zeroth order, or you're in numerical trouble\n");
 				success = false;
 				return success;
 			} else if (approx_merit_improve < cfg::min_approx_improve) {
-				printf("Converged: y tolerance\n");
+				//printf("Converged: y tolerance\n");
 				X = Xopt; U = Uopt; *delta = deltaopt;
 				return success;
 			} else if ((exact_merit_improve < 0) || (merit_improve_ratio < cfg::improve_ratio_threshold)) {
@@ -515,7 +515,7 @@ bool minimize_merit_function(StdVectorX& X, StdVectorU& U, double* delta, bounds
 			}
 
 			if (trust_box_size < cfg::min_trust_box_size) {
-				printf("Converged x tolerance\n");
+				//printf("Converged x tolerance\n");
 				return success;
 			}
 

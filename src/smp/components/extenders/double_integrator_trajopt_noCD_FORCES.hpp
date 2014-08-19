@@ -5,6 +5,8 @@
 #include "../../../../other_things/double_integrator_FORCES/SQP/without_CD/double_integrator_noCD_sqp.hpp"
 
 #include <iostream>
+#include <iomanip>
+#include <fstream>
 #include <cstdlib>
 
 #include <eigen3/Eigen/Eigen>
@@ -118,6 +120,29 @@ int smp::extender_double_integrator_trajopt<typeparams,NUM_DIMENSIONS>
   // 2D ACADO stuffs
   if (run_FORCES_optimization(state_from_in, state_towards_in,
           &(trajectory_out->list_states), &(trajectory_out->list_inputs)) != 1) {
+
+    // Check if exact extender can solve:
+    #include "double_integrator.hpp"
+    typedef extender_double_integrator<typeparams, 2> ex;
+    ex exact_extender;
+    int exact_connec = -1;
+    if (exact_extender.extend(state_from_in, state_towards_in, &exact_connec, trajectory_out, 
+	intermediate_vertices_out) == 1) {
+	std::cout << "SQP FORCES can't solve, but exact can." << "\n";
+	ofstream outfile ("bad_states.txt", ios::app);
+	if (outfile.is_open()) {
+	    outfile << "x_start: ";
+	    for(int i = 0; i < 4; i++) {
+		outfile << std::setprecision(10) << state_from_in->state_vars[i] << ", ";
+	    }
+	    outfile << "\nx_goal: ";
+	    for(int i = 0; i < 4; i++) {
+		outfile << std::setprecision(10) << state_towards_in->state_vars[i] << ", ";
+	    }
+	    outfile << "\n\n";
+	}
+    }
+
     return 0;
   }
 
