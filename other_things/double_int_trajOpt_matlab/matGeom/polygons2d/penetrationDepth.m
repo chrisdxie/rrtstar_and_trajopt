@@ -29,6 +29,8 @@ if sum(polygon2(end, :)==polygon2(1,:))~=2
     polygon2 = [polygon2; polygon2(1,:)];
 end
 
+best_overlap = -inf;
+
 global_contact_infos = zeros(0,5);
 for i=1:2
     if i==1
@@ -68,7 +70,7 @@ for i=1:2
         [max_pos1 argmax_pos1] = max(pos1);
         diffs = [ min_pos2-max_pos1; min_pos1-max_pos2 ];
         if any(diffs >= 0)
-            [dist contact_pts] = distancePolygons(poly1, poly2);
+            [dist contact_pts] = distancePolygons(polygon1, polygon2);
             return
         end
         arg_diffs = [ argmax_pos1 argmin_pos2; argmin_pos1 argmax_pos2 ];
@@ -82,10 +84,29 @@ for i=1:2
 
         contact_vertex = poly2(arg_vertex,:);
         contact_point = contact_vertex + (pos1(arg_face)-pos2(arg_vertex))*sep_axis_edge(1,3:4);
+        
+        % Update, hopefully it works..
+        if abs(dist) < abs(best_overlap)
+            
+            if ~isPointOnPolyline(contact_point, poly1)
+                continue;
+            end
+            
+            best_overlap = dist;
+            if i == 1
+                contact_pts = [contact_point; contact_vertex];
+            else
+                contact_pts = [contact_vertex; contact_point];
+            end
+        end
+        
         contact_infos(f,:) = [dist contact_vertex contact_point];
     end
     global_contact_infos(end+1:end+size(contact_infos,1),:) = contact_infos;
 end
+
+dist = best_overlap;
+return % Update, hopefully it works..
 
 [dist arg_dist] = max(global_contact_infos(:,1));
 if arg_dist < size(polygon1,1) % size of polygon is the size of vertices plus 1

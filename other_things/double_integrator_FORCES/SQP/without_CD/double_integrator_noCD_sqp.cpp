@@ -495,7 +495,7 @@ bool minimize_merit_function(StdVectorX& X, StdVectorU& U, double* delta, bounds
 			double merit_improve_ratio = exact_merit_improve/approx_merit_improve;
 
 			printf("\tapprox improve: %.3f. exact improve: %.3f. ratio: %.3f \n", approx_merit_improve, exact_merit_improve, merit_improve_ratio);
-			if (approx_merit_improve < -1e-5) {
+			if (approx_merit_improve < -1) {
 				printf("Approximate merit function got worse (%.3e).\n", approx_merit_improve);
 				printf("Either convexification is wrong to zeroth order, or you're in numerical trouble\n");
 				success = false;
@@ -548,8 +548,9 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double* delta, bounds_t bounds,
 		} else {
 			penalty_increases++;
 			penalty_coeff *= cfg::penalty_coeff_increase_ratio;
-			if (penalty_increases > cfg::max_penalty_coeff_increases) {
+			if (penalty_increases == cfg::max_penalty_coeff_increases) {
 				printf("Number of penalty coefficient increases exceeded maximum allowed.\n");
+				success = false;
 				break;
 			}
 		}
@@ -572,10 +573,7 @@ int solve_double_integrator_noCD_BVP(VectorX x_start, VectorX x_goal, StdVectorX
 	double_integrator_QP_solver_noCD_info info;
 	setup_state_vars(problem, output);
 
-//	StdVectorX X(T);
-//	StdVectorU U(T-1);
-	double delta_init = 1;
-	delta = &delta_init;
+	*delta = 1;
 
 	// Initialize X variable
 	Matrix<double, X_DIM, T> init;
@@ -589,7 +587,7 @@ int solve_double_integrator_noCD_BVP(VectorX x_start, VectorX x_goal, StdVectorX
 
 	// Initialize U variable
 	for(int t = 0; t < T-1; ++t) {
-		U[t] = .5*MatrixXd::Zero(U_DIM, 1);
+		U[t] = MatrixXd::Zero(U_DIM, 1);
 	}
 
 	bool success = penalty_sqp(X, U, delta, bounds, problem, output, info);
@@ -621,8 +619,8 @@ int main() {
 
 	// Start and goal state
 	Vector4d x_start, x_goal;
-	x_start << 0, 0, 0, 0;
-	x_goal << 5, 5, 0, 0;
+	x_start << 9.78713, 0.442322, -0.913086, -0.850323;
+	x_goal << 9.29103, 9.45342, -0.852262, -0.86858;
 
 	// Initialize X variable
 	Matrix<double, X_DIM, T> init;
@@ -654,6 +652,10 @@ int main() {
 	bounds.x_start = x_start;
 
 	bool success = penalty_sqp(X, U, delta, bounds, problem, output, info);
+
+	if (success) {
+		printf("Success!!");
+	}
 
 	cleanup_state_vars();
 }

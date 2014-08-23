@@ -166,14 +166,20 @@ int main() {
 		}
 	}
 
+	t1 << .5, .48,
+		  .5, .52,
+		  .5, .48;
+	t2 << .1, .1,
+		   1, .5,
+		   0, 1;
 
-	MatrixXd ans = signedDistancePolygons(point_robot, t2);
+	MatrixXd ans = signedDistancePolygons(t1, t2);
 	np::ndarray ans_np = eigen_to_ndarray(ans);
 	np::ndarray t1_np = eigen_to_ndarray(t1);
 	np::ndarray t2_np = eigen_to_ndarray(t2);
 
 	std::cout << "Plotting...\n";
-	plot(plotter, point_robot_np, t2_np, ans_np);
+	plot(plotter, t1_np, t2_np, ans_np);
 
 }
 

@@ -118,11 +118,11 @@ stages(i).cost.H = zeros(stages(i).dims.n);                 % No quadratic cost
 params(end+1) = newParam(['f' i_str], i, 'cost.f');         % Parameter for cost
 
 % Lower Bounds
-stages(i).ineq.b.lbidx = 3:3+stages(i).dims.l-1;                % Lower bounds on states, controls, and time
+stages(i).ineq.b.lbidx = 3:3+stages(i).dims.l-1;                % Lower bounds on velocities, controls, and time
 params(end+1) = newParam(['lb' i_str], i, 'ineq.b.lb');
 
 % Upper bounds
-stages(i).ineq.b.ubidx = 3:3+stages(i).dims.u-1;                % Upper bounds on states, controls, NOT time
+stages(i).ineq.b.ubidx = 3:3+stages(i).dims.u-1;                % Upper bounds on velocities, controls, NOT time
 params(end+1) = newParam(['ub' i_str], i, 'ineq.b.ub');
 
 % Equality between z1 and z2 is time (delta), and next state.

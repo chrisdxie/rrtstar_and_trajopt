@@ -28,7 +28,7 @@ typedef double double_integrator_QP_solver_CD_FLOAT;
 /* SOLVER SETTINGS ------------------------------------------------------*/
 /* print level */
 #ifndef double_integrator_QP_solver_CD_SET_PRINTLEVEL
-#define double_integrator_QP_solver_CD_SET_PRINTLEVEL    (2)
+#define double_integrator_QP_solver_CD_SET_PRINTLEVEL    (0)
 #endif
 
 /* timing */
@@ -84,8 +84,8 @@ typedef double double_integrator_QP_solver_CD_FLOAT;
 /* fill this with data before calling the solver! */
 typedef struct double_integrator_QP_solver_CD_params
 {
-    /* vector of size 23 */
-    double_integrator_QP_solver_CD_FLOAT f1[23];
+    /* vector of size 20 */
+    double_integrator_QP_solver_CD_FLOAT f1[20];
 
     /* vector of size 7 */
     double_integrator_QP_solver_CD_FLOAT lb1[7];
@@ -93,176 +93,170 @@ typedef struct double_integrator_QP_solver_CD_params
     /* vector of size 6 */
     double_integrator_QP_solver_CD_FLOAT ub1[6];
 
-    /* matrix of size [34 x 23] (column major format) */
-    double_integrator_QP_solver_CD_FLOAT A1[782];
+    /* matrix of size [14 x 20] (column major format) */
+    double_integrator_QP_solver_CD_FLOAT A1[280];
 
-    /* vector of size 34 */
-    double_integrator_QP_solver_CD_FLOAT b1[34];
+    /* vector of size 14 */
+    double_integrator_QP_solver_CD_FLOAT b1[14];
 
-    /* vector of size 23 */
-    double_integrator_QP_solver_CD_FLOAT f2[23];
+    /* vector of size 20 */
+    double_integrator_QP_solver_CD_FLOAT f2[20];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT lb2[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT lb2[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT ub2[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT ub2[4];
 
-    /* matrix of size [34 x 23] (column major format) */
-    double_integrator_QP_solver_CD_FLOAT A2[782];
+    /* matrix of size [28 x 20] (column major format) */
+    double_integrator_QP_solver_CD_FLOAT A2[560];
 
-    /* vector of size 34 */
-    double_integrator_QP_solver_CD_FLOAT b2[34];
+    /* vector of size 28 */
+    double_integrator_QP_solver_CD_FLOAT b2[28];
 
-    /* vector of size 23 */
-    double_integrator_QP_solver_CD_FLOAT f3[23];
+    /* vector of size 20 */
+    double_integrator_QP_solver_CD_FLOAT f3[20];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT lb3[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT lb3[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT ub3[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT ub3[4];
 
-    /* matrix of size [34 x 23] (column major format) */
-    double_integrator_QP_solver_CD_FLOAT A3[782];
+    /* matrix of size [28 x 20] (column major format) */
+    double_integrator_QP_solver_CD_FLOAT A3[560];
 
-    /* vector of size 34 */
-    double_integrator_QP_solver_CD_FLOAT b3[34];
+    /* vector of size 28 */
+    double_integrator_QP_solver_CD_FLOAT b3[28];
 
-    /* vector of size 23 */
-    double_integrator_QP_solver_CD_FLOAT f4[23];
+    /* vector of size 20 */
+    double_integrator_QP_solver_CD_FLOAT f4[20];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT lb4[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT lb4[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT ub4[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT ub4[4];
 
-    /* matrix of size [34 x 23] (column major format) */
-    double_integrator_QP_solver_CD_FLOAT A4[782];
+    /* matrix of size [28 x 20] (column major format) */
+    double_integrator_QP_solver_CD_FLOAT A4[560];
 
-    /* vector of size 34 */
-    double_integrator_QP_solver_CD_FLOAT b4[34];
+    /* vector of size 28 */
+    double_integrator_QP_solver_CD_FLOAT b4[28];
 
-    /* vector of size 23 */
-    double_integrator_QP_solver_CD_FLOAT f5[23];
+    /* vector of size 20 */
+    double_integrator_QP_solver_CD_FLOAT f5[20];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT lb5[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT lb5[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT ub5[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT ub5[4];
 
-    /* matrix of size [34 x 23] (column major format) */
-    double_integrator_QP_solver_CD_FLOAT A5[782];
+    /* matrix of size [28 x 20] (column major format) */
+    double_integrator_QP_solver_CD_FLOAT A5[560];
 
-    /* vector of size 34 */
-    double_integrator_QP_solver_CD_FLOAT b5[34];
+    /* vector of size 28 */
+    double_integrator_QP_solver_CD_FLOAT b5[28];
 
-    /* vector of size 23 */
-    double_integrator_QP_solver_CD_FLOAT f6[23];
+    /* vector of size 20 */
+    double_integrator_QP_solver_CD_FLOAT f6[20];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT lb6[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT lb6[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT ub6[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT ub6[4];
 
-    /* matrix of size [34 x 23] (column major format) */
-    double_integrator_QP_solver_CD_FLOAT A6[782];
+    /* matrix of size [28 x 20] (column major format) */
+    double_integrator_QP_solver_CD_FLOAT A6[560];
 
-    /* vector of size 34 */
-    double_integrator_QP_solver_CD_FLOAT b6[34];
+    /* vector of size 28 */
+    double_integrator_QP_solver_CD_FLOAT b6[28];
 
-    /* vector of size 23 */
-    double_integrator_QP_solver_CD_FLOAT f7[23];
+    /* vector of size 20 */
+    double_integrator_QP_solver_CD_FLOAT f7[20];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT lb7[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT lb7[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT ub7[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT ub7[4];
 
-    /* matrix of size [34 x 23] (column major format) */
-    double_integrator_QP_solver_CD_FLOAT A7[782];
+    /* matrix of size [28 x 20] (column major format) */
+    double_integrator_QP_solver_CD_FLOAT A7[560];
 
-    /* vector of size 34 */
-    double_integrator_QP_solver_CD_FLOAT b7[34];
+    /* vector of size 28 */
+    double_integrator_QP_solver_CD_FLOAT b7[28];
 
-    /* vector of size 23 */
-    double_integrator_QP_solver_CD_FLOAT f8[23];
+    /* vector of size 20 */
+    double_integrator_QP_solver_CD_FLOAT f8[20];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT lb8[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT lb8[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT ub8[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT ub8[4];
 
-    /* matrix of size [34 x 23] (column major format) */
-    double_integrator_QP_solver_CD_FLOAT A8[782];
+    /* matrix of size [28 x 20] (column major format) */
+    double_integrator_QP_solver_CD_FLOAT A8[560];
 
-    /* vector of size 34 */
-    double_integrator_QP_solver_CD_FLOAT b8[34];
+    /* vector of size 28 */
+    double_integrator_QP_solver_CD_FLOAT b8[28];
 
-    /* vector of size 23 */
-    double_integrator_QP_solver_CD_FLOAT f9[23];
+    /* vector of size 20 */
+    double_integrator_QP_solver_CD_FLOAT f9[20];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT lb9[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT lb9[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT ub9[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT ub9[4];
 
-    /* matrix of size [34 x 23] (column major format) */
-    double_integrator_QP_solver_CD_FLOAT A9[782];
+    /* matrix of size [28 x 20] (column major format) */
+    double_integrator_QP_solver_CD_FLOAT A9[560];
 
-    /* vector of size 34 */
-    double_integrator_QP_solver_CD_FLOAT b9[34];
+    /* vector of size 28 */
+    double_integrator_QP_solver_CD_FLOAT b9[28];
 
-    /* vector of size 23 */
-    double_integrator_QP_solver_CD_FLOAT f10[23];
+    /* vector of size 20 */
+    double_integrator_QP_solver_CD_FLOAT f10[20];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT lb10[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT lb10[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT ub10[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT ub10[4];
 
-    /* matrix of size [34 x 23] (column major format) */
-    double_integrator_QP_solver_CD_FLOAT A10[782];
+    /* matrix of size [28 x 20] (column major format) */
+    double_integrator_QP_solver_CD_FLOAT A10[560];
 
-    /* vector of size 34 */
-    double_integrator_QP_solver_CD_FLOAT b10[34];
+    /* vector of size 28 */
+    double_integrator_QP_solver_CD_FLOAT b10[28];
 
-    /* vector of size 21 */
-    double_integrator_QP_solver_CD_FLOAT f11[21];
+    /* vector of size 18 */
+    double_integrator_QP_solver_CD_FLOAT f11[18];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT lb11[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT lb11[4];
 
-    /* vector of size 6 */
-    double_integrator_QP_solver_CD_FLOAT ub11[6];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT ub11[4];
 
-    /* matrix of size [34 x 21] (column major format) */
-    double_integrator_QP_solver_CD_FLOAT A11[714];
+    /* matrix of size [28 x 18] (column major format) */
+    double_integrator_QP_solver_CD_FLOAT A11[504];
 
-    /* vector of size 34 */
-    double_integrator_QP_solver_CD_FLOAT b11[34];
+    /* vector of size 28 */
+    double_integrator_QP_solver_CD_FLOAT b11[28];
 
-    /* vector of size 7 */
-    double_integrator_QP_solver_CD_FLOAT f12[7];
+    /* vector of size 4 */
+    double_integrator_QP_solver_CD_FLOAT f12[4];
 
     /* vector of size 4 */
     double_integrator_QP_solver_CD_FLOAT lb12[4];
 
     /* vector of size 4 */
     double_integrator_QP_solver_CD_FLOAT ub12[4];
-
-    /* matrix of size [14 x 7] (column major format) */
-    double_integrator_QP_solver_CD_FLOAT A12[98];
-
-    /* vector of size 14 */
-    double_integrator_QP_solver_CD_FLOAT b12[14];
 
 } double_integrator_QP_solver_CD_params;
 

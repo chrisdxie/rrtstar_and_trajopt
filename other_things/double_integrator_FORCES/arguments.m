@@ -1,4 +1,4 @@
-
+function [args] = arguments(x, penalty_coeff, trust_box_size)
 o{1} = [1 4; 1 2; 5 2; 5 4];
 o{2} = [1.5 9.5;1.5 6.5; 2.5 6.5; 2.5 9.5];
 o{3} = [6 8; 6 6; 8 6; 8 8];
@@ -13,4 +13,4 @@ args.x_goal = x((args.N-1)*args.nX+1:(args.N-1)*args.nX+args.nX);
 args.trust_box_size=trust_box_size;
 args.obstacles = o;
 args.d_safe = 0.05;
-
+end

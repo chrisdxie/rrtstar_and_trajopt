@@ -2,66 +2,64 @@
 %
 %   OUTPUT = double_integrator_QP_solver_CD(PARAMS) solves a multistage problem
 %   subject to the parameters supplied in the following struct:
-%       PARAMS.f1 - column vector of length 23
+%       PARAMS.f1 - column vector of length 20
 %       PARAMS.lb1 - column vector of length 7
 %       PARAMS.ub1 - column vector of length 6
-%       PARAMS.A1 - matrix of size [34 x 23]
-%       PARAMS.b1 - column vector of length 34
-%       PARAMS.f2 - column vector of length 23
-%       PARAMS.lb2 - column vector of length 6
-%       PARAMS.ub2 - column vector of length 6
-%       PARAMS.A2 - matrix of size [34 x 23]
-%       PARAMS.b2 - column vector of length 34
-%       PARAMS.f3 - column vector of length 23
-%       PARAMS.lb3 - column vector of length 6
-%       PARAMS.ub3 - column vector of length 6
-%       PARAMS.A3 - matrix of size [34 x 23]
-%       PARAMS.b3 - column vector of length 34
-%       PARAMS.f4 - column vector of length 23
-%       PARAMS.lb4 - column vector of length 6
-%       PARAMS.ub4 - column vector of length 6
-%       PARAMS.A4 - matrix of size [34 x 23]
-%       PARAMS.b4 - column vector of length 34
-%       PARAMS.f5 - column vector of length 23
-%       PARAMS.lb5 - column vector of length 6
-%       PARAMS.ub5 - column vector of length 6
-%       PARAMS.A5 - matrix of size [34 x 23]
-%       PARAMS.b5 - column vector of length 34
-%       PARAMS.f6 - column vector of length 23
-%       PARAMS.lb6 - column vector of length 6
-%       PARAMS.ub6 - column vector of length 6
-%       PARAMS.A6 - matrix of size [34 x 23]
-%       PARAMS.b6 - column vector of length 34
-%       PARAMS.f7 - column vector of length 23
-%       PARAMS.lb7 - column vector of length 6
-%       PARAMS.ub7 - column vector of length 6
-%       PARAMS.A7 - matrix of size [34 x 23]
-%       PARAMS.b7 - column vector of length 34
-%       PARAMS.f8 - column vector of length 23
-%       PARAMS.lb8 - column vector of length 6
-%       PARAMS.ub8 - column vector of length 6
-%       PARAMS.A8 - matrix of size [34 x 23]
-%       PARAMS.b8 - column vector of length 34
-%       PARAMS.f9 - column vector of length 23
-%       PARAMS.lb9 - column vector of length 6
-%       PARAMS.ub9 - column vector of length 6
-%       PARAMS.A9 - matrix of size [34 x 23]
-%       PARAMS.b9 - column vector of length 34
-%       PARAMS.f10 - column vector of length 23
-%       PARAMS.lb10 - column vector of length 6
-%       PARAMS.ub10 - column vector of length 6
-%       PARAMS.A10 - matrix of size [34 x 23]
-%       PARAMS.b10 - column vector of length 34
-%       PARAMS.f11 - column vector of length 21
-%       PARAMS.lb11 - column vector of length 6
-%       PARAMS.ub11 - column vector of length 6
-%       PARAMS.A11 - matrix of size [34 x 21]
-%       PARAMS.b11 - column vector of length 34
-%       PARAMS.f12 - column vector of length 7
+%       PARAMS.A1 - matrix of size [14 x 20]
+%       PARAMS.b1 - column vector of length 14
+%       PARAMS.f2 - column vector of length 20
+%       PARAMS.lb2 - column vector of length 4
+%       PARAMS.ub2 - column vector of length 4
+%       PARAMS.A2 - matrix of size [28 x 20]
+%       PARAMS.b2 - column vector of length 28
+%       PARAMS.f3 - column vector of length 20
+%       PARAMS.lb3 - column vector of length 4
+%       PARAMS.ub3 - column vector of length 4
+%       PARAMS.A3 - matrix of size [28 x 20]
+%       PARAMS.b3 - column vector of length 28
+%       PARAMS.f4 - column vector of length 20
+%       PARAMS.lb4 - column vector of length 4
+%       PARAMS.ub4 - column vector of length 4
+%       PARAMS.A4 - matrix of size [28 x 20]
+%       PARAMS.b4 - column vector of length 28
+%       PARAMS.f5 - column vector of length 20
+%       PARAMS.lb5 - column vector of length 4
+%       PARAMS.ub5 - column vector of length 4
+%       PARAMS.A5 - matrix of size [28 x 20]
+%       PARAMS.b5 - column vector of length 28
+%       PARAMS.f6 - column vector of length 20
+%       PARAMS.lb6 - column vector of length 4
+%       PARAMS.ub6 - column vector of length 4
+%       PARAMS.A6 - matrix of size [28 x 20]
+%       PARAMS.b6 - column vector of length 28
+%       PARAMS.f7 - column vector of length 20
+%       PARAMS.lb7 - column vector of length 4
+%       PARAMS.ub7 - column vector of length 4
+%       PARAMS.A7 - matrix of size [28 x 20]
+%       PARAMS.b7 - column vector of length 28
+%       PARAMS.f8 - column vector of length 20
+%       PARAMS.lb8 - column vector of length 4
+%       PARAMS.ub8 - column vector of length 4
+%       PARAMS.A8 - matrix of size [28 x 20]
+%       PARAMS.b8 - column vector of length 28
+%       PARAMS.f9 - column vector of length 20
+%       PARAMS.lb9 - column vector of length 4
+%       PARAMS.ub9 - column vector of length 4
+%       PARAMS.A9 - matrix of size [28 x 20]
+%       PARAMS.b9 - column vector of length 28
+%       PARAMS.f10 - column vector of length 20
+%       PARAMS.lb10 - column vector of length 4
+%       PARAMS.ub10 - column vector of length 4
+%       PARAMS.A10 - matrix of size [28 x 20]
+%       PARAMS.b10 - column vector of length 28
+%       PARAMS.f11 - column vector of length 18
+%       PARAMS.lb11 - column vector of length 4
+%       PARAMS.ub11 - column vector of length 4
+%       PARAMS.A11 - matrix of size [28 x 18]
+%       PARAMS.b11 - column vector of length 28
+%       PARAMS.f12 - column vector of length 4
 %       PARAMS.lb12 - column vector of length 4
 %       PARAMS.ub12 - column vector of length 4
-%       PARAMS.A12 - matrix of size [14 x 7]
-%       PARAMS.b12 - column vector of length 14
 %
 %   OUTPUT returns the values of the last iteration of the solver where
 %       OUTPUT.z1 - column vector of size 7

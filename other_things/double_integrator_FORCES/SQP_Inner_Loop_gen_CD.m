@@ -33,11 +33,11 @@ i = 1;
 i_str = sprintf('%d', i);
 
 % Dimensions of first stage
-stages(i).dims.n = 2*nX+2*nU+1+2*nO+nX;                     % number of stage variables
+stages(i).dims.n = 2*nX+2*nU+1+nO+nX;                       % number of stage variables
 stages(i).dims.l = nX+nU+1;                                 % number of lower bounds
 stages(i).dims.u = nX+nU;                                   % number of upper bounds
 stages(i).dims.r = nX+nU+1;                                 % number of equality constraints
-stages(i).dims.p = 4*nO+4*nX+2*nU+2;                        % number of affine constraints
+stages(i).dims.p = 2*nO+2*nX;                               % number of affine constraints (SWvolume, dynamics)
 stages(i).dims.q = 0;                                       % number of quadratic constraints
 
 % Cost of the first stage
@@ -45,15 +45,15 @@ stages(i).cost.H = zeros(stages(i).dims.n);                 % No quadratic cost
 params(1) = newParam(['f' i_str], i, 'cost.f');             % Parameter for cost
 
 % Lower Bounds
-stages(i).ineq.b.lbidx = [1:nX+nU 2*nX+2*nU+1];             % Lower bounds on states, controls, and time
+stages(i).ineq.b.lbidx = [1:nX+nU 2*nX+2*nU+1];             % Lower bounds on start state, controls, and time
 params(end+1) = newParam(['lb' i_str], i, 'ineq.b.lb');
 
 % Upper bounds
-stages(i).ineq.b.ubidx = 1:stages(i).dims.u;                % Upper bounds on states, controls, NOT time
+stages(i).ineq.b.ubidx = 1:stages(i).dims.u;                % Upper bounds on start state, controls, NOT time
 params(end+1) = newParam(['ub' i_str], i, 'ineq.b.ub');
 
 % Equality between z1 and z2 is time (delta), and next state. 
-stages(i).eq.C = [zeros(nX+nU+1, nX+nU) eye(nX+nU+1) zeros(nX+nU+1, 2*nO+nX)];
+stages(i).eq.C = [zeros(nX+nU+1, nX+nU) eye(nX+nU+1) zeros(nX+nU+1, nO+nX)];
 stages(i).eq.c = zeros(stages(i).dims.r, 1);
 
 % Inequality constraints: These include linearized dynamics and linearized
@@ -67,11 +67,11 @@ for i=2:N-2
     i_str = sprintf('%d', i);
 
     % Dimensions
-    stages(i).dims.n = 2*nX+2*nU+1+2*nO+nX;                     % number of stage variables
-    stages(i).dims.l = nX+nU;                                   % number of lower bounds
-    stages(i).dims.u = nX+nU;                                   % number of upper bounds
+    stages(i).dims.n = 2*nX+2*nU+1+nO+nX;                     % number of stage variables
+    stages(i).dims.l = d+nU;                                    % number of lower bounds
+    stages(i).dims.u = d+nU;                                    % number of upper bounds
     stages(i).dims.r = nX+nU+1;                                 % number of equality constraints
-    stages(i).dims.p = 4*nO+4*nX+2*nU+2;                        % number of affine constraints
+    stages(i).dims.p = 2*nO+4*nX+2*nU+2;                        % number of affine constraints
     stages(i).dims.q = 0;                                       % number of quadratic constraints
     
     % Cost
@@ -79,18 +79,18 @@ for i=2:N-2
     params(end+1) = newParam(['f' i_str], i, 'cost.f');         % Parameter for cost
     
     % Lower Bounds
-    stages(i).ineq.b.lbidx = 1:stages(i).dims.l;                % Lower bounds on states, controls, and time
+    stages(i).ineq.b.lbidx = 3:3+stages(i).dims.l-1;                % Lower bounds on velocities, controls
     params(end+1) = newParam(['lb' i_str], i, 'ineq.b.lb');
     
     % Upper bounds
-    stages(i).ineq.b.ubidx = 1:stages(i).dims.u;                % Upper bounds on states, controls, NOT time
+    stages(i).ineq.b.ubidx = 3:3+stages(i).dims.u-1;                % Upper bounds on velocities, controls
     params(end+1) = newParam(['ub' i_str], i, 'ineq.b.ub');
     
     % Equality between z1 and z2 is time (delta), and next state. 
-    stages(i).eq.C = [zeros(nX+nU+1, nX+nU) eye(nX+nU+1) zeros(nX+nU+1, 2*nO+nX)];
+    stages(i).eq.C = [zeros(nX+nU+1, nX+nU) eye(nX+nU+1) zeros(nX+nU+1, nO+nX)];
     stages(i).eq.c = zeros(stages(i).dims.r, 1);
 
-    stages(i).eq.D = [-1*eye(nX+nU) zeros(nX+nU, nX+nU+1+2*nO+nX); zeros(1, stages(i).dims.n)];
+    stages(i).eq.D = [-1*eye(nX+nU) zeros(nX+nU, nX+nU+1+nO+nX); zeros(1, stages(i).dims.n)];
     stages(i).eq.D(nX+nU+1, 2*nX+2*nU+1) = -1;
     
     % Inequality constraints: These include linearized dynamics and linearized
@@ -106,11 +106,11 @@ i = N-1;
 i_str = sprintf('%d', i);
 
 % Dimensions
-stages(i).dims.n = 2*nX+nU+1+2*nO+nX;                       % number of stage variables
-stages(i).dims.l = nX+nU;                                   % number of lower bounds
-stages(i).dims.u = nX+nU;                                   % number of upper bounds
+stages(i).dims.n = 2*nX+nU+1+nO+nX;                       % number of stage variables
+stages(i).dims.l = d+nU;                                   % number of lower bounds
+stages(i).dims.u = d+nU;                                   % number of upper bounds
 stages(i).dims.r = nX;                                      % number of equality constraints
-stages(i).dims.p = 4*nO+4*nX+2*nU+2;                        % number of affine constraints
+stages(i).dims.p = 2*nO+4*nX+2*nU+2;                        % number of affine constraints
 stages(i).dims.q = 0;                                       % number of quadratic constraints
 
 % Cost
@@ -118,18 +118,18 @@ stages(i).cost.H = zeros(stages(i).dims.n);                 % No quadratic cost
 params(end+1) = newParam(['f' i_str], i, 'cost.f');         % Parameter for cost
 
 % Lower Bounds
-stages(i).ineq.b.lbidx = 1:stages(i).dims.l;                % Lower bounds on states, controls, and time
+stages(i).ineq.b.lbidx = 3:3+stages(i).dims.l-1;                % Lower bounds on velocities, controls, and time
 params(end+1) = newParam(['lb' i_str], i, 'ineq.b.lb');
 
 % Upper bounds
-stages(i).ineq.b.ubidx = 1:stages(i).dims.u;                % Upper bounds on states, controls, NOT time
+stages(i).ineq.b.ubidx = 3:3+stages(i).dims.u-1;                % Upper bounds on velocities, controls, NOT time
 params(end+1) = newParam(['ub' i_str], i, 'ineq.b.ub');
 
 % Equality between z1 and z2 is time (delta), and next state.
-stages(i).eq.C = [zeros(nX, nX+nU) eye(nX) zeros(nX, 1+2*nO+nX)];
+stages(i).eq.C = [zeros(nX, nX+nU) eye(nX) zeros(nX, 1+nO+nX)];
 stages(i).eq.c = zeros(stages(i).dims.r, 1);
 
-stages(i).eq.D = [-1*eye(nX+nU) zeros(nX+nU, nX+1+2*nO+nX); zeros(1, stages(i).dims.n)];
+stages(i).eq.D = [-1*eye(nX+nU) zeros(nX+nU, nX+1+nO+nX); zeros(1, stages(i).dims.n)];
 stages(i).eq.D(nX+nU+1, 2*nX+nU+1) = -1;
 
 % Inequality constraints: These include linearized dynamics and linearized
@@ -143,11 +143,11 @@ i = N;
 i_str = sprintf('%d', i);
 
 % Dimensions of last stage
-stages(i).dims.n = nX+nO;                                   % number of stage variables
+stages(i).dims.n = nX;                                      % number of stage variables
 stages(i).dims.l = nX;                                      % number of lower bounds
 stages(i).dims.u = nX;                                      % number of upper bounds
 stages(i).dims.r = 0;                                       % number of equality constraints
-stages(i).dims.p = 2*nO+2*nX;                               % number of affine constraints
+stages(i).dims.p = 0;                                       % number of affine constraints
 stages(i).dims.q = 0;                                       % number of quadratic constraints
 
 % Cost of last stage
@@ -166,8 +166,8 @@ stages(i).eq.D = [-1*eye(nX) zeros(nX, nO)];
 
 % Inequality constraints: These include linearized dynamics and linearized
 % collisions
-params(end+1) = newParam(['A' i_str], i, 'ineq.p.A');
-params(end+1) = newParam(['b' i_str], i, 'ineq.p.b');
+%params(end+1) = newParam(['A' i_str], i, 'ineq.p.A');
+%params(end+1) = newParam(['b' i_str], i, 'ineq.p.b');
 
 % ------------ OUTPUTS ---------------------
 
@@ -190,7 +190,7 @@ outputs(i) = newOutput(var, i, 1:nX);
 
 solver_name = 'double_integrator_QP_solver_CD';
 codeoptions = getOptions(solver_name);
-codeoptions.printlevel = 2; % Debugging info for now
+codeoptions.printlevel = 0; % Debugging info for now
 codeoptions.timing=1;       % Debugging, just to see how long it takes
 codeoptions.maxit=100;
 
