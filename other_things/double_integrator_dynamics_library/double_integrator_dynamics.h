@@ -54,6 +54,57 @@ namespace double_integrator_dynamics {
 	VectorXd dynamics_difference(VectorXd (*f)(VectorXd, VectorXd), VectorXd x,
 								 VectorXd x_next, VectorXd u, double delta);
 
+	/*
+	 *  This function returns the value of the collision function (makes use of
+	 *  signed distance). Specifically, it is -1 * SD(x, obstacles) + d_safe. It also
+	 *  returns the jacobian that results in taking the first order Taylor series
+	 *  approximation of the swept out volume collision function.
+	 *
+	 *  The matrix "obstacles" should be supplied as a 4 x nO matrix, where nO is the
+	 *  number of obstacles. Each column vector represents an obstacle. The column
+	 *  has this format: [x1 center, x1 size, x2 center, x2 size]'. For example, the
+	 *  obstacle represented by [3, 2, 7, 4] has corners: (2, 5), (2, 9), (4, 9), (4, 5).
+	 *
+	 *  The first column of the returned matrix is the signed distance between
+	 *  the line create by x and x_next evaluated between each obstacle. The rest
+	 *  of it is the jacobian. It should be a matrix of dimension nO x nX, where nO
+	 *  is the number of obstacles and nX is the dimension of the state vector x.
+	 */
+	MatrixXd collision_and_jacobian(VectorXd x, double d_safe, MatrixXd obstacles);
+
+	/*
+	 *  This function returns the value of the swept out volume collision function.
+	 *  Specifically, it is -1 * SD(x, x_next, obstacles) + d_safe. It also
+	 *  returns the two jacobians that result in taking the first order
+	 *  Taylor series approximation of the swept out volume collision function.
+	 *
+	 *  The matrix "obstacles" should be supplied as a 4 x nO matrix, where nO is the
+	 *  number of obstacles. Each column vector represents an obstacle. The column
+	 *  has this format: [x1 center, x1 size, x2 center, x2 size]'. For example, the
+	 *  obstacle represented by [3, 2, 7, 4] has corners: (2, 5), (2, 9), (4, 9), (4, 5).
+	 *
+	 *  The first column of the returned matrix is the signed distance between
+	 *  the line create by x and x_next evaluated between each obstacle. Of the next
+	 *  part of the matrix, the left half of the matrix is dg/dx, and
+	 *  the right half of the matrix is dg/dx_next.
+	 */
+	MatrixXd swept_out_volume_collision_and_jacobian(VectorXd x, VectorXd x_next, double d_safe, MatrixXd obstacles);
+
+	/* UTILS */
+
+	/*
+	 *  Returns the sign of n
+	 */
+	int sign(double n);
+
+	/*
+	 *  Returns the jacobians of the point w.r.t x and x_next. This function is
+	 *  specific to the double integrator point robot. It works when all three
+	 *  parameters are 2 dimensional.
+	 *
+	 *  The left half of the return value is dP/dx, the right half is dP/dx_next
+	 */
+	MatrixXd calcJacobians(VectorXd point, VectorXd x, VectorXd x_next);
 
 }
 

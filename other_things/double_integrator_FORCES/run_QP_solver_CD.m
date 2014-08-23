@@ -49,7 +49,7 @@ function [output, exitflag, info] = run_QP_solver_CD(args)
     for j=1:2*nX+2*nU+1
         f_string = strcat(f_string, ' 0;');
     end
-    for j=1:nX+2*nO
+    for j=1:nX+nO
         f_string = strcat(f_string, ' mu;');
     end
     f_string = strcat(f_string, ']');
@@ -66,7 +66,7 @@ function [output, exitflag, info] = run_QP_solver_CD(args)
         f1_string = strcat(f1_string, ' 0;');
     end
     f1_string = strcat(f1_string, ' 1;');
-    for j=1:nX+2*nO
+    for j=1:nX+nO
         f1_string = strcat(f1_string, ' mu;');
     end
     f1_string = strcat(f1_string, ']');
@@ -77,7 +77,7 @@ function [output, exitflag, info] = run_QP_solver_CD(args)
     for j=1:2*nX+nU+1
         f_almost_string = strcat(f_almost_string, ' 0;');
     end
-    for j=1:nX+2*nO
+    for j=1:nX+nO
         f_almost_string = strcat(f_almost_string, ' mu;');
     end
     f_almost_string = strcat(f_almost_string, ']');
@@ -88,9 +88,9 @@ function [output, exitflag, info] = run_QP_solver_CD(args)
     for j=1:nX
         fN_string = strcat(fN_string, ' 0;');
     end
-    for j=1:nO
-        fN_string = strcat(fN_string, ' mu;');
-    end
+%     for j=1:nO
+%         fN_string = strcat(fN_string, ' mu;');
+%     end
     fN_string = strcat(fN_string, ']');
     eval(['params.f' sprintf('%d', N) ' = ' fN_string ';']);
     
@@ -98,10 +98,10 @@ function [output, exitflag, info] = run_QP_solver_CD(args)
     
     % Create the string vector for lower and upper bound
     lb_string = '['; ub_string = '[';
-    for j=1:nX/2 % d = nX/2
-        lb_string = strcat(lb_string, ' x_min;');
-        ub_string = strcat(ub_string, ' x_max;');
-    end
+%     for j=1:nX/2 % d = nX/2
+%         lb_string = strcat(lb_string, ' x_min;');
+%         ub_string = strcat(ub_string, ' x_max;');
+%     end
     for j=1:nX/2
         lb_string = strcat(lb_string, ' v_min;');
         ub_string = strcat(ub_string, ' v_max;');
@@ -124,8 +124,8 @@ function [output, exitflag, info] = run_QP_solver_CD(args)
     % Also enforce that delta >= 0
     lb1_string = '['; ub1_string = '[';
     for j=1:nX
-        lb1_string = strcat(lb1_string, [' ' num2str(x_start(j) - eps) ';']);
-        ub1_string = strcat(ub1_string, [' ' num2str(x_start(j) + eps) ';']);        
+        lb1_string = strcat(lb1_string, [' ' num2str(x_start(j)) ';']);
+        ub1_string = strcat(ub1_string, [' ' num2str(x_start(j)) ';']);        
     end
     for j=1:nU
         lb1_string = strcat(lb1_string, ' u_min;');
@@ -139,8 +139,8 @@ function [output, exitflag, info] = run_QP_solver_CD(args)
     % Lastly, create lbN and ubN strings
     lbN_string = '['; ubN_string = '[';
     for j=1:nX
-        lbN_string = strcat(lbN_string, [' ' num2str(x_goal(j) - eps) ';']);
-        ubN_string = strcat(ubN_string, [' ' num2str(x_goal(j) + eps) ';']);
+        lbN_string = strcat(lbN_string, [' ' num2str(x_goal(j)) ';']);
+        ubN_string = strcat(ubN_string, [' ' num2str(x_goal(j)) ';']);
     end
     lbN_string = strcat(lbN_string, ']');
     ubN_string = strcat(ubN_string, ']');
@@ -150,10 +150,10 @@ function [output, exitflag, info] = run_QP_solver_CD(args)
     %---------------- Fill out A's and b's --------------------%
     
     % Must linearize around z0
-    addpath('../../other_things/double_int_trajOpt_matlab/');
-    setup; % Get MatGeom library ready, since we need some things
-    robot_length = 0.1; robot_width = 0.1;
-    make_robot_poly = @(x) orientedBoxToPolygon([x(1), x(2), robot_length, robot_width, 0]);
+    %addpath('../../other_things/double_int_trajOpt_matlab/');
+    %setup; % Get MatGeom library ready, since we need some things
+%     robot_length = 0; robot_width = 0;
+%     make_robot_poly = @(x) orientedBoxToPolygon([x(1), x(2), robot_length, robot_width, 0]);
     
     % Get function handle on double integrator
     f = @double_integrator_dynamics;
@@ -167,8 +167,8 @@ function [output, exitflag, info] = run_QP_solver_CD(args)
     for i=1:N-1
         % Setup loop iteration
         i_str = sprintf('%d',i);
-        A = zeros(4*nO+4*nX+2*nU+2, 2*nX+2*nU+1+2*nO+nX);
-        b = zeros(4*nO+4*nX+2*nU+2, 1);
+        A = zeros(2*nO+4*nX+2*nU+2, 2*nX+2*nU+1+nO+nX);
+        b = zeros(2*nO+4*nX+2*nU+2, 1);
         curr_row = 1;
 
         % Grab corresponding state, control, and time
@@ -178,24 +178,24 @@ function [output, exitflag, info] = run_QP_solver_CD(args)
         delta = delta0;
         
         % Collisions for every intermediate state
-        A(curr_row:curr_row+nO-1, :) = [zeros(nO, 2*nX+2*nU+1) -1*eye(nO) zeros(nO, nO+nX)];
-        curr_row = curr_row + nO;
+%         A(curr_row:curr_row+nO-1, :) = [zeros(nO, 2*nX+2*nU+1) -1*eye(nO) zeros(nO, nO+nX)];
+%         curr_row = curr_row + nO;
         
-        x_prime = [x;u;delta];
-        % Grab collisions jacobian 
-        % Note: gjac returns jacobian that has padded zeros at end for
-        % other things like controls and delta.
-        [gval gjac] = g_collisions(x_prime, d_safe, [nX 1], make_robot_poly, obstacles);
-        A(curr_row:curr_row+nO-1, :) = [gjac zeros(nO, nX+nU) -1*eye(nO) zeros(nO, nO+nX)];
-        b(curr_row:curr_row+nO-1, :) = gjac*x_prime - gval;
-        curr_row = curr_row + nO;
-        
+%         x_prime = [x;u;delta];
+%         % Grab collisions jacobian 
+%         % Note: gjac returns jacobian that has padded zeros at end for
+%         % other things like controls and delta.
+%         [gval gjac] = g_collisions(x_prime, d_safe, [nX 1], make_robot_poly, obstacles);
+%         A(curr_row:curr_row+nO-1, :) = [gjac zeros(nO, nX+nU) -1*eye(nO) zeros(nO, nO+nX)];
+%         b(curr_row:curr_row+nO-1, :) = gjac*x_prime - gval;
+%         curr_row = curr_row + nO;
+
         % Swept out volume
-        A(curr_row:curr_row+nO-1, :) = [zeros(nO, 2*nX+2*nU+1+nO) -1*eye(nO) zeros(nO, nX)];
+        A(curr_row:curr_row+nO-1, :) = [zeros(nO, 2*nX+2*nU+1) -1*eye(nO) zeros(nO, nX)];
         curr_row = curr_row + nO;
         
         [sval sjac sjacnext] = swept_out_volume_collisions(x, x_next, d_safe, obstacles);
-        A(curr_row:curr_row+nO-1, :) = [sjac zeros(nO, nU) sjacnext zeros(nO, nU+1+nO) -1*eye(nO) zeros(nO, nX)];
+        A(curr_row:curr_row+nO-1, :) = [sjac zeros(nO, nU) sjacnext zeros(nO, nU+1) -1*eye(nO) zeros(nO, nX)];
         b(curr_row:curr_row+nO-1, :) = sjac*x + sjacnext*x_next - sval;
         curr_row = curr_row + nO;
         
@@ -206,31 +206,34 @@ function [output, exitflag, info] = run_QP_solver_CD(args)
         DH = [DH_X eye(nX) DH_U DH_delta];
         cfg.T=2;cfg.nX=nX;cfg.nU=nU;cfg.f=f;
         hval = double_integrator_trajectory_dynamics([x;x_next;u;delta], cfg);
-        A(curr_row:curr_row+nX-1, :) = [DH_X DH_U eye(nX) zeros(nX, nU) DH_delta zeros(nX, 2*nO) -1*eye(nX)];
+        A(curr_row:curr_row+nX-1, :) = [DH_X DH_U eye(nX) zeros(nX, nU) DH_delta zeros(nX, nO) -1*eye(nX)];
         b(curr_row:curr_row+nX-1, :) = DH*x_prime - hval;
         curr_row = curr_row + nX;
-        A(curr_row:curr_row+nX-1, :) = [-1*DH_X -1*DH_U -1*eye(nX) zeros(nX, nU) -1*DH_delta zeros(nX, 2*nO) -1*eye(nX)];
+        A(curr_row:curr_row+nX-1, :) = [-1*DH_X -1*DH_U -1*eye(nX) zeros(nX, nU) -1*DH_delta zeros(nX, nO) -1*eye(nX)];
         b(curr_row:curr_row+nX-1, :) = hval - DH*x_prime;
         curr_row = curr_row + nX;
         
         % --------- %
         
         % Trust box stuff
-        A(curr_row:curr_row+nX+nU+1-1, :) = [eye(nX+nU) zeros(nX+nU, nX+nU+1+2*nO+nX); zeros(1, 2*nX+2*nU+1+2*nO+nX)];
+        A(curr_row:curr_row+nX+nU+1-1, :) = [eye(nX+nU) zeros(nX+nU, nX+nU+1+nO+nX); zeros(1, 2*nX+2*nU+1+nO+nX)];
         A(curr_row+nX+nU+1-1, 2*nX+2*nU+1) = 1;
         b(curr_row:curr_row+nX-1) = x + trust_box_size;
         b(curr_row+nX:curr_row+nX+nU-1) = u + trust_box_size;
         b(curr_row+nX+nU) = delta + trust_box_size;
         curr_row = curr_row + nX+nU+1;
         
-        A(curr_row:curr_row+nX+nU+1-1, :) = [-1*eye(nX+nU) zeros(nX+nU, nX+nU+1+2*nO+nX); zeros(1, 2*nX+2*nU+1+2*nO+nX)];
+        A(curr_row:curr_row+nX+nU+1-1, :) = [-1*eye(nX+nU) zeros(nX+nU, nX+nU+1+nO+nX); zeros(1, 2*nX+2*nU+1+nO+nX)];
         A(curr_row+nX+nU+1-1, 2*nX+2*nU+1) = -1;        
         b(curr_row:curr_row+nX-1) = trust_box_size - x;
         b(curr_row+nX:curr_row+nX+nU-1) = trust_box_size - u;
         b(curr_row+nX+nU) = trust_box_size - delta;
         curr_row = curr_row + nX+nU+1;
         
-        if (i == N-1)
+        if (i == 1)
+            A(2*nO+2*nX+1:end, :) = [];
+            b(2*nO+2*nX+1:end, :) = [];
+        elseif (i == N-1)
             A(:, 2*nX+nU+1:2*nX+2*nU) = [];
         end
         
@@ -240,32 +243,32 @@ function [output, exitflag, info] = run_QP_solver_CD(args)
         
     end
     
-    % A_N, b_N
-    i = N;
-    i_str = sprintf('%d',i);
-    A = zeros(2*nO+2*nX, nX+nO);
-    b = zeros(2*nO+2*nX, 1);
-    curr_row = 1;
-    
-    % Grab corresponding state
-    x = x0((i-1)*nX+1 : (i-1)*nX+nX);
-    
-    A(curr_row:curr_row+nO-1, :) = [zeros(nO, nX) -1*eye(nO)];
-    curr_row = curr_row + nO;
-    [gval gjac] = g_collisions(x, d_safe, [nX 1], make_robot_poly, obstacles);
-    A(curr_row:curr_row+nO-1, :) = [gjac -1*eye(nO)];
-    b(curr_row:curr_row+nO-1, :) = gjac*x - gval;
-    curr_row = curr_row + nO;
-    
-    A(curr_row:curr_row+nX-1, :) = [eye(nX) zeros(nX, nO)];
-    b(curr_row:curr_row+nX-1) = x + trust_box_size;
-    curr_row = curr_row + nX;
-    A(curr_row:curr_row+nX-1, :) = [-1*eye(nX) zeros(nX, nO)];
-    b(curr_row:curr_row+nX-1) = trust_box_size - x;
-    curr_row = curr_row + nX;
-    
-    eval(['params.A' i_str ' = ' mat2str(A) ';']);
-    eval(['params.b' i_str ' = ' mat2str(b) ';']);
+%     % A_N, b_N
+%     i = N;
+%     i_str = sprintf('%d',i);
+%     A = zeros(2*nO+2*nX, nX+nO);
+%     b = zeros(2*nO+2*nX, 1);
+%     curr_row = 1;
+%     
+%     % Grab corresponding state
+%     x = x0((i-1)*nX+1 : (i-1)*nX+nX);
+%     
+%     A(curr_row:curr_row+nO-1, :) = [zeros(nO, nX) -1*eye(nO)];
+%     curr_row = curr_row + nO;
+%     [gval gjac] = g_collisions(x, d_safe, [nX 1], make_robot_poly, obstacles);
+%     A(curr_row:curr_row+nO-1, :) = [gjac -1*eye(nO)];
+%     b(curr_row:curr_row+nO-1, :) = gjac*x - gval;
+%     curr_row = curr_row + nO;
+%     
+%     A(curr_row:curr_row+nX-1, :) = [eye(nX) zeros(nX, nO)];
+%     b(curr_row:curr_row+nX-1) = x + trust_box_size;
+%     curr_row = curr_row + nX;
+%     A(curr_row:curr_row+nX-1, :) = [-1*eye(nX) zeros(nX, nO)];
+%     b(curr_row:curr_row+nX-1) = trust_box_size - x;
+%     curr_row = curr_row + nX;
+%     
+%     eval(['params.A' i_str ' = ' mat2str(A) ';']);
+%     eval(['params.b' i_str ' = ' mat2str(b) ';']);
     
     %--------------------- DONE ---------------------%
     

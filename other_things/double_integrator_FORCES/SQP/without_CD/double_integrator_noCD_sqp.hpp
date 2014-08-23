@@ -549,8 +549,9 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double* delta, bounds_t bounds,
 		} else {
 			penalty_increases++;
 			penalty_coeff *= cfg::penalty_coeff_increase_ratio;
-			if (penalty_increases > cfg::max_penalty_coeff_increases) {
+			if (penalty_increases == cfg::max_penalty_coeff_increases) {
 				printf("Number of penalty coefficient increases exceeded maximum allowed.\n");
+				success = false;
 				break;
 			}
 		}

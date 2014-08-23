@@ -24,7 +24,7 @@ Vector2d signed_distance_2d:: perpendicularAxis(Vector2d line) {
 	axis(0) = line(1); axis(1) = line(0);
 	axis(0) *= -1;
 
-	if (axis.norm() != 0) {
+	if ((axis.cwiseAbs()).norm() != 0) {
 		axis.normalize();
 	} else {
 		axis << 0, 0;
@@ -85,7 +85,11 @@ Vector2d signed_distance_2d::closestPointOnLineSegment(Vector2d point, Vector2d 
 
 	// Get Unit vector in direction of edge
 	Vector2d u = p1 - p2;
-	u.normalize(); // Assuming u has nonzero length
+	if ((u.cwiseAbs()).sum() != 0) {
+		u.normalize(); // Assuming u has nonzero length
+	} else {
+		u << 0, 0;
+	}
 	Vector2d d = p1; // d can be any point on the line. p1 or p2 will do
 
 	double t = (point - d).dot(u);

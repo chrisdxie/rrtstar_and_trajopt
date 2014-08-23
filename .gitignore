@@ -1,5 +1,6 @@
 # Mac stuff
 *.DS_Store
+*~
 
 # bin and build will be specific to machine
 bin/

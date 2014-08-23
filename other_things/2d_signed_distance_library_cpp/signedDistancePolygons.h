@@ -26,9 +26,9 @@ namespace signed_distance_2d {
 	 *  	http://www.codezealot.org/archives/55
 	 *
 	 *	If the return value is called DIST_POINTS, then
-	 *	DIST_POINTS(1,1) is the value of the signed distance function.
-	 *	DIST_POINTS(2,:) is the first point belonging to POLYGON1.
-	 *	DIST_POINTS(3,:) is the second point belonging to POLYGON2.
+	 *	DIST_POINTS(0,0) is the value of the signed distance function.
+	 *	DIST_POINTS(1,:) is the first point belonging to POLYGON1.
+	 *	DIST_POINTS(2,:) is the second point belonging to POLYGON2.
 	 */
 	MatrixXd signedDistancePolygons(MatrixXd polygon1, MatrixXd polygon2);
 

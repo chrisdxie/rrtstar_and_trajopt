@@ -1,8 +1,8 @@
 function [ x ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min, u_max, v_min, v_max)
 
-    setup
+    %setup
 
-    addpath ../../../../Courses/CS287/Homeworks/HW3/starter_PS3/q2_starter/  %TODO: your path might be different depending on where you solved q2
+    %addpath ../../../../Courses/CS287/Homeworks/HW3/starter_PS3/q2_starter/  %TODO: your path might be different depending on where you solved q2
 
     n = size(x_start,1); % Dimension of state
     m = n/2; % Dimension of input
@@ -20,8 +20,8 @@ function [ x ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min, u_max
     dsafe = 0.05; % Safety margin
 
     % Point robot
-    robot_length = 0.1;
-    robot_width = 0.1;
+    robot_length = 0.05;
+    robot_width = 0.05;
 
     % Function that maps state vector to polygon (which is used for collision
     % checking)
@@ -43,6 +43,9 @@ function [ x ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min, u_max
     else
         g = @(x) g_collisions(x, dsafe, [n,T], make_robot_poly, obstacles);
     end
+    
+    % SWEPT OUT VOLUME, COMMENT IF NOT SWEPT OUT VOLUME
+    g = @(x) swv_collisions(x, dsafe, [n T], obstacles);
         
     % The nonconvex system dynamics
     traj_dynamics_cfg = struct();
@@ -89,10 +92,10 @@ function [ x ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min, u_max
     cfg = struct();
     cfg.callback = @(x,~) plot_traj(make_robot_poly, obstacles, reshape(x(1:n*T),size(traj_init))); % This does the plotting
     cfg.initial_trust_box_size=.1;
-    cfg.g_use_numerical = true;
+    cfg.g_use_numerical = false;
     cfg.min_approx_improve = 1e-2;
 
-    x = penalty_sqp(x0, Q, q, f, A_ineq, b_ineq, A_eq, b_eq, g, h, cfg);
+    x = my_penalty_sqp(x0, Q, q, f, A_ineq, b_ineq, A_eq, b_eq, g, h, cfg);
     
     %plot_traj(make_robot_poly, obstacles, reshape(x(1:n*T),size(traj_init)));
     
