@@ -5,6 +5,7 @@
 # bin and build will be specific to machine
 bin/
 build/
+*.o
 
 # This should be downloaded by user
 ACADOtoolkit/

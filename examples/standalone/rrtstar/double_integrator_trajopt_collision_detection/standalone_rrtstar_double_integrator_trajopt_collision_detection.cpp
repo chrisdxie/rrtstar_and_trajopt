@@ -16,7 +16,7 @@ using namespace Eigen;
 
 // SMP HEADER FILES ------
 #include <smp/components/extenders/double_integrator.hpp>
-#include <smp/components/extenders/double_integrator_trajopt_collision_detection.hpp>
+#include <smp/components/extenders/double_integrator_trajopt_CD_FORCES.hpp>
 #include <smp/components/samplers/boost_random_uniform.hpp>
 #include <smp/components/collision_checkers/standard.hpp>
 #include <smp/components/distance_evaluators/kdtree.hpp>
@@ -108,12 +108,12 @@ py::object init_display() {
   return plotter;
 }
 
-void plot(py::object plotter, np::ndarray states, np::ndarray obstacles,
+void plot(py::object plotter, np::ndarray states, np::ndarray inputs, np::ndarray obstacles,
     np::ndarray goal_region, int iter, double cost) {
 
   try {
       // pass control to python now
-    plotter(states, obstacles, goal_region, iter, "with_CD", cost);
+    plotter(states, inputs, obstacles, goal_region, iter, "with_CD", cost);
   }
   catch(py::error_already_set const &) {
       // will pass python errors to cpp for printing
@@ -164,7 +164,7 @@ main (int argc, char* argv[]) {
   planner.parameters.set_phase (2);   // The phase parameter can be used to run the algorithm as an RRT, 
                                       // See the documentation of the RRT* algorithm for more information.
 
-  planner.parameters.set_gamma (35.0);    // Set this parameter should be set at least to the side length of
+  planner.parameters.set_gamma (15.0);    // Set this parameter should be set at least to the side length of
                                           //   the (bounded) state space. E.g., if the state space is a box
                                           //   with side length L, then this parameter should be set to at 
                                           //   least L for rapid and efficient convergence in trajectory space.
@@ -183,8 +183,8 @@ main (int argc, char* argv[]) {
   // 2.a Initialize the sampler
   region<4> sampler_support;
   for (int i = 0; i < 2; i++) {
-    sampler_support.center[i] = 0.0;
-    sampler_support.size[i] = 20.0;
+    sampler_support.center[i] = 5.0;
+    sampler_support.size[i] = 12.0;
   }
   for (int i = 2; i < 4; i++) {
     sampler_support.center[i] = 0.0;
@@ -273,6 +273,9 @@ main (int argc, char* argv[]) {
   obstacles.col(1) << obstacle_2.center[0], obstacle_2.size[0], obstacle_2.center[1], obstacle_2.size[1];
   obstacles.col(2) << obstacle_3.center[0], obstacle_3.size[0], obstacle_3.center[1], obstacle_3.size[1];
 
+  // Set obstacles in extender
+  extender.setObstacles(obstacles);
+
   // Get goal region
   // Same format as obstacles. Only one column, since one goal region
   MatrixXd goal_region(4,1);
@@ -292,7 +295,7 @@ main (int argc, char* argv[]) {
     planner.iteration ();
     
     if (i%1 == 0){
-      cout << "Iteration : " << i << endl;
+      cout << "Iteration : " << i+1 << endl;
     }
     if ((i+1) % 100 == 0) { // Plot every 100 iterations, and save automatically in a folder called "pics"
 
@@ -313,24 +316,26 @@ main (int argc, char* argv[]) {
         }
         index++;
       }
-
       np::ndarray states_np = eigen_to_ndarray(states);
 
-      double best_cost = min_time_reachability.get_best_cost();
+      int num_inputs = trajectory_final.list_inputs.size();
+      MatrixXd inputs(3, num_inputs);
 
-      /*
       cout << "Printing inputs of best trajectory:" << endl;
+      index = 0;
       for (typename list<input_t*>::iterator iter_input = trajectory_final.list_inputs.begin();
            iter_input != trajectory_final.list_inputs.end(); iter_input++) {
         input_t *traj_input = *iter_input;
         for (int i = 0; i < 3; i++) {
-          cout << traj_input->input_vars[i] << " ";
+          inputs(i, index) = traj_input->input_vars[i];
         }
-        cout << endl;
+        index++;
       }
-      */
+      np::ndarray inputs_np = eigen_to_ndarray(inputs);
 
-      plot(plotter, states_np, obstacles_np, goal_region_np, i+1, best_cost);
+      double best_cost = min_time_reachability.get_best_cost();
+
+      plot(plotter, states_np, inputs_np, obstacles_np, goal_region_np, i+1, best_cost);
     }
   }
 

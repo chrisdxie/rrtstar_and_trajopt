@@ -12,6 +12,7 @@
 #include <smp/components/extenders/double_integrator.h>
 
 #include <eigen3/Eigen/Eigen>
+using namespace Eigen;
 
 #include <list>
 
@@ -44,11 +45,15 @@ namespace smp {
         int run_FORCES_optimization(state_t *start_state, state_t *end_state, 
                                    list<state_t*> *list_states, list<input_t*> *list_inputs);
 
+	MatrixXd obs;
+
     public:
 
         int extend (state_t *state_from_in, state_t *state_towards_in,
                     int *exact_connection_out, trajectory_t *trajectory_out,
                     list<state_t*> *intermediate_vertices_out);
+
+	int setObstacles(MatrixXd obstacles);
     
     };
 
