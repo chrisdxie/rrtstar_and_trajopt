@@ -6,7 +6,7 @@ import os
 from math import pi, atan
 
 
-def plot(states, obstacles, goal_region, iter, extra_string, cost):
+def plot(states, inputs, obstacles, goal_region, iter, extra_string, cost):
 
     plt.clf()
     plt.cla()
@@ -57,8 +57,9 @@ def plot(states, obstacles, goal_region, iter, extra_string, cost):
         ax.fill(x, y, 'r')
 
     # Plot sequence of states
-
     plt.plot(states[0,:], states[1,:], color='b')
+
+    # Plot markers at each state
     for i in range(states.shape[1]):
     	# since the output is in radians, I convert it to degrees
     	# the -90 is because I want the tip of the triangle to start facing the right
@@ -84,6 +85,29 @@ def plot(states, obstacles, goal_region, iter, extra_string, cost):
 
     save('pics/{0}_iters_{1}'.format(iter,extra_string), 'pdf')
 
+    if os.path.exists('paths_of_{0}'.format(extra_string)):
+        f = open('paths_of_{0}'.format(extra_string), 'a')
+    else:
+        f = open('paths_of_{0}'.format(extra_string), 'w')
+    f.write('Iteration: {0}\n'.format(iter))
+    f.write('States:\n')
+    for i in range(states.shape[1]):
+        f.write('\tState {0}: '.format(i))
+        state_string = ''
+        for j in range(states.shape[0]):
+            state_string += str(states[j,i]) + ', '
+        state_string = state_string[:-2]
+        f.write(state_string + '\n')
+    f.write('Inputs:\n')
+    for i in range(inputs.shape[1]):
+        f.write('\tInput {0}: '.format(i))
+        input_string = ''
+        for j in range(inputs.shape[0]):
+            input_string += str(inputs[j,i]) + ', '
+        input_string = input_string[:-2]
+        f.write(input_string + '\n')
+    f.write('Cost: {0}\n\n'.format(cost))
+    f.close()
 
 
 def save(path, ext='png', close=True, verbose=True):
@@ -135,3 +159,4 @@ def save(path, ext='png', close=True, verbose=True):
      
     if verbose:
         print("Done")
+

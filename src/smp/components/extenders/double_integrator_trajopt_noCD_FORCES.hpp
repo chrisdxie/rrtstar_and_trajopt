@@ -151,7 +151,7 @@ int smp::extender_double_integrator_trajopt<typeparams,NUM_DIMENSIONS>
     if (exact_extender.extend(state_from_in, state_towards_in, &exact_connec, trajectory_out, 
 	intermediate_vertices_out) == 1) {
 	std::cout << "SQP FORCES can't solve, but exact can." << "\n";
-	ofstream outfile ("bad_states.txt", ios::app);
+	ofstream outfile ("SQP_cant_Exact_can.txt", ios::app);
 	if (outfile.is_open()) {
 	    outfile << "x_start: ";
 	    for(int i = 0; i < 4; i++) {
@@ -169,6 +169,25 @@ int smp::extender_double_integrator_trajopt<typeparams,NUM_DIMENSIONS>
   }
 
   //std::cout << "SQP optimal time: " << trajectory_out->list_inputs.front()[0][0] * (T-1) << "\n";
+
+  /*
+  if (exact_extender.extend(state_from_in, state_towards_in, &exact_connec, trajectory_out,
+      intermediate_vertices_out) != 1) {
+      std::cout << "Exact can't solve, but SQP FORCES can." << "\n";
+      ofstream outfile ("Exact_cant_SQP_can.txt", ios::app);
+        if (outfile.is_open()) {
+          outfile << "x_start: ";
+          for(int i = 0; i < 4; i++) {
+              outfile << std::setprecision(10) << state_from_in->state_vars[i] << ", ";
+          }
+          outfile << "\nx_goal: ";
+          for(int i = 0; i < 4; i++) {
+              outfile << std::setprecision(10) << state_towards_in->state_vars[i] << ", ";
+          }
+          outfile << "\n\n";
+      }
+  }
+  */
 
   *exact_connection_out = 1; // Always an exact connection
   
