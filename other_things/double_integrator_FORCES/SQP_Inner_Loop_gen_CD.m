@@ -162,7 +162,7 @@ params(end+1) = newParam(['lb' i_str], i, 'ineq.b.lb');
 stages(i).ineq.b.ubidx = 1:stages(i).dims.u;                % Upper bounds on states
 params(end+1) = newParam(['ub' i_str], i, 'ineq.b.ub');
 
-stages(i).eq.D = [-1*eye(nX) zeros(nX, nO)];
+stages(i).eq.D = -1*eye(nX);
 
 % Inequality constraints: These include linearized dynamics and linearized
 % collisions
