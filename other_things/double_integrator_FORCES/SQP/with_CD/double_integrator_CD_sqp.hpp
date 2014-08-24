@@ -1,14 +1,4 @@
 /*
- * double_integrator_CD_sqp.hpp
- *
- *  Created on: Aug 22, 2014
- *      Author: ChrisXie
- */
-
-#ifndef DOUBLE_INTEGRATOR_CD_SQP_HPP_
-#define DOUBLE_INTEGRATOR_CD_SQP_HPP_
-
-/*
  * double_integrator_CD_sqp.cpp
  *
  *  Created on: Aug 18, 2014
@@ -46,10 +36,10 @@ const int T = TIMESTEPS; // I am mixing N and T for timesteps. They are SAME THI
 #define UB_DIM_2_TO_N_MINUS_1 X_DIM/2+U_DIM
 #define LB_DIM_N X_DIM
 #define UB_DIM_N X_DIM
-#define A_DIM_1 2*O_DIM+2*X_DIM
-#define B_DIM_1 2*O_DIM+2*X_DIM
 #define A_DIM_OUTPUT_1_TO_N_MINUS_1 2*O_DIM+4*X_DIM+2*U_DIM+2
 #define B_DIM_1_TO_N_MINUS_1 2*O_DIM+4*X_DIM+2*U_DIM+2
+#define A_DIM_OUTPUT_N 2*X_DIM
+#define B_DIM_N 2*X_DIM
 
 #include <vector>
 #include <iostream>
@@ -108,8 +98,8 @@ void setup_state_vars(double_integrator_QP_solver_CD_params& problem, double_int
 	f = new double_integrator_QP_solver_CD_FLOAT*[T];
 	lb = new double_integrator_QP_solver_CD_FLOAT*[T];
 	ub = new double_integrator_QP_solver_CD_FLOAT*[T];
-	A = new double_integrator_QP_solver_CD_FLOAT*[T-1];
-	b = new double_integrator_QP_solver_CD_FLOAT*[T-1];
+	A = new double_integrator_QP_solver_CD_FLOAT*[T];
+	b = new double_integrator_QP_solver_CD_FLOAT*[T];
 
 	// problem outputs
 	z = new double_integrator_QP_solver_CD_FLOAT*[T];
@@ -123,13 +113,8 @@ void setup_state_vars(double_integrator_QP_solver_CD_params& problem, double_int
 		b[ BOOST_PP_SUB(n,1) ] = problem.b##n ; \
 		z[ BOOST_PP_SUB(n,1) ] = output.z##n ;
 #define BOOST_PP_LOCAL_MACRO(n) SET_VARS(n)
-#define BOOST_PP_LOCAL_LIMITS (1, TIMESTEPS-1)
+#define BOOST_PP_LOCAL_LIMITS (1, TIMESTEPS)
 #include BOOST_PP_LOCAL_ITERATE()
-	/* Hack to get around boost preprocessing.. 12 timesteps hard coded */
-	f[T-1] = problem.f12;
-	lb[T-1] = problem.lb12;
-	ub[T-1] = problem.ub12;
-	z[T-1] = output.z12;
 
 	/* Initalize everything to infinity */
 
@@ -162,6 +147,9 @@ void setup_state_vars(double_integrator_QP_solver_CD_params& problem, double_int
 	// A_{N-1}, b_{N-1}
 	fill_col_major(A[T-2], INFTY*Matrix<double,A_DIM_OUTPUT_1_TO_N_MINUS_1,Z_DIM_N_MINUS_1>::Ones());
 	fill_col_major(b[T-2], INFTY*Matrix<double,B_DIM_1_TO_N_MINUS_1,1>::Ones());
+	// A_N, b_N
+	fill_col_major(A[T-1], INFTY*Matrix<double,A_DIM_OUTPUT_N, Z_DIM_N>::Ones());
+	fill_col_major(b[T-1], INFTY*Matrix<double,B_DIM_N, 1>::Ones());
 
 	// z_1, ..., z_{N-2}
 	for(int t = 0; t < T-1; ++t) {
@@ -233,15 +221,8 @@ bool is_valid_inputs() {
 		if (ub[T-1][i] == INFTY) {return false;}
 	}
 
-	// Check A_1, b_1
-	for(int i = 0; i < (A_DIM_1)*(Z_DIM_1_TO_N_MINUS_2); ++i) {
-		if (A[0][i] == INFTY) {return false;}
-	}
-	for(int i = 0; i < B_DIM_1; ++i) {
-		if (b[0][i] == INFTY) {return false;}
-	}
-	// Check A_2, ..., A_{N-2}, b_2, ..., b_{N-2}
-	for(int t = 1; t < T-2; ++t) {
+	// Check A_1, ..., A_{N-2}, b_1, ..., b_{N-2}
+	for(int t = 0; t < T-2; ++t) {
 		// A is a matrix
 		for (int i = 0; i < (A_DIM_OUTPUT_1_TO_N_MINUS_1)*(Z_DIM_1_TO_N_MINUS_2); ++i) {
 			if (A[t][i] == INFTY) {return false;}
@@ -257,6 +238,13 @@ bool is_valid_inputs() {
 	}
 	for (int i = 0; i < B_DIM_1_TO_N_MINUS_1; ++i) {
 		if (b[T-2][i] == INFTY) {return false;}
+	}
+	// Check A_N, b_N
+	for (int i = 0; i < (A_DIM_OUTPUT_N)*(Z_DIM_N); ++i) {
+		if (A[T-1][i] == INFTY) {return false;}
+	}
+	for (int i = 0; i < (B_DIM_N)*(Z_DIM_N); ++i) {
+		if (b[T-1][i] == INFTY) {return false;}
 	}
 
 	// Inputs are valid!
@@ -429,16 +417,6 @@ void fill_in_A_and_b(StdVectorX& X, StdVectorU& U, double* delta, double trust_b
 //			std::cout << std::setprecision(4) << "A" << t+1 << ":\n" << A_N_MINUS_1_temp << "\n";
 //			std::cout << std::setprecision(4) << "b" << t+1 << ":\n" << b_temp << "\n";
 			continue;
-		} else if (t == 0) { // Cut off trust box portion of A_temp, b_temp
-			Matrix<double, A_DIM_1, Z_DIM_1_TO_N_MINUS_2> A_1;
-			Matrix<double, B_DIM_1, 1> b_1;
-			A_1 << A_temp.topRows(A_DIM_1);
-			b_1 << b_temp.head(B_DIM_1);
-			fill_col_major(A[t], A_1);
-			fill_col_major(b[t], b_1);
-//			std::cout << std::setprecision(4) << "A1:\n" << A_1 << "\n";
-//			std::cout << std::setprecision(4) << "b1:\n" << b_1 << "\n";
-			continue;
 		}
 
 		fill_col_major(A[t], A_temp);
@@ -447,6 +425,26 @@ void fill_in_A_and_b(StdVectorX& X, StdVectorU& U, double* delta, double trust_b
 //		std::cout << std::setprecision(4) << "b" << t+1 << ":\n" << b_temp << "\n";
 	}
 
+	// A_N, b_N
+	// Grab x, u, and x_next
+	VectorX x = X[T-1];
+
+	// Instantiate A_t, b_t, set them to zero
+	Matrix<double, A_DIM_OUTPUT_N, Z_DIM_N> A_temp;
+	Matrix<double, B_DIM_N, 1> b_temp;
+	A_temp.setZero();b_temp.setZero();
+
+	// Index of current row we are at
+	int curr_row = 0;
+
+	A_temp.middleRows(curr_row, X_DIM) << MatrixXd::Identity(X_DIM, X_DIM);
+	b_temp.middleRows(curr_row, X_DIM) << x + trust_box_size*MatrixXd::Ones(X_DIM,1);
+	curr_row += X_DIM;
+	A_temp.middleRows(curr_row, X_DIM) << -1 * MatrixXd::Identity(X_DIM, X_DIM);
+	b_temp.middleRows(curr_row, X_DIM) << trust_box_size*MatrixXd::Ones(X_DIM,1) - x;
+
+	fill_col_major(A[T-1], A_temp);
+	fill_col_major(b[T-1], b_temp);
 
 }
 
@@ -590,7 +588,7 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double* delta, bounds_t bounds,
 		}
 
 		double constraint_violation = (computeMerit(delta, X, U, penalty_coeff, bounds) - computeObjective(delta, X, U))/penalty_coeff;
-		printf("Constraint violation: %.5f\n", constraint_violation);
+		//printf("Constraint violation: %.5f\n", constraint_violation);
 
 		if (constraint_violation <= cfg::cnt_tolerance) {
 			break;
@@ -651,6 +649,3 @@ int solve_double_integrator_CD_BVP(VectorX x_start, VectorX x_goal, StdVectorX& 
 	}
 
 }
-
-
-#endif /* DOUBLE_INTEGRATOR_CD_SQP_HPP_ */

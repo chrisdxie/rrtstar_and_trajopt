@@ -209,14 +209,18 @@ MatrixXd double_integrator_dynamics::calcJacobians(VectorXd point, VectorXd x, V
 
 	// Preprocess: Get dimension of position, and position vectors only.
 	int d = x.size()/2;
-	x = x.head(d);
-	x_next = x_next.head(d);
+//	x = x.head(d);
+//	x_next = x_next.head(d);
+
+	Vector2d x_, x_next_;
+	x_  << x(0), x(1);
+ 	x_next_ << x_next(0), x_next(1);
 
 	// Jacobians
 	MatrixXd jacs(d, 4*d); // Remember, left half is dP/dx, right half is dP/dx_next
 	jacs.setZero();
 
-	double alpha = (point - x).norm()/(x_next - x).norm();
+	double alpha = (point - x_).norm()/(x_next_ - x_).norm();
 	jacs.leftCols(d) = (1-alpha)*MatrixXd::Identity(d, d);
 	jacs.middleCols(2*d, d) =  alpha * MatrixXd::Identity(d, d);
 

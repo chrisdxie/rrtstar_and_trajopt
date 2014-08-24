@@ -176,49 +176,56 @@ bool is_valid_inputs() {
 	 * still infinity.
 	 */
 
-	// Debug
-
 	// Check f_1, ..., f_{N-2}
 	for(int t = 0; t < T-2; ++t) {
 		for(int i = 0; i < Z_DIM_1_TO_N_MINUS_2; ++i) {
 			if (f[t][i] == INFTY) {return false;}
+//			std::cout << f[t][i] << "\n";
 		}
 	}
 
 	// Check f_{N-1}
 	for(int i = 0; i < Z_DIM_N_MINUS_1; ++i) {
 		if (f[T-2][i] == INFTY) {return false;}
+//		std::cout << f[T-2][i] << "\n";
 	}
 
 	// Check f_{N}
 	for(int i = 0; i < Z_DIM_N; ++i) {
 		if (f[T-1][i] == INFTY) {return false;}
+//		std::cout << f[T-1][i] << "\n";
 	}
 
 	// Check lb_1, ub_1
 	for(int i = 0; i < LB_DIM_1; ++i) {
 		if (lb[0][i] == INFTY) {return false;}
+//		std::cout << lb[0][i] << "\n";
 	}
 	for(int i = 0; i < UB_DIM_1; ++i) {
 		if (ub[0][i] == INFTY) {return false;}
+//		std::cout << ub[0][i] << "\n";
 	}
 
 	// Check lb_2, ..., lb_{N-1}, ub_2, ..., ub_{N-1}
 	for(int t = 1; t < T-1; ++t) {
 		for(int i = 0; i < LB_DIM_2_TO_N_MINUS_1; ++i) {
 			if (lb[t][i] == INFTY) {return false;}
+//			std::cout << lb[t][i] << "\n";
 		}
 		for(int i = 0; i < UB_DIM_2_TO_N_MINUS_1; ++i) {
 			if (ub[t][i] == INFTY) {return false;}
+//			std::cout << ub[t][i] << "\n";
 		}
 
 	}
 	// CHeck lb_N, ub_N
 	for(int i = 0; i < LB_DIM_N; ++i) {
 		if (lb[T-1][i] == INFTY) {return false;}
+//		std::cout << lb[T-1][i] << "\n";
 	}
 	for(int i = 0; i < UB_DIM_N; ++i) {
 		if (ub[T-1][i] == INFTY) {return false;}
+//		std::cout << ub[T-1][i] << "\n";
 	}
 
 	// Check A_1, ..., A_{N-2}, b_1, ..., b_{N-2}
@@ -226,25 +233,31 @@ bool is_valid_inputs() {
 		// A is a matrix
 		for (int i = 0; i < (A_DIM_OUTPUT_1_TO_N_MINUS_1)*(Z_DIM_1_TO_N_MINUS_2); ++i) {
 			if (A[t][i] == INFTY) {return false;}
+//			std::cout << A[t][i] << "\n";
 		}
 		// b is a vector
 		for (int i = 0; i < B_DIM_1_TO_N_MINUS_1; ++i) {
 			if (b[t][i] == INFTY) {return false;}
+//			std::cout << b[t][i] << "\n";
 		}
 	}
 	// Check A_{N-1}, b_{N-1}
 	for (int i = 0; i < (A_DIM_OUTPUT_1_TO_N_MINUS_1)*(Z_DIM_N_MINUS_1); ++i) {
 		if (A[T-2][i] == INFTY) {return false;}
+//		std::cout << A[T-2][i] << "\n";
 	}
 	for (int i = 0; i < B_DIM_1_TO_N_MINUS_1; ++i) {
 		if (b[T-2][i] == INFTY) {return false;}
+//		std::cout << b[T-2][i] << "\n";
 	}
 	// Check A_N, b_N
 	for (int i = 0; i < (A_DIM_OUTPUT_N)*(Z_DIM_N); ++i) {
 		if (A[T-1][i] == INFTY) {return false;}
+//		std::cout << A[T-1][i] << "\n";
 	}
-	for (int i = 0; i < (B_DIM_N)*(Z_DIM_N); ++i) {
+	for (int i = 0; i < B_DIM_N; ++i) {
 		if (b[T-1][i] == INFTY) {return false;}
+//		std::cout << b[T-1][i] << "\n";
 	}
 
 	// Inputs are valid!
@@ -445,6 +458,9 @@ void fill_in_A_and_b(StdVectorX& X, StdVectorU& U, double* delta, double trust_b
 
 	fill_col_major(A[T-1], A_temp);
 	fill_col_major(b[T-1], b_temp);
+//	std::cout << std::setprecision(4) << "A" << T << ":\n" << A_temp << "\n";
+//	std::cout << std::setprecision(4) << "b" << T << ":\n" << b_temp << "\n";
+
 
 }
 
@@ -667,8 +683,8 @@ int main() {
 
 	// Start and goal state
 	Vector4d x_start, x_goal;
-	x_start << 2, 0, 0, 0;
-	x_goal << 2, 5, 0.5, 0.5;
+	x_start << 4, 0, 0, 0;
+	x_goal << 4, 5, 0, 0;
 
 	// Obstacles
 	Matrix<double, 4, 3> obstacles; obstacles.setZero();

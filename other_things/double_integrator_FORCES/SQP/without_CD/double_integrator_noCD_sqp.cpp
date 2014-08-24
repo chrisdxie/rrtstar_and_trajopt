@@ -619,8 +619,8 @@ int main() {
 
 	// Start and goal state
 	Vector4d x_start, x_goal;
-	x_start << 9.78713, 0.442322, -0.913086, -0.850323;
-	x_goal << 9.29103, 9.45342, -0.852262, -0.86858;
+	x_start << 0,0,0,0;
+	x_goal << 0, 5, .5, .5;
 
 	// Initialize X variable
 	Matrix<double, X_DIM, T> init;

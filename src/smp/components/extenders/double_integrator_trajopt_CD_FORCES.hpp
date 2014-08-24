@@ -148,6 +148,7 @@ int smp::extender_double_integrator_trajopt<typeparams,NUM_DIMENSIONS>
     //typedef extender_double_integrator<typeparams, 2> ex;
     //ex exact_extender;
     //int exact_connec = -1;
+    /*
     if (exact_extender.extend(state_from_in, state_towards_in, &exact_connec, trajectory_out, 
 	intermediate_vertices_out) == 1) {
 	std::cout << "SQP FORCES can't solve, but exact can." << "\n";
@@ -164,7 +165,7 @@ int smp::extender_double_integrator_trajopt<typeparams,NUM_DIMENSIONS>
 	    outfile << "\n\n";
 	}
     }
-
+    */
     return 0;
   }
 
