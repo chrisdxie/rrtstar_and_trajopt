@@ -37,7 +37,7 @@ stages(i).dims.n = 2*nX+2*nU+1+nO+nX;                       % number of stage va
 stages(i).dims.l = nX+nU+1;                                 % number of lower bounds
 stages(i).dims.u = nX+nU;                                   % number of upper bounds
 stages(i).dims.r = nX+nU+1;                                 % number of equality constraints
-stages(i).dims.p = 2*nO+2*nX;                               % number of affine constraints (SWvolume, dynamics)
+stages(i).dims.p = 2*nO+4*nX+2*nU+2;                               % number of affine constraints (SWvolume, dynamics)
 stages(i).dims.q = 0;                                       % number of quadratic constraints
 
 % Cost of the first stage
@@ -147,7 +147,7 @@ stages(i).dims.n = nX;                                      % number of stage va
 stages(i).dims.l = nX;                                      % number of lower bounds
 stages(i).dims.u = nX;                                      % number of upper bounds
 stages(i).dims.r = 0;                                       % number of equality constraints
-stages(i).dims.p = 0;                                       % number of affine constraints
+stages(i).dims.p = 2*nX;                                       % number of affine constraints
 stages(i).dims.q = 0;                                       % number of quadratic constraints
 
 % Cost of last stage
@@ -166,8 +166,8 @@ stages(i).eq.D = [-1*eye(nX) zeros(nX, nO)];
 
 % Inequality constraints: These include linearized dynamics and linearized
 % collisions
-%params(end+1) = newParam(['A' i_str], i, 'ineq.p.A');
-%params(end+1) = newParam(['b' i_str], i, 'ineq.p.b');
+params(end+1) = newParam(['A' i_str], i, 'ineq.p.A');
+params(end+1) = newParam(['b' i_str], i, 'ineq.p.b');
 
 % ------------ OUTPUTS ---------------------
 

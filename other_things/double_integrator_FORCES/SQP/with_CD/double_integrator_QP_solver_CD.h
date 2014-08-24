@@ -93,11 +93,11 @@ typedef struct double_integrator_QP_solver_CD_params
     /* vector of size 6 */
     double_integrator_QP_solver_CD_FLOAT ub1[6];
 
-    /* matrix of size [14 x 20] (column major format) */
-    double_integrator_QP_solver_CD_FLOAT A1[280];
+    /* matrix of size [28 x 20] (column major format) */
+    double_integrator_QP_solver_CD_FLOAT A1[560];
 
-    /* vector of size 14 */
-    double_integrator_QP_solver_CD_FLOAT b1[14];
+    /* vector of size 28 */
+    double_integrator_QP_solver_CD_FLOAT b1[28];
 
     /* vector of size 20 */
     double_integrator_QP_solver_CD_FLOAT f2[20];
@@ -257,6 +257,12 @@ typedef struct double_integrator_QP_solver_CD_params
 
     /* vector of size 4 */
     double_integrator_QP_solver_CD_FLOAT ub12[4];
+
+    /* matrix of size [8 x 4] (column major format) */
+    double_integrator_QP_solver_CD_FLOAT A12[32];
+
+    /* vector of size 8 */
+    double_integrator_QP_solver_CD_FLOAT b12[8];
 
 } double_integrator_QP_solver_CD_params;
 
