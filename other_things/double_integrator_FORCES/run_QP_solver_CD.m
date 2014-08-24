@@ -230,10 +230,11 @@ function [output, exitflag, info] = run_QP_solver_CD(args)
         b(curr_row+nX+nU) = trust_box_size - delta;
         curr_row = curr_row + nX+nU+1;
         
-        if (i == 1)
-            A(2*nO+2*nX+1:end, :) = [];
-            b(2*nO+2*nX+1:end, :) = [];
-        elseif (i == N-1)
+%         if (i == 1)
+%             A(2*nO+2*nX+1:end, :) = [];
+%             b(2*nO+2*nX+1:end, :) = [];
+%         elseif (i == N-1)
+        if (i == N-1)
             A(:, 2*nX+nU+1:2*nX+2*nU) = [];
         end
         
@@ -243,32 +244,32 @@ function [output, exitflag, info] = run_QP_solver_CD(args)
         
     end
     
-%     % A_N, b_N
-%     i = N;
-%     i_str = sprintf('%d',i);
-%     A = zeros(2*nO+2*nX, nX+nO);
-%     b = zeros(2*nO+2*nX, 1);
-%     curr_row = 1;
-%     
-%     % Grab corresponding state
-%     x = x0((i-1)*nX+1 : (i-1)*nX+nX);
-%     
+     % A_N, b_N
+     i = N;
+     i_str = sprintf('%d',i);
+     A = zeros(2*nX, nX);
+     b = zeros(2*nX, 1);
+     curr_row = 1;
+     
+     % Grab corresponding state
+     x = x0((i-1)*nX+1 : (i-1)*nX+nX);
+     
 %     A(curr_row:curr_row+nO-1, :) = [zeros(nO, nX) -1*eye(nO)];
 %     curr_row = curr_row + nO;
 %     [gval gjac] = g_collisions(x, d_safe, [nX 1], make_robot_poly, obstacles);
 %     A(curr_row:curr_row+nO-1, :) = [gjac -1*eye(nO)];
 %     b(curr_row:curr_row+nO-1, :) = gjac*x - gval;
 %     curr_row = curr_row + nO;
-%     
-%     A(curr_row:curr_row+nX-1, :) = [eye(nX) zeros(nX, nO)];
-%     b(curr_row:curr_row+nX-1) = x + trust_box_size;
-%     curr_row = curr_row + nX;
-%     A(curr_row:curr_row+nX-1, :) = [-1*eye(nX) zeros(nX, nO)];
-%     b(curr_row:curr_row+nX-1) = trust_box_size - x;
-%     curr_row = curr_row + nX;
-%     
-%     eval(['params.A' i_str ' = ' mat2str(A) ';']);
-%     eval(['params.b' i_str ' = ' mat2str(b) ';']);
+     
+     A(curr_row:curr_row+nX-1, :) = eye(nX);
+     b(curr_row:curr_row+nX-1) = x + trust_box_size;
+     curr_row = curr_row + nX;
+     A(curr_row:curr_row+nX-1, :) = -1*eye(nX);
+     b(curr_row:curr_row+nX-1) = trust_box_size - x;
+     curr_row = curr_row + nX;
+     
+     eval(['params.A' i_str ' = ' mat2str(A) ';']);
+     eval(['params.b' i_str ' = ' mat2str(b) ';']);
     
     %--------------------- DONE ---------------------%
     

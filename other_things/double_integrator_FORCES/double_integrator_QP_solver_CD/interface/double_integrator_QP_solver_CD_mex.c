@@ -132,11 +132,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.A1 must be a double.");
     }
-    if( mxGetM(par) != 14 || mxGetN(par) != 20 ) {
-    mexErrMsgTxt("PARAMS.A1 must be of size [14 x 20]");
+    if( mxGetM(par) != 28 || mxGetN(par) != 20 ) {
+    mexErrMsgTxt("PARAMS.A1 must be of size [28 x 20]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.A1, 280);
+    copyMArrayToC(mxGetPr(par), params.A1, 560);
 
 	par = mxGetField(PARAMS, 0, "b1");
 #ifdef MEXARGMUENTCHECKS
@@ -147,11 +147,11 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     {
     mexErrMsgTxt("PARAMS.b1 must be a double.");
     }
-    if( mxGetM(par) != 14 || mxGetN(par) != 1 ) {
-    mexErrMsgTxt("PARAMS.b1 must be of size [14 x 1]");
+    if( mxGetM(par) != 28 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.b1 must be of size [28 x 1]");
     }
 #endif	 
-    copyMArrayToC(mxGetPr(par), params.b1, 14);
+    copyMArrayToC(mxGetPr(par), params.b1, 28);
 
 	par = mxGetField(PARAMS, 0, "f2");
 #ifdef MEXARGMUENTCHECKS
@@ -947,6 +947,36 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
     }
 #endif	 
     copyMArrayToC(mxGetPr(par), params.ub12, 4);
+
+	par = mxGetField(PARAMS, 0, "A12");
+#ifdef MEXARGMUENTCHECKS
+    if( par == NULL )	{
+        mexErrMsgTxt("PARAMS.A12 not found");
+    }
+    if( !mxIsDouble(par) )
+    {
+    mexErrMsgTxt("PARAMS.A12 must be a double.");
+    }
+    if( mxGetM(par) != 8 || mxGetN(par) != 4 ) {
+    mexErrMsgTxt("PARAMS.A12 must be of size [8 x 4]");
+    }
+#endif	 
+    copyMArrayToC(mxGetPr(par), params.A12, 32);
+
+	par = mxGetField(PARAMS, 0, "b12");
+#ifdef MEXARGMUENTCHECKS
+    if( par == NULL )	{
+        mexErrMsgTxt("PARAMS.b12 not found");
+    }
+    if( !mxIsDouble(par) )
+    {
+    mexErrMsgTxt("PARAMS.b12 must be a double.");
+    }
+    if( mxGetM(par) != 8 || mxGetN(par) != 1 ) {
+    mexErrMsgTxt("PARAMS.b12 must be of size [8 x 1]");
+    }
+#endif	 
+    copyMArrayToC(mxGetPr(par), params.b12, 8);
 
 	/* call solver */
 	exitflag = double_integrator_QP_solver_CD_solve(&params, &output, &info);

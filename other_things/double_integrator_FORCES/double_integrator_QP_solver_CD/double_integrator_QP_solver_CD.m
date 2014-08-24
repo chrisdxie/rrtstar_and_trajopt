@@ -5,8 +5,8 @@
 %       PARAMS.f1 - column vector of length 20
 %       PARAMS.lb1 - column vector of length 7
 %       PARAMS.ub1 - column vector of length 6
-%       PARAMS.A1 - matrix of size [14 x 20]
-%       PARAMS.b1 - column vector of length 14
+%       PARAMS.A1 - matrix of size [28 x 20]
+%       PARAMS.b1 - column vector of length 28
 %       PARAMS.f2 - column vector of length 20
 %       PARAMS.lb2 - column vector of length 4
 %       PARAMS.ub2 - column vector of length 4
@@ -60,6 +60,8 @@
 %       PARAMS.f12 - column vector of length 4
 %       PARAMS.lb12 - column vector of length 4
 %       PARAMS.ub12 - column vector of length 4
+%       PARAMS.A12 - matrix of size [8 x 4]
+%       PARAMS.b12 - column vector of length 8
 %
 %   OUTPUT returns the values of the last iteration of the solver where
 %       OUTPUT.z1 - column vector of size 7
