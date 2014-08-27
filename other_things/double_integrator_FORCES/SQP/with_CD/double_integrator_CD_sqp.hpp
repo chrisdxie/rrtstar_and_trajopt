@@ -588,7 +588,7 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double* delta, bounds_t bounds,
 		}
 
 		double constraint_violation = (computeMerit(delta, X, U, penalty_coeff, bounds) - computeObjective(delta, X, U))/penalty_coeff;
-		//printf("Constraint violation: %.5f\n", constraint_violation);
+//		printf("Constraint violation: %.5f\n", constraint_violation);
 
 		if (constraint_violation <= cfg::cnt_tolerance) {
 			break;

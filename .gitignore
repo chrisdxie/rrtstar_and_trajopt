@@ -6,6 +6,7 @@
 bin/
 build/
 *.o
+pics/
 
 # This should be downloaded by user
 ACADOtoolkit/
