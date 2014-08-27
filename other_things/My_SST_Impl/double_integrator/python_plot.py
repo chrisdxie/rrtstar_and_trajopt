@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 
@@ -6,7 +8,7 @@ from math import pi, atan
 
 #import IPython
 
-def plot(states, parents, goal_path, obstacles, goal_region, iters, cost):
+def plot(states, parents, goal_path, obstacles, goal_region, iters, cost, delta_v, delta_s):
 
     #print goal_path
     
@@ -66,7 +68,7 @@ def plot(states, parents, goal_path, obstacles, goal_region, iters, cost):
         plt.plot([states[0,i], parents[0,i]], [states[1,i], parents[1,i]],color='blue')
     
     # Plot goal state and markers
-    plt.plot(goal_path[0,:], goal_path[1,:], color='g', linewidth=4.0)
+    plt.plot(goal_path[0,:], goal_path[1,:], color='g', linewidth=3.0)
     for i in range(goal_path.shape[1]):
         # since the output is in radians, I convert it to degrees
         # the -90 is because I want the tip of the triangle to start facing the right
@@ -85,20 +87,20 @@ def plot(states, parents, goal_path, obstacles, goal_region, iters, cost):
     
     plt.title('Cost: ' + str(cost))
 
-    plt.show(block=False)
-    plt.pause(.1)
+    #plt.show(block=False)
+    #plt.pause(.1)
     
     # way to save the plot
     #save('figure_name', ext="png", close=False, verbose=False)
     
     # do pause in python so plot can be resized etc.
-    pause = True
-    if (pause):
-        print("Type 'save' to save this figure into a pdf file as 'pics/<number of iterations>_iters.pdf'")
-        print("Otherwise, press Enter to continue.")
-        user_says = raw_input()
-        if user_says.strip() == 'save':
-            save('pics/{0}_iters'.format(iters), 'pdf')
+    # pause = True
+    # if (pause):
+    #     print("Type 'save' to save this figure into a pdf file as 'pics/<number of iterations>_iters.pdf'")
+    #     print("Otherwise, press Enter to continue.")
+    #     user_says = raw_input()
+    #     if user_says.strip() == 'save':
+    save('pics/{0}_iters_dv_{1}_ds_{2}'.format(iters, delta_v, delta_s), 'pdf')
 
        
 def save(path, ext='png', close=True, verbose=True):

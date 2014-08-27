@@ -75,13 +75,13 @@ py::object init_display() {
 
 void plot(py::object plotter, np::ndarray states, np::ndarray parents,
 		np::ndarray goal_path, np::ndarray obstacles, np::ndarray goal_region,
-		int iters, double cost) {
+		int iters, double cost, double dv, double ds) {
 
     bool pause = true;
 
 	try {
 	    // pass control to python now
-		plotter(states, parents, goal_path, obstacles, goal_region, iters, cost);
+		plotter(states, parents, goal_path, obstacles, goal_region, iters, cost, dv, ds);
 	}
 	catch(py::error_already_set const &) {
 	    // will pass python errors to cpp for printing
@@ -406,13 +406,15 @@ Vector4d sample_state() {
 	return sample;
 }
 
-void SST() {
+double SST() {
 
 	// Initialize random seed using current time.
 	// Uncomment this line if you want feed the random number generator a seed based on time.
 	if (setup_values.randomize) {
 		srand(time(NULL));
 	}
+
+	double best_cost = 1e10;
 
 	// Initialize sets
 	std::set<Node*> V_active, V_inactive;
@@ -469,6 +471,7 @@ void SST() {
 					} else {
 						std::cout << "Found UPDATED goal w/ cost: " << x_new->cost << "\n";
 					}
+
 				}
 
 				if (x_peer != NULL) {
@@ -521,6 +524,9 @@ void SST() {
 	// Now, find best path.
 	if (goal_node != NULL) {
 
+		// For returning
+		best_cost = goal_node->cost;
+
 		MatrixXd goal_path = get_path(goal_node);
 
 		// Plot in Python
@@ -536,11 +542,14 @@ void SST() {
 		np::ndarray goal_region_np = eigen_to_ndarray(setup_values.goal_region);
 
 		std::cout << "Plotting...\n";
-		plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, goal_region_np, setup_values.max_iters, goal_node->cost); // Finally, plot
+		plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, goal_region_np,
+			 setup_values.max_iters, goal_node->cost, setup_values.delta_v, setup_values.delta_s); // Finally, plot
 
 	} else {
 		std::cout << "No path found.\n";
 	}
+
+	return best_cost;
 
 }
 
@@ -570,11 +579,27 @@ int main(int argc, char* argv[]) {
     }
 
     // Setup function
-    setup(max_iters, randomize, delta_v, delta_s);
+    //setup(max_iters, randomize, delta_v, delta_s);
 
-    // Run the RRT
-    std::cout << "Running SST...\n";
-    SST();
+    // Run the SST
+    double bcost = 1e11;
+    int bi, bj;
+    const int num_vals = 13;
+    double delta_values[num_vals] = {5.0, 4.0, 3.0, 2.0, 1.8, 1.6, 1.4, 1.2, 1.0, .8, .6, .4, .2};
+    for(int i = 0; i < num_vals; ++i) {
+    	for(int j = 0; j < num_vals; ++j) {
+    		setup(max_iters, "false", delta_values[i], delta_values[j]);
+    		std::cout << "Running SST with values: delta_v = " << delta_values[i] << ", delta_s = " << delta_values[j] << "\n";
+    		double cand = SST();
+    		if (cand < bcost) {
+    			bcost = cand; bi = i; bj = j;
+    		}
+    	}
+    }
+
+    std::cout << "Best values: delta_v = " << delta_values[bi] << ", j = " << delta_values[bj] << ", with cost of " << bcost << "\n";
+//    std::cout << "Running SST...\n";
+//    SST();
 
     std::cout << "exiting\n";
 }
