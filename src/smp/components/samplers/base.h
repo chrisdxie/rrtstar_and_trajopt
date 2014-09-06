@@ -104,6 +104,8 @@ namespace smp {
          * @returns Returns 1 for success, a non-positive number for failure.
          */
         virtual int sample (state_t **state_sample_out) = 0;    
+
+        virtual bool in_support_region(state_t *state) = 0;
     };
 
 

@@ -81,6 +81,9 @@ namespace smp {
          */
         int set_support (const region_t support_in);
 
+        // Check if sample is in region
+        bool in_support_region(state_t* state);
+
     
     };
 

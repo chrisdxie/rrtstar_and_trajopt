@@ -100,6 +100,17 @@ int smp::sampler_uniform<typeparams,NUM_DIMENSIONS>
   return 1;
 }
 
-
+template< class typeparams, int NUM_DIMENSIONS >
+bool smp::sampler_uniform<typeparams,NUM_DIMENSIONS>
+::in_support_region (state_t *state) {
+  
+  for (int i = 0; i < NUM_DIMENSIONS; i++) {
+    if ((*state)[i] < support.center[i] - .5*support.size[i] || 
+        (*state)[i] > support.center[i] + .5*support.size[i]) {
+      return false;
+    }
+  }
+  return true;
+}
 
 #endif

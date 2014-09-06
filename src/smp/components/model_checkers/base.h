@@ -108,6 +108,8 @@ namespace smp {
          * @returns Returns 1 for success, a non-positive value to indiacate error.
          */
         virtual int get_solution (trajectory_t &trajectory_out) = 0;
+
+        virtual double get_best_cost () = 0;
         
     };
 

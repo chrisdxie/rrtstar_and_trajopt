@@ -107,12 +107,12 @@ py::object init_display() {
   return plotter;
 }
 
-void plot(py::object plotter, np::ndarray states, np::ndarray obstacles,
+void plot(py::object plotter, np::ndarray all_states, np::ndarray all_parents, np::ndarray states, np::ndarray obstacles,
     np::ndarray goal_region, int iter, double cost) {
 
   try {
       // pass control to python now
-    plotter(states, obstacles, goal_region, iter, cost);
+    plotter(all_states, all_parents, states, obstacles, goal_region, iter, cost);
   }
   catch(py::error_already_set const &) {
       // will pass python errors to cpp for printing
@@ -162,7 +162,7 @@ main (int argc, char* argv[]) {
   planner.parameters.set_phase (2);   // The phase parameter can be used to run the algorithm as an RRT, 
                                       // See the documentation of the RRT* algorithm for more information.
 
-  planner.parameters.set_gamma (35.0);    // Set this parameter should be set at least to the side length of
+  planner.parameters.set_gamma (15.0);    // Set this parameter should be set at least to the side length of
                                           //   the (bounded) state space. E.g., if the state space is a box
                                           //   with side length L, then this parameter should be set to at 
                                           //   least L for rapid and efficient convergence in trajectory space.
@@ -181,8 +181,8 @@ main (int argc, char* argv[]) {
   // 2.a Initialize the sampler
   region<4> sampler_support;
   for (int i = 0; i < 2; i++) {
-    sampler_support.center[i] = 0.0;
-    sampler_support.size[i] = 20.0;
+    sampler_support.center[i] = 5.0;
+    sampler_support.size[i] = 12.0;
   }
   for (int i = 2; i < 4; i++) {
     sampler_support.center[i] = 0.0;
@@ -323,10 +323,40 @@ main (int argc, char* argv[]) {
       }
       */
 
-      plot(plotter, states_np, obstacles_np, goal_region_np, i+1, best_cost);
+      // DFS on tree to get states and parents:
+      MatrixXd all_states(4, planner.get_num_vertices()); all_states.setZero();
+      MatrixXd all_parents(4, planner.get_num_vertices()); all_parents.setZero();
+      int k = 0;
+      std::stack<vertex<typeparams>*> fringe;
+      fringe.push(planner.root_vertex);
+      while(fringe.size() > 0) {
+        vertex<typeparams>* candidate = fringe.top();
+        fringe.pop();
+        if (k == 0) {
+          for(int j = 0; j < 4; ++j) {
+            all_states(j,k) = candidate->state->state_vars[j];
+            all_parents(j,k) = candidate->state->state_vars[j];
+          }
+        } else {
+          vertex<typeparams>* parent = (*(candidate->incoming_edges.begin()))->vertex_src;
+          for(int j = 0; j < 4; ++j) {
+            all_states(j,k) = candidate->state->state_vars[j];
+            all_parents(j,k) = parent->state->state_vars[j];
+          }
+        }
+        k++;
+        for(std::list<edge<typeparams>*>::iterator it = candidate->outgoing_edges.begin();
+            it != candidate->outgoing_edges.end(); it++) {
+          fringe.push((*it)->vertex_dst);
+        }
+      }
+
+      np::ndarray all_states_np = eigen_to_ndarray(all_states);
+      np::ndarray all_parents_np = eigen_to_ndarray(all_parents);
+
+      plot(plotter, all_states_np, all_parents_np, states_np, obstacles_np, goal_region_np, i+1, best_cost);
     }
   }
-
   
   
 

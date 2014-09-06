@@ -6,7 +6,9 @@ import os
 from math import pi, atan
 
 
-def plot(states, obstacles, goal_region, iter, cost):
+def plot(all_states, all_parents, states, obstacles, goal_region, iter, cost):
+
+    print states
 
     plt.clf()
     plt.cla()
@@ -56,9 +58,12 @@ def plot(states, obstacles, goal_region, iter, cost):
 
         ax.fill(x, y, 'r')
 
-    # Plot sequence of states
+    # Plot tree
+    for i in range(all_states.shape[1]):
+        plt.plot([all_parents[0,i], all_states[0,i]], [all_parents[1,i], all_states[1,i]], color='b')
 
-    plt.plot(states[0,:], states[1,:], color='b')
+    # Plot sequence of states
+    plt.plot(states[0,:], states[1,:], color='g')
     for i in range(states.shape[1]):
     	# since the output is in radians, I convert it to degrees
     	# the -90 is because I want the tip of the triangle to start facing the right
@@ -73,7 +78,7 @@ def plot(states, obstacles, goal_region, iter, cost):
         if i == 0: # intitial state is [0,0,0,0], orientation is nan
             continue
         else:
-            plt.plot(states[0,i], states[1,i], marker=(3,0,orientation*180/pi-90), markersize=10, color='b')
+            plt.plot(states[0,i], states[1,i], marker=(3,0,orientation*180/pi-90), markersize=10, color='g')
 
     # Title
     plt.title('Cost: ' + str(cost))
