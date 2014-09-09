@@ -5,7 +5,7 @@ function drawEllipseContour(Q, c)
 
     assert(all(size(Q) == [2 2]));
 
-    [x,y] = meshgrid(-1:0.1:11);
+    [x,y] = meshgrid(-20:0.1:20);
     
     % Center
     x = x-c(1);
