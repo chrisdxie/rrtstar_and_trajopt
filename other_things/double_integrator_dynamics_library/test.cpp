@@ -14,6 +14,7 @@
 using namespace double_integrator_dynamics;
 
 #include <eigen3/Eigen/Eigen>
+#include <eigen3/Eigen/SVD>
 using namespace Eigen;
 
 int main() {
@@ -29,7 +30,9 @@ int main() {
 
 	// Must qualify this with the correct namespace, apparently Eigen has this method too, which was a contribution from some user
 	MatrixXd jac = -1*double_integrator_dynamics::numerical_jacobian(continuous_double_integrator_dynamics, x, u, d);
-	//VectorXd ans = dynamics_difference(continuous_double_integrator_dynamics, x, x_next, u, d);
+	VectorXd ans = dynamics_difference(continuous_double_integrator_dynamics, x, x_next, u, d);
+
+	std::cout << "Ans:\n" << ans << "\n";
 
 	Matrix<double, X_DIM, X_DIM> DH_X = jac.leftCols(X_DIM);
 	Matrix<double, X_DIM, U_DIM> DH_U = jac.middleCols(X_DIM, U_DIM);
@@ -49,7 +52,22 @@ int main() {
 //	std::cout << "Answer:\n" << v << "\n";
 
 	x << 6, 7, 8, 9; // Can reassign using << operator
-	std::cout << x << "\n";
+	//std::cout << x << "\n";
+
+	MatrixXd U = v.jacobiSvd(ComputeFullU | ComputeFullV).matrixU();
+	MatrixXd V = v.jacobiSvd(ComputeFullU | ComputeFullV).matrixV();
+	MatrixXd S = v.jacobiSvd(ComputeFullU | ComputeFullV).singularValues();
+
+	//std::cout << "U:\n" << U << "\n";
+	//std::cout << "V:\n" << V << "\n";
+	//std::cout << "S:\n" << S << "\n";
+	MatrixXd realS(v.rows(), v.cols()); realS.setZero();
+	for(int i = 0; i < min(v.rows(), v.cols()); ++i) {
+		realS(i,i) = S(i);
+	}
+	//std::cout << "Real S:\n" << realS << "\n";
+	//std::cout << "Multiplying them together:\n" << U * realS * V.transpose() << "\n";
+	//std::cout << "Compare to actual matrix:\n" << v << "\n";
 
 }
 

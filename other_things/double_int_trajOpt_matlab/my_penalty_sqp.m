@@ -34,7 +34,7 @@ cfg.cnt_tolerance = 1e-4;
 cfg.max_merit_coeff_increases = 3;
 cfg.merit_coeff_increase_ratio = 10;
 cfg.initial_trust_box_size = 1;
-cfg.initial_penalty_coeff = 1.;
+cfg.initial_penalty_coeff = 10;
 cfg.max_penalty_iter = 4;
 cfg.f_use_numerical = true;
 cfg.g_use_numerical = false;
@@ -97,6 +97,9 @@ while true
             sum(abs(nonconvex_eq_constraints)) > cfg.cnt_tolerance
         constraints_satisfied = false;
     end
+    
+    display(['Constraint violation: ' num2str(sum(nonconvex_ineq_constraints) + ...
+        sum(abs(nonconvex_eq_constraints)))]);
     
     if constraints_satisfied
         break; % We're done!
@@ -178,10 +181,13 @@ function [x, trust_box_size, success] = minimize_merit_function(x, Q, q, ...
             fval = f(x);
             [fgrad, fhess] = numerical_grad_hess(f,x,cfg.full_hessian);
             % diagonal adjustment
-            mineig = min(eigs(fhess));
+            [V D] = eig(fhess);
+            mineig = min(diag(D));
             if mineig < 0
                 fprintf('    negative hessian detected. adjusting by %.3g\n',-mineig);
-                fhess = fhess + eye(dim_x) * ( - mineig);
+                %fhess = fhess + eye(dim_x) * ( - mineig);
+                D(D < 0) = 0;
+                fhess = V*D*V';
             end
         else
             [fval, fgrad, fhess] = f(x);
@@ -220,7 +226,7 @@ function [x, trust_box_size, success] = minimize_merit_function(x, Q, q, ...
 			% Make sure to include the constant term f(x) in the merit function
 			% objective as the resulting cvx_optval is used further below.
                         
-            %{
+            
             cvx_begin quiet
                 variables xp(dim_x, 1);
 
@@ -242,10 +248,11 @@ function [x, trust_box_size, success] = minimize_merit_function(x, Q, q, ...
                 return;
             end
             %}
-            
+            %{
             args = arguments(x, penalty_coeff, trust_box_size); % This script will need to coincide exactly with some certain things. Look at it to be sure it's right
-            [output, exitflag, info] = run_QP_solver_CD(args); % w/ collision detection
+            %[output, exitflag, info] = run_QP_solver_CD(args); % w/ collision detection
             %[output, exitflag, info] = run_QP_solver_noCD(args); % w/out collision detection
+            [output, exitflag, info] = run_QP_solver_noCD_exp(args); % w/out collision detection            
             if (exitflag ~= 1)
                 info
                 disp('Problem in QP Solver'); % Fix this to return bad success
@@ -286,6 +293,7 @@ function [x, trust_box_size, success] = minimize_merit_function(x, Q, q, ...
                 return;
             elseif approx_merit_improve < cfg.min_approx_improve
                 fprintf('Converged: y tolerance\n');
+                display(['New_merit: ' num2str(new_merit)]);
                 x = xp;
                 if ~isempty(cfg.callback), cfg.callback(x,info); end
                 return;
@@ -300,6 +308,7 @@ function [x, trust_box_size, success] = minimize_merit_function(x, Q, q, ...
             
             if trust_box_size < cfg.min_trust_box_size
                 fprintf('Converged: x tolerance\n');
+                display(['New_merit: ' num2str(new_merit)]);
                 return;
             end
         end % tr

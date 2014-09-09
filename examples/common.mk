@@ -93,7 +93,7 @@ LDFALGS_SMP :=
 #-----------------------------------------------------------------------------
 
 # Stuff for rll3 machine
-RLL3FLAGS := -I/home/chris/rrtstar_and_trajopt/ACADOtoolkit/include -I/home/chris/rrtstar_and_trajopt/ACADOtoolkit/external_packages -I/home/chris/rrtstar_and_trajopt/ACADOtoolkit/external_packages/csparse/ -I/home/chris/rrtstar_and_trajopt/ACADOtoolkit/external_packages/qpOASES-3.0beta/include -I/home/chris/rrtstar_and_trajopt/ACADOtoolkit/build/include  -I/usr/include/python2.7 -rdynamic -L/usr/local/lib -L/usr/lib/libpython2.7.so /home/chris/rrtstar_and_trajopt/ACADOtoolkit/build/libs/libacado_toolkit_s.so -lboost_iostreams-mt -lboost_python -lboost_thread-mt -lpthread -lboost_filesystem-mt -lboost_system-mt /usr/local/lib/libboost_numpy.so -lpython2.7 -Wl,-rpath,/usr/local/lib:/usr/lib/libpython2.7.so:/home/chris/rrtstar_and_trajopt/ACADOtoolkit/build/libs -L/home/chris/rrtstar_and_trajopt/ACADOtoolkit/build/libs -lacado_toolkit_s
+RLL3FLAGS := -I/usr/include/python2.7 -rdynamic -L/usr/local/lib -L/usr/lib/libpython2.7.so -lboost_iostreams-mt -lboost_python -lboost_thread-mt -lpthread -lboost_filesystem-mt -lboost_system-mt /usr/local/lib/libboost_numpy.so -lpython2.7 -Wl,-rpath,/usr/local/lib:/usr/lib/libpython2.7.so
 
 #CXXFLAGS = $(CXXFLAGS_STD) $(CXXFLAGS_SMP) $(RLL3FLAGS)
 CXXFLAGS = $(CXXFLAGS_OPT) $(CXXFLAGS_SMP) $(RLL3FLAGS)

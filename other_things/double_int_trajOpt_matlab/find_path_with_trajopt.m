@@ -1,4 +1,4 @@
-function [ x ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min, u_max, v_min, v_max)
+function [ x, cost ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min, u_max, v_min, v_max)
 
     %setup
 
@@ -14,7 +14,7 @@ function [ x ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min, u_max
     input_init = zeros(m,T-1); % Set inputs to 0
 
     % Time is the final input variable, last variable in state. It is initialized to 1
-    delta_init = 1;
+    delta_init = .1;
     x0 = [traj_init(:); input_init(:); delta_init];
 
     dsafe = 0.05; % Safety margin
@@ -28,13 +28,17 @@ function [ x ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min, u_max
     make_robot_poly = @(x) orientedBoxToPolygon([x(1), x(2), robot_length, robot_width, 0]);
 
     % Minimize the last variable, which is time
-    q = [zeros(1,size(x0,1)-1) 1];
+    %q = [zeros(1,size(x0,1)-1) 1];
+    q = [zeros(1,size(x0,1)-1) T-1];
 
     % Q matrix is 0.
     Q = zeros(size(x0,1),size(x0,1));
-
+%     for i=n*T+1:n*T+m*(T-1)
+%         Q(i,i) = 2; % For testing against exact solution
+%     end
+    
     % No nonconvex cost
-    f = @(x) 0;
+    f = @(x) x(end) * x(n*T+1:n*T+m*(T-1))'*x(n*T+1:n*T+m*(T-1)); % delta times the squared norm controls
     
     % The constraint function g does all the work of computing signed distances
     % and their gradients. This is a nonconvex inequality constraint
@@ -45,7 +49,7 @@ function [ x ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min, u_max
     end
     
     % SWEPT OUT VOLUME, COMMENT IF NOT SWEPT OUT VOLUME
-    g = @(x) swv_collisions(x, dsafe, [n T], obstacles);
+    %g = @(x) swv_collisions(x, dsafe, [n T], obstacles);
         
     % The nonconvex system dynamics
     traj_dynamics_cfg = struct();
@@ -60,27 +64,27 @@ function [ x ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min, u_max
     A_ineq = zeros(n*T + 2*m*(T-1) + 1, size(x0,1));
     b_ineq = zeros(n*T + 2*m*(T-1) + 1, 1);
     % Velocities first:
-    row = 1;
-    for i=1:n*T
-        if mod(i,n) > n/2 || mod(i,n) == 0
-            A_ineq(row, i) = 1; % Max velocity
-            b_ineq(row) = v_max;
-            A_ineq(row+1, i) = -1; % Min velocity
-            b_ineq(row+1) = -1*v_min;
-            row = row + 2;
-        end
-    end
-    % u_min and u_max next
-    for i=n*T+1:n*T+m*(T-1)
-        A_ineq(row,i) = 1; % Max input
-        b_ineq(row) = u_max;
-        A_ineq(row+1,i) = -1; % Min input
-        b_ineq(row+1) = -1*u_min;
-        row = row+2;
-    end
-    % Delta last
-    A_ineq(end,end) = -1;
-    
+%     row = 1;
+%     for i=1:n*T
+%         if mod(i,n) > n/2 || mod(i,n) == 0
+%             A_ineq(row, i) = 1; % Max velocity
+%             b_ineq(row) = v_max;
+%             A_ineq(row+1, i) = -1; % Min velocity
+%             b_ineq(row+1) = -1*v_min;
+%             row = row + 2;
+%         end
+%     end
+%     % u_min and u_max next
+%     for i=n*T+1:n*T+m*(T-1)
+%         A_ineq(row,i) = 1; % Max input
+%         b_ineq(row) = u_max;
+%         A_ineq(row+1,i) = -1; % Min input
+%         b_ineq(row+1) = -1*u_min;
+%         row = row+2;
+%     end
+     % Delta last
+     A_ineq(end,end) = -1;
+     
 
     % Linear equality constraints: start and end goal
 
@@ -92,11 +96,11 @@ function [ x ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min, u_max
     cfg = struct();
     cfg.callback = @(x,~) plot_traj(make_robot_poly, obstacles, reshape(x(1:n*T),size(traj_init))); % This does the plotting
     cfg.initial_trust_box_size=.1;
-    cfg.g_use_numerical = false;
+    cfg.g_use_numerical = true;
     cfg.min_approx_improve = 1e-2;
 
     x = my_penalty_sqp(x0, Q, q, f, A_ineq, b_ineq, A_eq, b_eq, g, h, cfg);
-    
+    cost = q*x + .5*x'*(Q*x) + f(x);
     %plot_traj(make_robot_poly, obstacles, reshape(x(1:n*T),size(traj_init)));
     
 end

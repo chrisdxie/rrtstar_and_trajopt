@@ -107,12 +107,12 @@ py::object init_display() {
   return plotter;
 }
 
-void plot(py::object plotter, np::ndarray states, np::ndarray inputs, np::ndarray obstacles,
+void plot(py::object plotter, np::ndarray all_states, np::ndarray all_parents, np::ndarray goal_states, np::ndarray goal_inputs, np::ndarray obstacles,
     np::ndarray goal_region, int iter, double cost) {
 
   try {
       // pass control to python now
-    plotter(states, inputs, obstacles, goal_region, iter, "", cost);
+    plotter(all_states, all_parents, goal_states, goal_inputs, obstacles, goal_region, iter, "", cost);
   }
   catch(py::error_already_set const &) {
       // will pass python errors to cpp for printing
@@ -326,10 +326,40 @@ main (int argc, char* argv[]) {
 
       double best_cost = min_time_reachability.get_best_cost();
 
-      plot(plotter, states_np, inputs_np, obstacles_np, goal_region_np, i+1, best_cost);
+      // DFS on tree to get states and parents:
+      MatrixXd all_states(4, planner.get_num_vertices()); all_states.setZero();
+      MatrixXd all_parents(4, planner.get_num_vertices()); all_parents.setZero();
+      int k = 0;
+      std::stack<vertex<typeparams>*> fringe;
+      fringe.push(planner.root_vertex);
+      while(fringe.size() > 0) {
+        vertex<typeparams>* candidate = fringe.top();
+        fringe.pop();
+        if (k == 0) {
+          for(int j = 0; j < 4; ++j) {
+            all_states(j,k) = candidate->state->state_vars[j];
+            all_parents(j,k) = candidate->state->state_vars[j];
+          }
+        } else {
+          vertex<typeparams>* parent = (*(candidate->incoming_edges.begin()))->vertex_src;
+          for(int j = 0; j < 4; ++j) {
+            all_states(j,k) = candidate->state->state_vars[j];
+            all_parents(j,k) = parent->state->state_vars[j];
+          }
+        }
+        k++;
+        for(std::list<edge<typeparams>*>::iterator it = candidate->outgoing_edges.begin();
+            it != candidate->outgoing_edges.end(); it++) {
+          fringe.push((*it)->vertex_dst);
+        }
+      }
+
+      np::ndarray all_states_np = eigen_to_ndarray(all_states);
+      np::ndarray all_parents_np = eigen_to_ndarray(all_parents);
+
+      plot(plotter, all_states_np, all_parents_np, states_np, inputs_np, obstacles_np, goal_region_np, i+1, best_cost);
     }
   }
-
   
   
 

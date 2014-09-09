@@ -17,12 +17,12 @@ using namespace Eigen;
 VectorXd double_integrator_dynamics::rk4(VectorXd (*f)(VectorXd, VectorXd),
 		VectorXd x, VectorXd u, double delta) {
 
-	VectorXd k1 = f(x, u);
-	VectorXd k2 = f(x + .5*k1, u);
-	VectorXd k3 = f(x + .5*k2, u);
-	VectorXd k4 = f(x + k3, u);
+	VectorXd k1 = delta * f(x, u);
+	VectorXd k2 = delta * f(x + .5*k1, u);
+	VectorXd k3 = delta * f(x + .5*k2, u);
+	VectorXd k4 = delta * f(x + k3, u);
 
-	VectorXd x_new = x + delta/6 * (k1 + 2*k2 + 2*k3 + k4);
+	VectorXd x_new = x + (k1 + 2*k2 + 2*k3 + k4)/6;
 	return x_new;
 
 }

@@ -180,7 +180,7 @@ namespace smp {
          * the current graph stored by the planner, and If the initial_state_in argument
          * is non-NULL, creates a new vertex that with the state stored in the initial_state_in
          * argument. 
-x         *
+         *
          * @param initial_state_in The state that the root_vertex will include. If this argument
          * is NULL, then no root vertex is created (But, the graph stored in the planner is 
          * deleted.
