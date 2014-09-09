@@ -4,7 +4,7 @@ function testEllipseSamplingMethod(x_start, x_goal, c_best, c_min)
     % http://arxiv.org/pdf/1404.2334v2.pdf
     
     % 2D
-    d = 4;
+    d = 2;
     
     x_c = (x_start + x_goal)/2;
     
