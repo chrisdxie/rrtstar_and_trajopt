@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6.0)
-project (plot_bitstar)
+project (bitstar)
 
 # puts executables into bin directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -25,5 +25,5 @@ include_directories(${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR} ${PYTHON_I
 link_directories(${Boost_LIBRARY_DIRS} ${PYTHON_LIBRARIES})
 
 # create executable and link to necessary subset of libraries
-add_executable(plot_bitstar plot_bitstar.cpp)
-target_link_libraries(plot_bitstar ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${MY_LIBRARIES}) 
+add_executable(bitstar bitstar.cpp)
+target_link_libraries(bitstar ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${MY_LIBRARIES}) 

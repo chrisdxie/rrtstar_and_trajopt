@@ -1,38 +1,31 @@
 #include <iostream>
 
-#include <boost/python.hpp>
-#include <boost/python/numeric.hpp>
-#include <boost/python/tuple.hpp>
-#include <boost/numpy.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/random.hpp>
-
-namespace py = boost::python;
-namespace np = boost::numpy;
 
 #include <eigen3/Eigen/Eigen>
 using namespace Eigen;
 
-#include <SetupObject.h>
-#include <Node.h>
-#include <Edge.h>
 #include <math.h>
 #include <set>
+#include <stack>
+#include <map>
 #include <queue>
 
-#define INFTY 1e10
+#include "bitstar.h"
+#include "plot_bitstar.h"
 
-#include "../../double_integrator_dynamics_library/double_integrator_dynamics.hpp"
-using namespace double_integrator_dynamics;
+//#include "../../double_integrator_dynamics_library/double_integrator_dynamics.hpp"
+//using namespace double_integrator_dynamics;
 
 #include "../../2d_signed_distance_library_cpp/signedDistancePolygons.hpp"
 
 // Global variables
 SetupObject setup_values;
-std::set<Node*> V;
+std::vector<Node*> V;
 std::set<Node*> X_sample;
 std::set<Edge*> Q_edge;
 std::set<Edge*> Q_rewire;
+
 double r; // Radius from RRT*, updated every iteration
 int n; // Number of vertices in V, updated every iteration
 double f_max, f_prev;
@@ -61,67 +54,7 @@ inline double uniform(double low, double high) {
 	return (high - low)*(rand() / double(RAND_MAX)) + low;
 }
 
-np::ndarray eigen_to_ndarray(const MatrixXd& m) {
-	if (m.cols() == 1) {
-		py::tuple shape = py::make_tuple(m.rows());
-		np::dtype dtype = np::dtype::get_builtin<float>();
-		np::ndarray n = np::zeros(shape, dtype);
-		for(int i=0; i < m.rows(); ++i) {
-			n[py::make_tuple(i)] = m(i);
-		}
-		return n;
-	} else {
-		py::tuple shape = py::make_tuple(m.rows(), m.cols());
-		np::dtype dtype = np::dtype::get_builtin<float>();
-		np::ndarray n = np::zeros(shape, dtype);
-		for(int i=0; i < m.rows(); ++i) {
-			for(int j=0; j < m.cols(); ++j) {
-				n[py::make_tuple(i,j)] = m(i,j);
-			}
-		}
-
-		return n;
-	}
-}
-
-py::object init_display() {
-    // necessary initializations
-	Py_Initialize();
-	np::initialize();
-	py::numeric::array::set_module_and_type("numpy", "ndarray");
-
-    // use boost to find directory of python_plot.py
-	std::string working_dir = boost::filesystem::current_path().normalize().string();
-	std::string plot_cpp_dir = working_dir + "/";
-
-    // necessary imports
-	py::object main_module = py::import("__main__");
-	py::object main_namespace = main_module.attr("__dict__");
-	py::exec("import sys, os", main_namespace);
-	// add plot_cpp_dir to sys.path
-	py::exec(py::str("sys.path.append('"+plot_cpp_dir+"')"), main_namespace);
-	// get python file module
-	py::object plot_mod = py::import("python_plot");
-
-    // get function from module
-	py::object plotter = plot_mod.attr("plot");
-	return plotter;
-}
-
-void plot(py::object plotter, np::ndarray states, np::ndarray parents,
-		np::ndarray goal_path, np::ndarray obstacles, int iters, double cost) {
-
-	try {
-	    // pass control to python now
-		plotter(states, parents, goal_path, obstacles, iters, cost);
-	}
-	catch(py::error_already_set const &) {
-	    // will pass python errors to cpp for printing
-		PyErr_Print();
-	}
-}
-
-void setup(int max_iters, std::string randomize) {
+void setup(int max_iters, std::string& randomize) {
 
 	// This function populates a matrix of values for setting up the problem.
 	// Setup variables:
@@ -171,7 +104,7 @@ void setup(int max_iters, std::string randomize) {
 	setup_values.obstacles = obstacles;
 
 	// Limits
-	setup_values.x_min = -10; // Center of 5, side length of 12
+	setup_values.x_min = -10;
 	setup_values.x_max = 10;
 
 	// Sampling stuff
@@ -184,8 +117,8 @@ void setup(int max_iters, std::string randomize) {
 	// To specifically seed it
 	if (randomize != "true" && randomize != "false") {
 		delete r_eng;
-		std::cout << randomize << "\n";
-		std::cout << randomize.c_str() << "\n";
+		//std::cout << randomize << "\n";
+		//std::cout << randomize.c_str() << "\n";
 		r_eng = new RANDOM_ENGINE(atoi(randomize.c_str())); // seed
 	};
 
@@ -199,47 +132,44 @@ void setup(int max_iters, std::string randomize) {
 
 	// SVD stuff for ball
 	VectorXd a1 = goal_state - initial_state;
-  	MatrixXd M(d, d); M.setZero();
-  	M.col(0) = a1;
+	MatrixXd M(d, d);
+	M.setZero(d,d);
+	M.col(0) = a1;
 
-  	// Perform SVD on M
-  	MatrixXd U = M.jacobiSvd(ComputeFullU | ComputeFullV).matrixU();
-  	MatrixXd V = M.jacobiSvd(ComputeFullU | ComputeFullV).matrixV();
+	// Perform SVD on M
+	MatrixXd U = M.jacobiSvd(ComputeFullU | ComputeFullV).matrixU();
+	MatrixXd V = M.jacobiSvd(ComputeFullU | ComputeFullV).matrixV();
 
-  	// Create W matrix
-  	MatrixXd W(d, d); W.setZero();
-  	for(int i = 0; i < d; ++i) {
-  		if (i == d - 1) {
-  			W(i, i) = U.determinant() * V.determinant();
-  		} else {
-  			W(i, i) = 1;
-  		}
-  	}
+	// Create W matrix
+	MatrixXd W(d, d);
+	W.setZero(d,d);
+	for(int i = 0; i < d; ++i) {
+		if (i == d - 1) {
+			W(i, i) = U.determinant() * V.determinant();
+		} else {
+			W(i, i) = 1;
+		}
+	}
 
-  	// Multiply to update C matrix
-  	C = U * W * V.transpose();
+	// Multiply to update C matrix
+	C = U * W * V.transpose();
 
 }
 
 // Returns true if point is inside rectangular polygon
-bool inside_rectangular_obs(Vector2d point, double x_min, double x_max,
-		double y_min, double y_max) {
-
-	return (x_min <= point(0)) && (point(0) <= x_max)
-			&& (y_min <= point(1)) && (point(1) <= y_max);
-
+inline bool inside_rectangular_obs(VectorXd& point, double x_min, double x_max,	double y_min, double y_max) {
+	return (x_min <= point(0)) && (point(0) <= x_max) && (y_min <= point(1)) && (point(1) <= y_max);
 }
 
-bool inBounds(VectorXd state) {
-	if (inside_rectangular_obs(state, setup_values.x_min, setup_values.x_max,
-			setup_values.x_min, setup_values.x_max)) {
+inline bool inBounds(VectorXd& state) {
+	if (inside_rectangular_obs(state, setup_values.x_min, setup_values.x_max, setup_values.x_min, setup_values.x_max)) {
 		return true;
 	}
 	return false;
 }
 
 // 2 dimensional collision check. Return true if point is contained inside rectangle
-bool exists_collision(VectorXd x_near, VectorXd x_new) {
+bool exists_collision(VectorXd& x_near, VectorXd& x_new) {
 
 	// Hard coded for point robot since states are in 2D
 
@@ -253,12 +183,14 @@ bool exists_collision(VectorXd x_near, VectorXd x_new) {
 		double y_min = obstacles(2,n) - .5*obstacles(3,n);
 		double y_max = obstacles(2,n) + .5*obstacles(3,n);
 
-		Matrix<double, 4, 2> obs; obs.setZero();
+		Matrix<double, 4, 2> obs;
+		obs.setZero(4,2);
 		obs.row(0) << x_min, y_min; obs.row(1) << x_min, y_max;
 		obs.row(2) << x_max, y_max; obs.row(3) << x_max, y_min;
 
 		// Compute line (2D polygon) spanned by x and x_next
-		Matrix<double, 2, 2> traj_line; traj_line.setZero();
+		Matrix<double, 2, 2> traj_line;
+		traj_line.setZero(2,2);
 		traj_line.row(0) << x_near(0), x_near(1);
 		traj_line.row(1) << x_new(0), x_new(1);
 
@@ -287,8 +219,7 @@ MatrixXd tree_to_matrix_states(Node* node) {
 		Node* candidate = fringe.top();
 		fringe.pop();
 		states.col(i++) = candidate->state;
-		for (std::set<Node*>::iterator child = candidate->children.begin();
-				child != candidate->children.end(); ++child) {
+		for (std::set<Node*>::iterator child = candidate->children.begin(); child != candidate->children.end(); ++child) {
 			fringe.push(*child);
 		}
 	}
@@ -311,8 +242,7 @@ MatrixXd tree_to_matrix_parents(Node* node) {
 		Node* candidate = fringe.top();
 		fringe.pop();
 		parents.col(i++) = candidate->parent->state;
-		for (std::set<Node*>::iterator child = candidate->children.begin();
-				child != candidate->children.end(); ++child) {
+		for (std::set<Node*>::iterator child = candidate->children.begin(); child != candidate->children.end(); ++child) {
 			fringe.push(*child);
 		}
 	}
@@ -336,8 +266,9 @@ MatrixXd tree_to_matrix_parents(Node* node) {
 //}
 
 /* Returns path from root */
+// HARD CODE FOR 2D
 MatrixXd get_path(Node* x) {
-	MatrixXd P(2, V.size()); // HARD CODE FOR 2D
+	MatrixXd P(2, V.size());
 	int index = 0;
 	while (x->state != setup_values.initial_state) {
 		P.col(index) = x->state;
@@ -353,82 +284,83 @@ MatrixXd get_path(Node* x) {
 }
 
 /* Return distance between two vectors */
-double dist(VectorXd p1, VectorXd p2) {
+inline double sq_dist(VectorXd& p1, VectorXd& p2) {
+	return (p1 - p2).transpose()*(p1 - p2);
+}
+
+inline double dist(VectorXd& p1, VectorXd& p2) {
 	return (p1 - p2).norm();
 }
 
-int factorial(int n) {
+inline int factorial(int n) {
 	return n == 0 ? 1 : n * factorial(n-1);
 }
 
 // Used in calculating high dimensional ellipsoid volume
-double unitBallVolume() {
+inline double unitBallVolume() {
 	// Returns the volume of the unit ball in n dimensions
-	int n = setup_values.dimension;
-	if (n % 2 == 0) { // Even
-		return pow(M_PI, n/2) / factorial(n/2 + 1);
-	} else { // Odd
-		return pow(M_PI, n/2.0) / ( (factorial(2*n)*sqrt(M_PI)) / (pow(4,n) * factorial(n)) );
-	}
+	//int n = setup_values.dimension;
+	//	if (n % 2 == 0) { // Even
+	//		return pow(M_PI, n/2) / factorial(n/2 + 1);
+	//	} else { // Odd
+	//		return pow(M_PI, n/2.0) / ( (factorial(2*n)*sqrt(M_PI)) / (pow(4,n) * factorial(n)) );
+	//	}
+	return M_PI;
 }
 
 // Sample from unit ball: http://math.stackexchange.com/questions/87230/picking-random-points-in-the-volume-of-sphere-with-uniform-probability/87238#87238
-VectorXd sample_from_unit_ball() {
+inline VectorXd sample_from_unit_ball() {
 
-    double R = 1; // Unit ball has radius 1
+	double R = 1; // Unit ball has radius 1
 
-    // Sample length
-    double length = R * pow((*u_sampler)(), 1.0/setup_values.dimension);
+	// Sample length
+	double length = R * pow((*u_sampler)(), 1.0/setup_values.dimension);
 
-    // Sample direction
-    VectorXd dir(setup_values.dimension);
-    for (int i = 0; i < setup_values.dimension; i++) {
-        dir(i) = (*g_sampler)();
-    }
-    // Normalize direction to length one, the multiply by sampled length
-    dir.normalize();
-    dir *= length;
+	// Sample direction
+	VectorXd dir(setup_values.dimension);
+	for (int i = 0; i < setup_values.dimension; i++) {
+		dir(i) = (*g_sampler)();
+	}
+	// Normalize direction to length one, the multiply by sampled length
+	dir.normalize();
+	dir *= length;
 
-    return dir;
+	return dir;
 
 }
 
-bool inSet(Node* x, std::set<Node*> Set) {
+inline bool inSet(Node* x, std::set<Node*>& Set) {
 	return Set.find(x) != Set.end();
 }
 
 /* HEURISTICS GO HERE */
 
 // Cost to come heuristic
-double g_hat(Node* x) {
-	return (x->state - setup_values.initial_state).norm();
-}
+//inline double g_hat(Node* x) {
+	//return (x->state - setup_values.initial_state).norm();
+	//return x->g_hat;
+//}
 // Cost to go heuristic
-double h_hat(Node* x) {
-	return (x->state - setup_values.goal_state).norm();
-}
+//inline double h_hat(Node* x) {
+	//return (x->state - setup_values.goal_state).norm();
+	//return x->h_hat;
+//}
 // Cost of x_start to x_goal where path is constrained to go through x heuristic
-double f_hat(Node* x) {
-	return g_hat(x) + h_hat(x);
-}
+//inline double f_hat(Node* x) {
+	//return g_hat(x) + h_hat(x);
+	//return x->f_hat;
+//}
 // Exact cost of connecting two nodes
-double c(Node* x, Node* y) {
+inline double c(Node* x, Node* y) {
 	num_true_cost_calls++;
 	return (x->state - y->state).norm();
 }
 // Cost of connecting two nodes heuristic
-double c_hat(Node* x, Node* y) { // This is specific to point robot example in paper
-//	if (exists_collision(x->state, y->state)) {
-//		return INFTY;
-//	}
+inline double c_hat(Node* x, Node* y) { // This is specific to point robot example in paper
+	//	if (exists_collision(x->state, y->state)) {
+	//		return INFTY;
+	//	}
 	return c(x, y);
-}
-// Cost of node from root of tree
-double g_T(Node* x) {
-	if (!inSet(x, V)) {
-		return INFTY;
-	}
-	return x->cost;
 }
 /* DONE WITH HEURISTICS */
 
@@ -436,26 +368,33 @@ double g_T(Node* x) {
 Edge* bestPotentialEdge() {
 	std::set<Edge*>::iterator it;
 	Edge* best_edge = NULL;
-	double best_cost;
+	double best_cost = INFTY;
+	double curr_cost = 0;
 	for(it = Q_edge.begin(); it != Q_edge.end(); ++it) {
 		Edge* e = *it;
-		if (best_edge == NULL || g_T(e->v) + e->heuristic_cost + h_hat(e->x) < best_cost) {
+		curr_cost = g_T(e->v) + e->heuristic_cost + (e->x->h_hat);
+		if (best_edge == NULL || curr_cost < best_cost) {
 			best_edge = e;
-			best_cost = g_T(e->v) + e->heuristic_cost + h_hat(e->x);
+			best_cost = curr_cost;
 		}
 	}
+
+	//std::cout << "best_cost: " << best_cost << " map best cost: " << Q_edge.begin()->first << std::endl;
+
 	return best_edge;
 }
 
 Edge* bestPotentialRewiring() {
 	std::set<Edge*>::iterator it;
 	Edge* best_edge = NULL;
-	double best_cost;
+	double best_cost = INFTY;
+	double curr_cost = 0;
 	for(it = Q_rewire.begin(); it != Q_rewire.end(); ++it) {
 		Edge* e = *it;
-		if (best_edge == NULL || g_T(e->v) + e->heuristic_cost + h_hat(e->x) < best_cost) {
+		curr_cost = g_T(e->v) + e->heuristic_cost + (e->x->h_hat);
+		if (best_edge == NULL || curr_cost < best_cost) {
 			best_edge = e;
-			best_cost = g_T(e->v) + e->heuristic_cost + h_hat(e->x);
+			best_cost = curr_cost;
 		}
 	}
 	return best_edge;
@@ -466,60 +405,73 @@ Edge* bestPotentialRewiring() {
 double prolateHyperSpheroidShellVolume(double smaller_diameter, double bigger_diameter) {
 
 	double ubv = unitBallVolume();
-	double c_min = g_hat(goal_node);
+	double c_min = (goal_node->g_hat);
 
-	double small_vol = ubv * pow(sqrt(pow(smaller_diameter,2) - pow(c_min,2))/2.0, setup_values.dimension-1)
-						   * smaller_diameter / 2.0;
+	double small_vol = ubv * pow(sqrt((smaller_diameter*smaller_diameter) - (c_min*c_min))*0.5, setup_values.dimension-1) * smaller_diameter * 0.5;
 	if (smaller_diameter < c_min) {
 		small_vol = 0;
 	}
-	double big_vol = ubv * pow(sqrt(pow(bigger_diameter,2) - pow(c_min,2))/2.0, setup_values.dimension-1)
-						 * bigger_diameter / 2.0;
+	double big_vol = ubv * pow(sqrt((bigger_diameter*bigger_diameter) - (c_min*c_min))*0.5, setup_values.dimension-1) * bigger_diameter * 0.5;
 
 	return big_vol - small_vol;
 
 }
 
-void sample_batch(double smaller_diameter, double bigger_diameter, double rho) {
+void sample_batch(double smaller_diameter, double bigger_diameter, double rho)
+{
+	double c_min = (goal_node->g_hat);
+	if (smaller_diameter > c_min) {
+		return;
+	}
 
 	int num_samples = 0;
 	double lambda_shell_vol = prolateHyperSpheroidShellVolume(smaller_diameter, bigger_diameter);
 	VectorXd x_center = (setup_values.initial_state + setup_values.goal_state)/2.0;
 
 	// Create L matrix from bigger radius
-	MatrixXd L_big(setup_values.dimension, setup_values.dimension); L_big.setZero();
-	MatrixXd L_small(setup_values.dimension, setup_values.dimension); L_small.setZero();
-	double c_min = g_hat(goal_node);
-  	for(int i = 0; i < setup_values.dimension; ++i) {
-  		if (i == 0) {
-  			L_big(i, i) = bigger_diameter/2; // Float division
-  			L_small(i,i) = smaller_diameter/2;
-  		} else {
-  			L_big(i, i) = sqrt(pow(bigger_diameter,2) - pow(c_min,2))/2.0;
-  			L_small(i, i) = sqrt(pow(smaller_diameter,2) - pow(c_min,2))/2.0;
-  		}
-  	}
+	MatrixXd L_big(setup_values.dimension, setup_values.dimension);
+	L_big.setZero(setup_values.dimension, setup_values.dimension);
+	MatrixXd L_small(setup_values.dimension, setup_values.dimension);
+	L_small.setZero(setup_values.dimension, setup_values.dimension);
+	for(int i = 0; i < setup_values.dimension; ++i) {
+		if (i == 0) {
+			L_big(i, i) = bigger_diameter*0.5;
+			L_small(i,i) = smaller_diameter*0.5;
+		} else {
+			L_big(i, i) = sqrt((bigger_diameter*bigger_diameter) - (c_min*c_min))*0.5;
+			L_small(i, i) = sqrt((smaller_diameter*smaller_diameter) - (c_min*c_min))*0.5;
+		}
+	}
 
+	std::cout << "c_min: " << c_min << " smaller_diameter: " << smaller_diameter << " bigger_diameter: " << bigger_diameter << " lambda shell: " << lambda_shell_vol << " rho: " << rho << " num samples: " << rho * lambda_shell_vol << std::endl;
+
+	MatrixXd CLLTCTInv = (C*L_small*L_small.transpose()*C.transpose()).inverse();
+	MatrixXd CLBig = C*L_big;
 	// Perform rejection sampling on the big ellipse until ratio is satisfied
 	while (num_samples < rho * lambda_shell_vol) {
-  		VectorXd x_ball = sample_from_unit_ball();
-  		VectorXd x_sample = C*L_big*x_ball + x_center;
+		VectorXd x_ball = sample_from_unit_ball();
+		VectorXd x_sample = CLBig*x_ball + x_center;
 
-  		// Check whether it's in the smaller ellipse by using the formula for quadratic form
-  		// This can ONLY be done when smaller radius is greater than c_min. Otherwise L_small will have stuff
-  		// Also, it's correct to just sample from total ellipse otherwise
-  		//if (inBounds(x_sample)) {
-  		if (smaller_diameter > c_min && (x_sample - x_center).transpose() * (C*L_small*L_small.transpose()*C.transpose()).inverse() * (x_sample - x_center) < 1) {
-  			continue;
-  		} else {
-  			Node* n = new Node;
-  			n->state = x_sample;
-  			X_sample.insert(n);
-  			num_samples++;
-  		}
-  		//}
+		// Check whether it's in the smaller ellipse by using the formula for quadratic form
+		// This can ONLY be done when smaller radius is greater than c_min. Otherwise L_small will have stuff
+		// Also, it's correct to just sample from total ellipse otherwise
+		if (inBounds(x_sample)) {
+			if (/*(smaller_diameter > c_min) && */ ((x_sample - x_center).transpose() * CLLTCTInv * (x_sample - x_center) < 1)) {
+				continue;
+			} else {
+				Node* n = new Node;
+				n->state = x_sample;
+				n->g_hat = (n->state - setup_values.initial_state).norm();
+				n->h_hat = (n->state - setup_values.goal_state).norm();
+				n->f_hat = n->g_hat + n->h_hat;
+				X_sample.insert(n);
+				num_samples++;
+			}
+		}
 
 	}
+
+	std::cout << "Num samples in batch: " << num_samples << std::endl;
 
 }
 
@@ -547,10 +499,11 @@ void clearRewiringQueue() {
 
 void updateFreeQueue(Node* v) {
 
-	double f_sample = std::min(f_hat(v) + 2*r, f_max);
+	double f_sample = std::min((v->f_hat) + 2*r, f_max);
+	// f_reqd or f_sample?
 	if (f_sample > f_prev) {
 		double lambda_sample = prolateHyperSpheroidShellVolume(f_prev, f_sample);
-		double rho = n / lambda_sample;
+		double rho = (double)n / lambda_sample;
 		sample_batch(f_prev, f_sample, rho);
 		f_prev = f_sample;
 	}
@@ -586,9 +539,10 @@ void updateEdgeQueue(Node* v) {
 	for(n_it = X_n.begin(); n_it != X_n.end(); ++n_it) {
 		Node* x = *n_it;
 		double heuristic_edge_cost = c_hat(v, x);
-		if (g_hat(v) + heuristic_edge_cost + h_hat(x) < g_T(goal_node)) {
+		if ((v->g_hat) + heuristic_edge_cost + (x->h_hat) < g_T(goal_node)) {
 			Edge* e = new Edge(v, x);
 			e->heuristic_cost = heuristic_edge_cost;
+			//double cost = g_T(e->v) + e->heuristic_cost + (e->x->h_hat);
 			Q_edge.insert(e);
 		}
 	}
@@ -598,12 +552,12 @@ void updateEdgeQueue(Node* v) {
 void updateRewireQueue(Node* v) {
 
 	// Find all nodes in V in a ball of radius r w/ center v
-	std::set<Node*> V_n;
-	std::set<Node*>::iterator n_it;
+	std::vector<Node*> V_n;
+	std::vector<Node*>::iterator n_it;
 	for(n_it = V.begin(); n_it != V.end(); ++n_it) {
 		Node* w = *n_it;
 		if (dist(w->state, v->state) <= r) {
-			V_n.insert(w);
+			V_n.push_back(w);
 		}
 	}
 
@@ -614,21 +568,22 @@ void updateRewireQueue(Node* v) {
 		if (g_T(v) + heuristic_edge_cost < g_T(w)) {
 			Edge* e = new Edge(v, w);
 			e->heuristic_cost = heuristic_edge_cost;
+			//double cost = g_T(e->v) + e->heuristic_cost + (e->x->h_hat);
 			Q_rewire.insert(e);
 		}
 	}
 
 }
 
-void Rewire() {
-
+void Rewire()
+{
 	while (Q_rewire.size() > 0) {
 
 		Edge* e = bestPotentialRewiring();
 		Q_rewire.erase(e);
 		Node* u = e->v; Node* w = e->x;
 
-		if (g_T(u) + e->heuristic_cost + h_hat(w) < g_T(goal_node)) {
+		if (g_T(u) + e->heuristic_cost + (w->h_hat) < g_T(goal_node)) {
 
 			if (g_T(u) + c(u, w) < g_T(w)) {
 				delete e; // After grabbing pointers to v, x and using heuristic cost, we have no need for the Edge e
@@ -656,15 +611,22 @@ double BITStar() {
 
 	// Setup intial state and add it to V; note that T and E are implicity represented
 	// by root node. Can perform DFS to find T, E are children pointers of every node in T
-	root_node = new Node;
+	root_node = new Node();
 	root_node->state = setup_values.initial_state;
+	root_node->g_hat = 0;
+	root_node->h_hat = (root_node->state - setup_values.goal_state).norm();
+	root_node->f_hat = root_node->h_hat;
 	root_node->cost = 0;
 	root_node->parent = root_node; // Convention for function tree_to_matrix_parents()
-	V.insert(root_node);
+	root_node->inV = true;
+	V.push_back(root_node);
 
 	// Add goal state to X_sample
 	goal_node = new Node;
 	goal_node->state = setup_values.goal_state;
+	goal_node->g_hat = (goal_node->state - setup_values.initial_state).norm();
+	goal_node->h_hat = 0;
+	goal_node->f_hat = root_node->g_hat;
 	X_sample.insert(goal_node);
 
 	// f_max from paper
@@ -688,10 +650,9 @@ double BITStar() {
 		f_prev = 0;
 
 		// Update Q_edge for all nodes in V
-		std::set<Node*>::iterator it;
+		std::vector<Node*>::iterator it;
 		for( it = V.begin(); it != V.end(); ++it) {
-			Node* v = *it;
-			updateEdgeQueue(v);
+			updateEdgeQueue(*it);
 		}
 
 		// Process edges in order of potential
@@ -703,8 +664,8 @@ double BITStar() {
 			Node* v = e->v; Node* x = e->x;
 
 			// Collision checking happens implicitly here, in c_hat function
-			if (g_T(v) + e->heuristic_cost + h_hat(x) < g_T(goal_node)) {
-				if (g_hat(v) + c(v, x) + h_hat(x) < g_T(goal_node)) {
+			if (g_T(v) + e->heuristic_cost + (x->h_hat) < g_T(goal_node)) {
+				if ((v->g_hat) + c(v, x) + (x->h_hat) < g_T(goal_node)) {
 
 					delete e; // After grabbing pointers to v, x and using heuristic cost, we have no need for the Edge e
 
@@ -714,7 +675,8 @@ double BITStar() {
 
 					// Update costs, insert node, create edge (parent and child pointer)
 					x->cost = g_T(v) + c(v, x);
-					V.insert(x);
+					V.push_back(x);
+					x->inV = true;
 					x->parent = v;
 					v->children.insert(x);
 
@@ -739,21 +701,21 @@ double BITStar() {
 
 		std::cout << "Size of V: " << V.size() << "\n";
 
-		MatrixXd goal_path = get_path(goal_node);
+		//MatrixXd goal_path = get_path(goal_node);
 
 		// Plot in Python
-		std::cout << "Solution found!\n";
-		std::cout << "Initializing display...\n";
-		py::object plotter = init_display(); // Initialize python interpreter and pyplot plot
+		//std::cout << "Solution found!\n";
+		//std::cout << "Initializing display...\n";
+		//py::object plotter = init_display(); // Initialize python interpreter and pyplot plot
 
 		// Convert Eigen matrices and vectors to Numpy ND arrays
-		np::ndarray states_np = eigen_to_ndarray(tree_to_matrix_states(root_node));
-		np::ndarray parents_np = eigen_to_ndarray(tree_to_matrix_parents(root_node));
-		np::ndarray goal_path_np = eigen_to_ndarray(goal_path);
-		np::ndarray obstacles_np = eigen_to_ndarray(setup_values.obstacles);
+		//np::ndarray states_np = eigen_to_ndarray(tree_to_matrix_states(root_node));
+		//np::ndarray parents_np = eigen_to_ndarray(tree_to_matrix_parents(root_node));
+		//np::ndarray goal_path_np = eigen_to_ndarray(goal_path);
+		//np::ndarray obstacles_np = eigen_to_ndarray(setup_values.obstacles);
 
-		std::cout << "Plotting...\n";
-		plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, setup_values.max_iters, g_T(goal_node));
+		//std::cout << "Plotting...\n";
+		//plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, setup_values.max_iters, g_T(goal_node));
 
 	}
 	return g_T(goal_node);
@@ -769,24 +731,25 @@ double BITStar() {
 
 int main(int argc, char* argv[]) {
 
-    // Assumes a command line argument of MAX_ITERS RANDOMIZE {true, false}
-    int max_iters = atoi(argv[1]);
-    std::string randomize;
-    if (argc >= 3) {
-    	randomize = argv[2];
-    } else {
-    	randomize = "false";
-    }
+	// Assumes a command line argument of MAX_ITERS RANDOMIZE {true, false}
+	int max_iters = atoi(argv[1]);
+	std::string randomize;
+	if (argc >= 3) {
+		randomize = argv[2];
+	} else {
+		randomize = "false";
+	}
 
-    // Setup function
-    setup(max_iters, randomize);
+	// Setup function
+	setup(max_iters, randomize);
 
-    std::cout << "Running BIT*...\n";
-    double path_length = BITStar();
+	std::cout << "Running BIT*...\n";
+	double path_length = BITStar();
 
-    std::cout << "Number of calls to true cost calculator: " << num_true_cost_calls << "\n";
-    std::cout << "Number of calls to signed distance checker: " << num_collision_check_calls << "\n";
-    std::cout << "Best path cost: " << path_length << "\n";
-    std::cout << "exiting\n";
+	std::cout << "Number of calls to true cost calculator: " << num_true_cost_calls << "\n";
+	std::cout << "Number of calls to signed distance checker: " << num_collision_check_calls << "\n";
+	std::cout << "Best path cost: " << path_length << "\n";
+	std::cout << "Optimal path cost: " << 13.547442467 << "\n";
+	std::cout << "exiting\n";
 }
 
