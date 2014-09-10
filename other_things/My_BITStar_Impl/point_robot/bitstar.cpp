@@ -357,10 +357,10 @@ inline double c(Node* x, Node* y) {
 }
 // Cost of connecting two nodes heuristic
 inline double c_hat(Node* x, Node* y) { // This is specific to point robot example in paper
-	//	if (exists_collision(x->state, y->state)) {
-	//		return INFTY;
-	//	}
-	return c(x, y);
+	if (exists_collision(x->state, y->state)) {
+		return INFTY;
+	}
+	return (x->state - y->state).norm();
 }
 /* DONE WITH HEURISTICS */
 
@@ -443,7 +443,7 @@ void sample_batch(double smaller_diameter, double bigger_diameter, double rho)
 		}
 	}
 
-	std::cout << "c_min: " << c_min << " smaller_diameter: " << smaller_diameter << " bigger_diameter: " << bigger_diameter << " lambda shell: " << lambda_shell_vol << " rho: " << rho << " num samples: " << rho * lambda_shell_vol << std::endl;
+	//std::cout << "c_min: " << c_min << " smaller_diameter: " << smaller_diameter << " bigger_diameter: " << bigger_diameter << " lambda shell: " << lambda_shell_vol << " rho: " << rho << " num samples: " << rho * lambda_shell_vol << std::endl;
 
 	MatrixXd CLLTCTInv = (C*L_small*L_small.transpose()*C.transpose()).inverse();
 	MatrixXd CLBig = C*L_big;
@@ -471,7 +471,7 @@ void sample_batch(double smaller_diameter, double bigger_diameter, double rho)
 
 	}
 
-	std::cout << "Num samples in batch: " << num_samples << std::endl;
+	//std::cout << "Num samples in batch: " << num_samples << std::endl;
 
 }
 
@@ -583,18 +583,21 @@ void Rewire()
 		Q_rewire.erase(e);
 		Node* u = e->v; Node* w = e->x;
 
-		if (g_T(u) + e->heuristic_cost + (w->h_hat) < g_T(goal_node)) {
-
-			if (g_T(u) + c(u, w) < g_T(w)) {
+		if (g_T(u) + e->heuristic_cost + (w->h_hat) < g_T(goal_node))
+		{
+			double wcost = g_T(u) + c(u, w);
+			if (wcost < g_T(w)) {
 				delete e; // After grabbing pointers to v, x and using heuristic cost, we have no need for the Edge e
-				if (exists_collision(u->state, w->state)) {
-					continue;
-				}
+
+				//if (exists_collision(u->state, w->state)) {
+				//	continue;
+				//}
+
 				// Erase edge (w_parent, w) from tree, set new edge (u, w)
 				Node* w_parent = w->parent; // First erase parent->child pointer
 				w_parent->children.erase(w);
 				w->parent = u; // This erases child->parent pointer and sets new one
-				w->cost = g_T(u) + c(u, w);
+				w->cost = wcost;
 			}
 
 		} else {
@@ -665,16 +668,17 @@ double BITStar() {
 
 			// Collision checking happens implicitly here, in c_hat function
 			if (g_T(v) + e->heuristic_cost + (x->h_hat) < g_T(goal_node)) {
-				if ((v->g_hat) + c(v, x) + (x->h_hat) < g_T(goal_node)) {
+				double cvx = c(v,x);
+				if ((v->g_hat) + cvx + (x->h_hat) < g_T(goal_node)) {
 
 					delete e; // After grabbing pointers to v, x and using heuristic cost, we have no need for the Edge e
 
-					if (exists_collision(v->state, x->state)) {
-						continue;
-					}
+					//if (exists_collision(v->state, x->state)) {
+					//	continue;
+					//}
 
 					// Update costs, insert node, create edge (parent and child pointer)
-					x->cost = g_T(v) + c(v, x);
+					x->cost = g_T(v) + cvx;
 					V.push_back(x);
 					x->inV = true;
 					x->parent = v;
@@ -695,6 +699,7 @@ double BITStar() {
 			}
 		}
 		k++;
+		std::cout << "cost of goal node: " << g_T(goal_node) << std::endl;
 	}
 
 	if (g_T(goal_node) < INFTY) {
