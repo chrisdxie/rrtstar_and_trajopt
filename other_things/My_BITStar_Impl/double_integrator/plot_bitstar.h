@@ -43,7 +43,7 @@ py::object init_display() {
 	py::numeric::array::set_module_and_type("numpy", "ndarray");
 
 	// use boost to find directory of python_plot.py
-	std::string working_dir = "/Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/other_things/My_BITStar_Impl/point_robot";
+	std::string working_dir = "/Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/other_things/My_BITStar_Impl/double_integrator";
 	std::string plot_cpp_dir = working_dir + "/";
 
 	// necessary imports

@@ -12,3 +12,8 @@ ACADOtoolkit/
 
 # PYC files
 *.pyc
+
+# Eclipse stuff
+.cproject
+.project
+.settings

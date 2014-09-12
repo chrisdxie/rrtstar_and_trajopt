@@ -10,6 +10,7 @@ using namespace Eigen;
 #include <stack>
 #include <map>
 #include <queue>
+#include <ctime>
 
 #include "bitstar.h"
 #include "plot_bitstar.h"
@@ -18,6 +19,8 @@ using namespace Eigen;
 //using namespace double_integrator_dynamics;
 
 #include "../../2d_signed_distance_library_cpp/signedDistancePolygons.hpp"
+
+#include "../../double_integrator_FORCES/SQP/without_CD/double_integrator_noCD_sqp.hpp"
 
 // Global variables
 SetupObject setup_values;
@@ -51,6 +54,8 @@ int num_true_cost_calls = 0;
 int num_collision_check_calls = 0;
 int num_samples_pruned = 0;
 
+double max_speed = sqrt(2); // Hard coded for this example
+
 inline double uniform(double low, double high) {
 	return (high - low)*(rand() / double(RAND_MAX)) + low;
 }
@@ -67,10 +72,9 @@ void setup(int max_iters, std::string& randomize) {
 	//		Rectangular obstacle x range
 	// 		Rectangular obstacle y range
 
-	int d = 2;
-	VectorXd initial_state(d);
+	VectorXd initial_state(2);
 	initial_state << 0, 0;
-	VectorXd goal_state(d);
+	VectorXd goal_state(2);
 	goal_state << 9, 9;
 
 	int num_obstacles = 3;
@@ -83,7 +87,7 @@ void setup(int max_iters, std::string& randomize) {
 	setup_values.max_iters = max_iters;
 
 	// Dimension of problem
-	setup_values.dimension = d;
+	setup_values.dimension = 4;
 
 	// Initial State
 	setup_values.initial_state = initial_state;
@@ -92,7 +96,7 @@ void setup(int max_iters, std::string& randomize) {
 	setup_values.goal_state = goal_state;
 
 	// Gamma
-	setup_values.gamma = 10; // Looked up thing in paper
+	setup_values.gamma = 6; // Looked up thing in paper
 
 	// Randomize argument
 	if (randomize == "true") {
@@ -107,6 +111,10 @@ void setup(int max_iters, std::string& randomize) {
 	// Limits
 	setup_values.x_min = -10;
 	setup_values.x_max = 10;
+	setup_values.v_min = -1;
+	setup_values.v_max = 1;
+	setup_values.u_min = -1;
+	setup_values.u_max = 1;
 
 	// Sampling stuff
 	if (setup_values.randomize) {
@@ -132,7 +140,9 @@ void setup(int max_iters, std::string& randomize) {
 	u_sampler = new U_GENERATOR(*r_eng, *u_dist);
 
 	// SVD stuff for ball
-	VectorXd a1 = goal_state - initial_state;
+	int d = 4;
+	VectorXd a1(d);
+	a1 << goal_state - initial_state, 0, 0;
 	MatrixXd M(d, d);
 	M.setZero(d,d);
 	M.col(0) = a1;
@@ -163,7 +173,13 @@ inline bool inside_rectangular_obs(VectorXd& point, double x_min, double x_max,	
 }
 
 inline bool inBounds(VectorXd& state) {
-	if (inside_rectangular_obs(state, setup_values.x_min, setup_values.x_max, setup_values.x_min, setup_values.x_max)) {
+	VectorXd pos(2), vel(2);
+	pos << state(0), state(1);
+	vel << state(2), state(3);
+	if (inside_rectangular_obs(pos, setup_values.x_min, setup_values.x_max,
+							   setup_values.x_min, setup_values.x_max) &&
+		inside_rectangular_obs(vel, setup_values.v_min, setup_values.v_max,
+				   setup_values.v_min, setup_values.v_max)) {
 		return true;
 	}
 	return false;
@@ -267,19 +283,27 @@ MatrixXd tree_to_matrix_parents(Node* node) {
 //}
 
 /* Returns path from root */
-// HARD CODE FOR 2D
+// Hacks everywhere in this method... not clean at all. Oh well
 MatrixXd get_path(Node* x) {
-	MatrixXd P(2, V.size());
+	MatrixXd P(setup_values.dimension, V.size()*T);
 	int index = 0;
-	while (x->state != setup_values.initial_state) {
-		P.col(index) = x->state;
+	VectorXd extended_initial_state(setup_values.dimension);
+	extended_initial_state << setup_values.initial_state, 0, 0;
+
+	while (x->state != extended_initial_state) {
+
+		P.col(index) = x->state; index++;
+		for (int i = T-2; i >= 0; --i) { // Hacked, hard coded
+			P.col(index) = x->states[i];
+			index ++;
+		}
+
 		x = x->parent;
-		index++;
 	}
 	P.col(index) = x->state;
 	index++;
 	MatrixXd R = P.leftCols(index).rowwise().reverse();
-	std::cout << "R:\n" << R << "\n";
+	//std::cout << "R:\n" << R << "\n";
 	return R;
 
 }
@@ -352,16 +376,58 @@ inline bool inSet(Node* x, std::set<Node*>& Set) {
 	//return x->f_hat;
 //}
 // Exact cost of connecting two nodes
-inline double c(Node* x, Node* y) {
+double c(Edge* e) {
 	num_true_cost_calls++;
-	return (x->state - y->state).norm();
-}
-// Cost of connecting two nodes heuristic
-inline double c_hat(Node* x, Node* y) { // This is specific to point robot example in paper
-	if (exists_collision(x->state, y->state)) {
+
+	Node* v = e->v;
+	Node* x = e->x;
+
+	// Instantiate StdVectorsX and StdVectorU
+	StdVectorX X(T);
+	StdVectorU U(T-1);
+
+	// Init bounds
+	bounds_t bounds;
+
+	bounds.u_max = setup_values.u_max;
+	bounds.u_min = setup_values.u_min;
+	bounds.x_max = setup_values.x_max;
+	bounds.x_min = setup_values.x_min;
+	bounds.v_max = setup_values.v_max;
+	bounds.v_min = setup_values.v_min;
+	bounds.x_start = v->state;
+	bounds.x_goal = x->state;
+
+	// Initialize pointer to time variable, delta
+	double* delta;
+	double delta_init = 1;
+	delta = &delta_init;
+
+	// Call SQP (Redundant call, whatever. fix later)
+	int success = solve_double_integrator_noCD_BVP(bounds.x_start, bounds.x_goal, X, U, delta, bounds);
+
+	// If not success, say the cost is infinity
+	if (success == 0) {
+		//std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start << "\nGoal state:\n" << bounds.x_goal << "\n";
 		return INFTY;
 	}
-	return (x->state - y->state).norm();
+
+	StdVectorX allButLastState(X.begin(), X.begin()+T-1);
+	e->states = allButLastState;
+	e->controls = U;
+	return *delta * (T-1);
+
+}
+// Cost of connecting two nodes heuristic
+inline double c_hat(Node* x, Node* y) { // This is specific to double integrator
+	VectorXd x_state(2);
+	VectorXd y_state(2);
+	x_state << x->state(0), x->state(1);
+	y_state << y->state(0), y->state(1);
+	if (exists_collision(x_state, y_state)) {
+		return INFTY;
+	}
+	return (x_state - y_state).norm()/max_speed;
 }
 /* DONE WITH HEURISTICS */
 
@@ -427,7 +493,8 @@ void sample_batch(double smaller_diameter, double bigger_diameter, double rho)
 
 	int num_samples = 0;
 	double lambda_shell_vol = prolateHyperSpheroidShellVolume(smaller_diameter, bigger_diameter);
-	VectorXd x_center = (setup_values.initial_state + setup_values.goal_state)/2.0;
+	VectorXd x_center(4); // Hard coded
+	x_center << (setup_values.initial_state + setup_values.goal_state)/2.0, 0, 0;
 
 	// Create L matrix from bigger radius
 	MatrixXd L_big(setup_values.dimension, setup_values.dimension);
@@ -462,8 +529,10 @@ void sample_batch(double smaller_diameter, double bigger_diameter, double rho)
 			} else {
 				Node* n = new Node;
 				n->state = x_sample;
-				n->g_hat = (n->state - setup_values.initial_state).norm();
-				n->h_hat = (n->state - setup_values.goal_state).norm();
+				VectorXd temp_state(2);
+				temp_state << n->state(0), n->state(1);
+				n->g_hat = (temp_state - setup_values.initial_state).norm()/max_speed;
+				n->h_hat = (temp_state - setup_values.goal_state).norm()/max_speed;
 				n->f_hat = n->g_hat + n->h_hat;
 				X_sample.insert(n);
 				num_samples++;
@@ -601,8 +670,10 @@ void Rewire()
 
 		if (g_T(u) + e->heuristic_cost + (w->h_hat) < g_T(goal_node))
 		{
-			double wcost = g_T(u) + c(u, w);
+			double wcost = g_T(u) + c(e);
 			if (wcost < g_T(w)) {
+				w->states = e->states;
+				w->controls = e->controls;
 				delete e; // After grabbing pointers to v, x and using heuristic cost, we have no need for the Edge e
 
 				//if (exists_collision(u->state, w->state)) {
@@ -625,15 +696,22 @@ void Rewire()
 
 double BITStar() {
 
+	// Time it
+	std::clock_t start;
+	double duration;
+	start = std::clock();
+
 	// Initialize random seed using current time.
 	// Uncomment this line if you want feed the random number generator a seed based on time.
 
 	// Setup intial state and add it to V; note that T and E are implicity represented
 	// by root node. Can perform DFS to find T, E are children pointers of every node in T
 	root_node = new Node();
-	root_node->state = setup_values.initial_state;
+	VectorXd extended_initial_state(setup_values.dimension);
+	extended_initial_state << setup_values.initial_state, 0, 0; // Tack on 0 velocities
+	root_node->state = extended_initial_state;
 	root_node->g_hat = 0;
-	root_node->h_hat = (root_node->state - setup_values.goal_state).norm();
+	root_node->h_hat = (setup_values.initial_state - setup_values.goal_state).norm()/max_speed;
 	root_node->f_hat = root_node->h_hat;
 	root_node->cost = 0;
 	root_node->parent = root_node; // Convention for function tree_to_matrix_parents()
@@ -642,8 +720,10 @@ double BITStar() {
 
 	// Add goal state to X_sample
 	goal_node = new Node;
-	goal_node->state = setup_values.goal_state;
-	goal_node->g_hat = (goal_node->state - setup_values.initial_state).norm();
+	VectorXd extended_goal_state(setup_values.dimension);
+	extended_goal_state << setup_values.goal_state, 0, 0; // Tack on 0 velocities
+	goal_node->state = extended_goal_state;
+	goal_node->g_hat = (setup_values.goal_state - setup_values.initial_state).norm()/max_speed;
 	goal_node->h_hat = 0;
 	goal_node->f_hat = root_node->g_hat;
 	X_sample.insert(goal_node);
@@ -687,9 +767,10 @@ double BITStar() {
 
 			// Collision checking happens implicitly here, in c_hat function
 			if (g_T(v) + e->heuristic_cost + (x->h_hat) < g_T(goal_node)) {
-				double cvx = c(v,x);
+				double cvx = c(e);
 				if ((v->g_hat) + cvx + (x->h_hat) < g_T(goal_node)) {
-
+					x->states = e->states;
+					x->controls = e->controls;
 					delete e; // After grabbing pointers to v, x and using heuristic cost, we have no need for the Edge e
 
 					//if (exists_collision(v->state, x->state)) {
@@ -721,6 +802,10 @@ double BITStar() {
 		std::cout << "cost of goal node: " << g_T(goal_node) << std::endl;
 	}
 
+	// More timing stuff
+	duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+	std::cout << "Duration of algorithm for " << setup_values.max_iters << " iterations: " << duration << "\n";
+
 	if (g_T(goal_node) < INFTY) {
 
 		std::cout << "Size of V: " << V.size() << "\n";
@@ -743,6 +828,7 @@ double BITStar() {
 		plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, setup_values.max_iters, g_T(goal_node));
 
 	}
+
 	return g_T(goal_node);
 
 }
@@ -768,13 +854,13 @@ int main(int argc, char* argv[]) {
 	// Setup function
 	setup(max_iters, randomize);
 
+	// Running of BIT*
 	std::cout << "Running BIT*...\n";
 	double path_length = BITStar();
 
 	std::cout << "Number of calls to true cost calculator: " << num_true_cost_calls << "\n";
 	std::cout << "Number of calls to signed distance checker: " << num_collision_check_calls << "\n";
 	std::cout << "Best path cost: " << path_length << "\n";
-	std::cout << "Optimal path cost: " << 13.547442467 << "\n";
 	std::cout << "exiting\n";
 }
 

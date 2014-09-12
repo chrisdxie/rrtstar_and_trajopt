@@ -452,12 +452,12 @@ bool minimize_merit_function(StdVectorX& X, StdVectorU& U, double* delta, bounds
 	fill_lb_and_ub(bounds);
 
 	for(int sqp_iter=0; true; ++sqp_iter) {
-		std::cout << "  sqp iter: " << sqp_iter << "\n";
+		//std::cout << "  sqp iter: " << sqp_iter << "\n";
 
 		merit = computeMerit(delta, X, U, penalty_coeff);
 
 		for(int trust_iter=0; true; ++trust_iter) {
-			std::cout << "   trust region size: " << trust_box_size << "\n";
+			//std::cout << "   trust region size: " << trust_box_size << "\n";
 
 			// fill in A, b
 			fill_in_A_and_b(X, U, delta, trust_box_size);
@@ -495,14 +495,14 @@ bool minimize_merit_function(StdVectorX& X, StdVectorU& U, double* delta, bounds
 			double exact_merit_improve = merit - new_merit;
 			double merit_improve_ratio = exact_merit_improve/approx_merit_improve;
 
-			printf("\tapprox improve: %.3f. exact improve: %.3f. ratio: %.3f \n", approx_merit_improve, exact_merit_improve, merit_improve_ratio);
+			//printf("\tapprox improve: %.3f. exact improve: %.3f. ratio: %.3f \n", approx_merit_improve, exact_merit_improve, merit_improve_ratio);
 			if (approx_merit_improve < -1e-5) {
-				printf("Approximate merit function got worse (%.3e).\n", approx_merit_improve);
-				printf("Either convexification is wrong to zeroth order, or you're in numerical trouble\n");
+				//printf("Approximate merit function got worse (%.3e).\n", approx_merit_improve);
+				//printf("Either convexification is wrong to zeroth order, or you're in numerical trouble\n");
 				success = false;
 				return success;
 			} else if (approx_merit_improve < cfg::min_approx_improve) {
-				printf("Converged: y tolerance\n");
+				//printf("Converged: y tolerance\n");
 				X = Xopt; U = Uopt; *delta = deltaopt;
 				return success;
 			} else if ((exact_merit_improve < 0) || (merit_improve_ratio < cfg::improve_ratio_threshold)) {
@@ -514,7 +514,7 @@ bool minimize_merit_function(StdVectorX& X, StdVectorU& U, double* delta, bounds
 			}
 
 			if (trust_box_size < cfg::min_trust_box_size) {
-				printf("Converged x tolerance\n");
+				//printf("Converged x tolerance\n");
 				return success;
 			}
 
@@ -574,9 +574,8 @@ int solve_double_integrator_noCD_BVP(VectorX x_start, VectorX x_goal, StdVectorX
 	double_integrator_QP_solver_noCD_info info;
 	setup_state_vars(problem, output);
 
-//	StdVectorX X(T);
-//	StdVectorU U(T-1);
-	*delta = 1;
+	// Smart initialization
+	*delta = (x_start - x_goal).norm()/10.0;
 
 	// Initialize X variable
 	Matrix<double, X_DIM, T> init;

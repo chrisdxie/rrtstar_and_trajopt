@@ -14,7 +14,8 @@ function [ x, cost ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min,
     input_init = zeros(m,T-1); % Set inputs to 0
 
     % Time is the final input variable, last variable in state. It is initialized to 1
-    delta_init = .1;
+    delta_init = norm(x_goal - x_start)/10; disp(['Delta init: ' num2str(delta_init)]);
+    %delta_init = .1;
     x0 = [traj_init(:); input_init(:); delta_init];
 
     dsafe = 0.05; % Safety margin
@@ -28,8 +29,8 @@ function [ x, cost ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min,
     make_robot_poly = @(x) orientedBoxToPolygon([x(1), x(2), robot_length, robot_width, 0]);
 
     % Minimize the last variable, which is time
-    %q = [zeros(1,size(x0,1)-1) 1];
-    q = [zeros(1,size(x0,1)-1) T-1];
+    q = [zeros(1,size(x0,1)-1) 1];
+    %q = [zeros(1,size(x0,1)-1) T-1];
 
     % Q matrix is 0.
     Q = zeros(size(x0,1),size(x0,1));
@@ -64,24 +65,24 @@ function [ x, cost ] = find_path_with_trajopt(x_start, x_goal, obstacles, u_min,
     A_ineq = zeros(n*T + 2*m*(T-1) + 1, size(x0,1));
     b_ineq = zeros(n*T + 2*m*(T-1) + 1, 1);
     % Velocities first:
-%     row = 1;
-%     for i=1:n*T
-%         if mod(i,n) > n/2 || mod(i,n) == 0
-%             A_ineq(row, i) = 1; % Max velocity
-%             b_ineq(row) = v_max;
-%             A_ineq(row+1, i) = -1; % Min velocity
-%             b_ineq(row+1) = -1*v_min;
-%             row = row + 2;
-%         end
-%     end
-%     % u_min and u_max next
-%     for i=n*T+1:n*T+m*(T-1)
-%         A_ineq(row,i) = 1; % Max input
-%         b_ineq(row) = u_max;
-%         A_ineq(row+1,i) = -1; % Min input
-%         b_ineq(row+1) = -1*u_min;
-%         row = row+2;
-%     end
+     row = 1;
+     for i=1:n*T
+         if mod(i,n) > n/2 || mod(i,n) == 0
+             A_ineq(row, i) = 1; % Max velocity
+             b_ineq(row) = v_max;
+             A_ineq(row+1, i) = -1; % Min velocity
+             b_ineq(row+1) = -1*v_min;
+             row = row + 2;
+         end
+     end
+     % u_min and u_max next
+     for i=n*T+1:n*T+m*(T-1)
+         A_ineq(row,i) = 1; % Max input
+         b_ineq(row) = u_max;
+         A_ineq(row+1,i) = -1; % Min input
+         b_ineq(row+1) = -1*u_min;
+         row = row+2;
+     end
      % Delta last
      A_ineq(end,end) = -1;
      
