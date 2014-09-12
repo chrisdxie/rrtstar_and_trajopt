@@ -34,7 +34,7 @@ cfg.cnt_tolerance = 1e-4;
 cfg.max_merit_coeff_increases = 3;
 cfg.merit_coeff_increase_ratio = 10;
 cfg.initial_trust_box_size = 1;
-cfg.initial_penalty_coeff = 10;
+cfg.initial_penalty_coeff = 1;
 cfg.max_penalty_iter = 4;
 cfg.f_use_numerical = true;
 cfg.g_use_numerical = false;
@@ -163,7 +163,6 @@ function [x, trust_box_size, success] = minimize_merit_function(x, Q, q, ...
     
     dim_x = length(x);
 
-
     success = true;
     sqp_iter = 1;
 
@@ -251,8 +250,8 @@ function [x, trust_box_size, success] = minimize_merit_function(x, Q, q, ...
             %{
             args = arguments(x, penalty_coeff, trust_box_size); % This script will need to coincide exactly with some certain things. Look at it to be sure it's right
             %[output, exitflag, info] = run_QP_solver_CD(args); % w/ collision detection
-            %[output, exitflag, info] = run_QP_solver_noCD(args); % w/out collision detection
-            [output, exitflag, info] = run_QP_solver_noCD_exp(args); % w/out collision detection            
+            [output, exitflag, info] = run_QP_solver_noCD(args); % w/out collision detection
+            %[output, exitflag, info] = run_QP_solver_noCD_exp(args); % w/out collision detection            
             if (exitflag ~= 1)
                 info
                 disp('Problem in QP Solver'); % Fix this to return bad success

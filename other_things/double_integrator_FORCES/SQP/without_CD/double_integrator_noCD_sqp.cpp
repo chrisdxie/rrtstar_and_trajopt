@@ -620,7 +620,7 @@ int main() {
 	// Start and goal state
 	Vector4d x_start, x_goal;
 	x_start << 0,0,0,0;
-	x_goal << 0, 5, .5, .5;
+	x_goal << 5,5,0,0;
 
 	// Initialize X variable
 	Matrix<double, X_DIM, T> init;

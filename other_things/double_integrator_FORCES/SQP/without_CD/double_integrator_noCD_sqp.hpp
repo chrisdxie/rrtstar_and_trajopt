@@ -574,7 +574,8 @@ int solve_double_integrator_noCD_BVP(VectorX x_start, VectorX x_goal, StdVectorX
 	double_integrator_QP_solver_noCD_info info;
 	setup_state_vars(problem, output);
 
-	*delta = 1;
+	// Smart initialization
+	*delta = (x_start - x_goal).norm()/10.0;
 
 	// Initialize X variable
 	Matrix<double, X_DIM, T> init;
