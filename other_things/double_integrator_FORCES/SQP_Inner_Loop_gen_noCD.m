@@ -15,9 +15,9 @@ function SQP_Inner_Loop_gen_noCD()
 currDir = pwd;
 disp('currDir');
 disp(currDir);
-forcesDir = strcat(currDir,'/FORCES');
+forcesDir = strcat(currDir,'/FORCES_PRO');
 addpath(forcesDir);
-disp(strcat(currDir,'/FORCES'));
+disp(strcat(currDir,'/FORCES_PRO'));
 
 % Problem setup
 timesteps = 12;

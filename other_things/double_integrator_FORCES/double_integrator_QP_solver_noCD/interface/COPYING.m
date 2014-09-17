@@ -19,18 +19,3 @@
 % of conflict of laws. The Courts of Zurich-City shall have exclusive 
 % jurisdiction in case of any dispute.
 % 
-
-mex -c -O -DUSEMEXPRINTS ../src/double_integrator_QP_solver_noCD.c 
-mex -c -O -DMEXARGMUENTCHECKS double_integrator_QP_solver_noCD_mex.c
-if( ispc )
-    mex double_integrator_QP_solver_noCD.obj double_integrator_QP_solver_noCD_mex.obj -output "double_integrator_QP_solver_noCD" 
-    delete('*.obj');
-elseif( ismac )
-    mex double_integrator_QP_solver_noCD.o double_integrator_QP_solver_noCD_mex.o -output "double_integrator_QP_solver_noCD"
-    delete('*.o');
-else % we're on a linux system
-    mex double_integrator_QP_solver_noCD.o double_integrator_QP_solver_noCD_mex.o -output "double_integrator_QP_solver_noCD" -lrt
-    delete('*.o');
-end
-copyfile(['double_integrator_QP_solver_noCD.',mexext], ['../../double_integrator_QP_solver_noCD.',mexext], 'f');
-copyfile( 'double_integrator_QP_solver_noCD.m', '../../double_integrator_QP_solver_noCD.m','f');

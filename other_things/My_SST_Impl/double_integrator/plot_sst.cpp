@@ -15,6 +15,9 @@ using namespace Eigen;
 #include <SetupObject.h>
 #include <Node.h>
 #include <set>
+#include <ctime>
+#include <iomanip>
+#include <fstream>
 
 #include "../../double_integrator_dynamics_library/double_integrator_dynamics.hpp"
 using namespace double_integrator_dynamics;
@@ -101,8 +104,8 @@ void setup(int max_iters, std::string randomize, double delta_v, double delta_s)
 	//		Rectangular obstacle x range
 	// 		Rectangular obstacle y range
 
-	int d = 2;
-	VectorXd initial_state(2*d);
+	int d = 4;
+	VectorXd initial_state(d);
 	initial_state << 0, 0, 0, 0;
 	Vector4d goal_region;
 	goal_region << 9, 1, 9, 1;
@@ -254,21 +257,20 @@ MatrixXd tree_to_matrix_parents(Node* node) {
 	return parents.leftCols(i);
 }
 
-//int num_nodes(Node* tree) {
-//
-//	int total = 0;
-//	if (tree->children.size() == 0) {
-//		int i = 0;
-//		return 1;
-//	}
-//	for (std::vector<Node*>::iterator child = tree->children.begin();
-//			child != tree->children.end(); child++) {
-//		Node* kid = *child;
-//		total += num_nodes(kid);
-//	}
-//	return total+1;
-//
-//}
+// int num_nodes(Node* tree) {
+
+// 	int total = 0;
+// 	if (tree->children.size() == 0) {
+// 		return 1;
+// 	}
+// 	for (std::set<Node*>::iterator child = tree->children.begin();
+// 			child != tree->children.end(); child++) {
+// 		Node* kid = *child;
+// 		total += num_nodes(kid);
+// 	}
+// 	return total+1;
+
+// }
 
 /* Returns path from root */
 MatrixXd get_path(Node* x) {
@@ -280,8 +282,8 @@ MatrixXd get_path(Node* x) {
 		index++;
 	}
 
-	P = P.leftCols(index).rowwise().reverse();
-	return P;
+	MatrixXd R = P.leftCols(index).rowwise().reverse();
+	return R;
 
 }
 
@@ -408,6 +410,11 @@ Vector4d sample_state() {
 
 double SST() {
 
+	// Time it
+	std::clock_t start;
+	double duration;
+	start = std::clock();
+
 	// Initialize random seed using current time.
 	// Uncomment this line if you want feed the random number generator a seed based on time.
 	if (setup_values.randomize) {
@@ -471,7 +478,17 @@ double SST() {
 					} else {
 						std::cout << "Found UPDATED goal w/ cost: " << x_new->cost << "\n";
 					}
+					best_cost = std::min(best_cost, x_new->cost);
 
+				}
+
+				// Write time, # of nodes, cost to file
+				ofstream outfile("statistics_" + std::to_string(setup_values.max_iters) + "_iters.txt", ios::app);
+				if (outfile.is_open()) {
+					outfile << std::setprecision(10) << ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+					outfile << ", " << V_active.size() + V_inactive.size();
+					outfile << ", " << best_cost << std::endl;
+					outfile.close();
 				}
 
 				if (x_peer != NULL) {
@@ -579,27 +596,27 @@ int main(int argc, char* argv[]) {
     }
 
     // Setup function
-    //setup(max_iters, randomize, delta_v, delta_s);
+    setup(max_iters, randomize, delta_v, delta_s);
 
     // Run the SST
-    double bcost = 1e11;
-    int bi, bj;
-    const int num_vals = 13;
-    double delta_values[num_vals] = {5.0, 4.0, 3.0, 2.0, 1.8, 1.6, 1.4, 1.2, 1.0, .8, .6, .4, .2};
-    for(int i = 0; i < num_vals; ++i) {
-    	for(int j = 0; j < num_vals; ++j) {
-    		setup(max_iters, "false", delta_values[i], delta_values[j]);
-    		std::cout << "Running SST with values: delta_v = " << delta_values[i] << ", delta_s = " << delta_values[j] << "\n";
-    		double cand = SST();
-    		if (cand < bcost) {
-    			bcost = cand; bi = i; bj = j;
-    		}
-    	}
-    }
+    // double bcost = 1e11;
+    // int bi, bj;
+    // const int num_vals = 13;
+    // double delta_values[num_vals] = {5.0, 4.0, 3.0, 2.0, 1.8, 1.6, 1.4, 1.2, 1.0, .8, .6, .4, .2};
+    // for(int i = 0; i < num_vals; ++i) {
+    // 	for(int j = 0; j < num_vals; ++j) {
+    // 		setup(max_iters, "false", delta_values[i], delta_values[j]);
+    // 		std::cout << "Running SST with values: delta_v = " << delta_values[i] << ", delta_s = " << delta_values[j] << "\n";
+    // 		double cand = SST();
+    // 		if (cand < bcost) {
+    // 			bcost = cand; bi = i; bj = j;
+    // 		}
+    // 	}
+    // }
 
-    std::cout << "Best values: delta_v = " << delta_values[bi] << ", j = " << delta_values[bj] << ", with cost of " << bcost << "\n";
-//    std::cout << "Running SST...\n";
-//    SST();
+    // std::cout << "Best values: delta_v = " << delta_values[bi] << ", j = " << delta_values[bj] << ", with cost of " << bcost << "\n";
+   std::cout << "Running SST...\n";
+   SST();
 
     std::cout << "exiting\n";
 }

@@ -6,9 +6,9 @@ from math import pi, atan
 
 #import IPython
 
-def plot(states, parents, goal_path, obstacles, iters, cost):
+def plot(states, parents, goal_path, goal_region, obstacles, iters, cost):
 
-    #print goal_path
+    print goal_path
     
     plt.clf()
     plt.cla()
@@ -17,6 +17,24 @@ def plot(states, parents, goal_path, obstacles, iters, cost):
     ax = fig.axes[0]
     ax.set_axis_bgcolor('white')
     ax.set_aspect('equal')
+
+    # Plot goal_region
+    if len(goal_region.shape) == 1: # If it is a 1D array, make it a 2D column array
+        goal_region = np.transpose([goal_region])
+
+    x_center = goal_region[0,0]
+    x_size = goal_region[1,0] 
+    y_center = goal_region[2,0]
+    y_size = goal_region[3,0]
+
+    # [x_min, x_min, x_max, x_max]
+    x_min = x_center - .5*x_size; x_max = x_center + .5*x_size;
+    x = [x_min, x_min, x_max, x_max]
+    # [y_min, y_max, y_max, y_min]
+    y_min = y_center - .5*y_size; y_max = y_center + .5*y_size;
+    y = [y_min, y_max, y_max, y_min]
+
+    ax.fill(x, y, 'c')
 
     # Plot obstacles
     if len(obstacles.shape) == 1: # If it is a 1D array, make it a 2D column array
@@ -81,6 +99,7 @@ def plot(states, parents, goal_path, obstacles, iters, cost):
         user_says = raw_input()
         if user_says.strip() == 'save':
             save('pics/{0}_iters'.format(iters), 'pdf')
+            np.savetxt('pics/states_{0}_iters'.format(iters), goal_path)
 
        
 def save(path, ext='png', close=True, verbose=True):

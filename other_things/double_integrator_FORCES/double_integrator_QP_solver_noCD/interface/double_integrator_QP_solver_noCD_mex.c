@@ -1,34 +1,40 @@
 /*
-FORCES - Fast interior point code generation for multistage problems.
-Copyright (C) 2011-14 Alexander Domahidi [domahidi@control.ee.ethz.ch],
-Automatic Control Laboratory, ETH Zurich.
+double_integrator_QP_solver_noCD : A fast customized optimization solver.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+Copyright (C) 2014 EMBOTECH GMBH [info@embotech.com]
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+This software is intended for simulation and testing purposes only. 
+Use of this software for any commercial purpose is prohibited.
+
+This program is distributed in the hope that it will be useful.
+EMBOTECH makes NO WARRANTIES with respect to the use of the software 
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+PARTICULAR PURPOSE. 
+
+EMBOTECH shall not have any liability for any damage arising from the use
+of the software.
+
+This Agreement shall exclusively be governed by and interpreted in 
+accordance with the laws of Switzerland, excluding its principles
+of conflict of laws. The Courts of Zurich-City shall have exclusive 
+jurisdiction in case of any dispute.
+
 */
 
 #include "mex.h"
+#include "math.h"
 #include "../include/double_integrator_QP_solver_noCD.h"
 
 /* copy functions */
-void copyCArrayToM(double_integrator_QP_solver_noCD_FLOAT *src, double *dest, int dim) {
+void copyCArrayToM(double *src, double *dest, int dim) {
     while (dim--) {
         *dest++ = (double)*src++;
     }
 }
-void copyMArrayToC(double *src, double_integrator_QP_solver_noCD_FLOAT *dest, int dim) {
+void copyMArrayToC(double *src, double *dest, int dim) {
     while (dim--) {
-        *dest++ = (double_integrator_QP_solver_noCD_FLOAT)*src++;
+        *dest++ = (double) (*src++) ;
     }
 }
 
@@ -45,21 +51,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
 	int exitflag;
 	const char *fname;
 	const char *outputnames[12] = {"z1","z2","z3","z4","z5","z6","z7","z8","z9","z10","z11","z12"};
-	const char *infofields[15] = { "it",
-		                       "res_eq",
-			                   "res_ineq",
-		                       "pobj",
-		                       "dobj",
-		                       "dgap",
-							   "rdgap",
-							   "mu",
-							   "mu_aff",
-							   "sigma",
-		                       "lsit_aff",
-		                       "lsit_cc",
-		                       "step_aff",
-							   "step_cc",
-							   "solvetime"};
+	const char *infofields[15] = { "it", "res_eq", "res_ineq",  "pobj",  "dobj",  "dgap", "rdgap",  "mu",  "mu_aff",  "sigma",  "lsit_aff",  "lsit_cc",  "step_aff",   "step_cc",  "solvetime"};
 	double_integrator_QP_solver_noCD_params params;
 	double_integrator_QP_solver_noCD_output output;
 	double_integrator_QP_solver_noCD_info info;
@@ -1041,7 +1033,8 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
 	/* copy info struct */
 	if( nlhs > 2 )
 	{
-		plhs[2] = mxCreateStructMatrix(1, 1, 15, infofields);
+		        plhs[2] = mxCreateStructMatrix(1, 1, 15, infofields);
+         
 		
 		/* iterations */
 		outvar = mxCreateDoubleMatrix(1, 1, mxREAL);
