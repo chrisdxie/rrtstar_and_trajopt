@@ -5,13 +5,13 @@
  *      Author: ChrisXie
  */
 
-#ifndef DOUBLE_INTEGRATOR_DYNAMICS_H_
-#define DOUBLE_INTEGRATOR_DYNAMICS_H_
+#ifndef DYNAMICS_LIBRARY_H_
+#define DYNAMICS_LIBRARY_H_
 
 #include <eigen3/Eigen/Eigen>
 using namespace Eigen;
 
-namespace double_integrator_dynamics {
+namespace dynamics_library {
 
 	/*
 	 *  This function performs RK4 integration to approximate the solution of
@@ -110,4 +110,4 @@ namespace double_integrator_dynamics {
 
 
 
-#endif /* DOUBLE_INTEGRATOR_DYNAMICS_H_ */
+#endif /* DYNAMICS_LIBRARY_H_ */

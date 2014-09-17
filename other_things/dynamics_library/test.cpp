@@ -10,8 +10,8 @@
 
 #include <iostream>
 
-#include "double_integrator_dynamics.hpp"
-using namespace double_integrator_dynamics;
+#include "dynamics_library.hpp"
+using namespace dynamics_library;
 
 #include <eigen3/Eigen/Eigen>
 #include <eigen3/Eigen/SVD>
@@ -29,7 +29,7 @@ int main() {
 	double d_safe = 0.05;
 
 	// Must qualify this with the correct namespace, apparently Eigen has this method too, which was a contribution from some user
-	MatrixXd jac = -1*double_integrator_dynamics::numerical_jacobian(continuous_double_integrator_dynamics, x, u, d);
+	MatrixXd jac = -1*dynamics_library::numerical_jacobian(continuous_double_integrator_dynamics, x, u, d);
 	VectorXd ans = dynamics_difference(continuous_double_integrator_dynamics, x, x_next, u, d);
 
 	std::cout << "Ans:\n" << ans << "\n";

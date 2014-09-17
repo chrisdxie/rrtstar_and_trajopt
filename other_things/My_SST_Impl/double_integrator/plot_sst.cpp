@@ -19,8 +19,8 @@ using namespace Eigen;
 #include <iomanip>
 #include <fstream>
 
-#include "../../double_integrator_dynamics_library/double_integrator_dynamics.hpp"
-using namespace double_integrator_dynamics;
+#include "../../dynamics_library/dynamics_library.hpp"
+using namespace dynamics_library;
 
 // Put setup in global storage
 SetupObject setup_values;

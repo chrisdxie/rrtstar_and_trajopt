@@ -5,16 +5,16 @@
  *      Author: ChrisXie
  */
 
-#ifndef DOUBLE_INTEGRATOR_DYNAMICS_HPP_
-#define DOUBLE_INTEGRATOR_DYNAMICS_HPP_
+#ifndef DYNAMICS_LIBRARY_HPP_
+#define DYNAMICS_LIBRARY_HPP_
 
 #include <eigen3/Eigen/Eigen>
 using namespace Eigen;
 
-#include "double_integrator_dynamics.h"
+#include "dynamics_library.h"
 #include "../2d_signed_distance_library_cpp/signedDistancePolygons.hpp"
 
-VectorXd double_integrator_dynamics::rk4(VectorXd (*f)(VectorXd, VectorXd),
+VectorXd dynamics_library::rk4(VectorXd (*f)(VectorXd, VectorXd),
 		VectorXd x, VectorXd u, double delta) {
 
 	VectorXd k1 = delta * f(x, u);
@@ -27,7 +27,7 @@ VectorXd double_integrator_dynamics::rk4(VectorXd (*f)(VectorXd, VectorXd),
 
 }
 
-VectorXd double_integrator_dynamics::continuous_double_integrator_dynamics(
+VectorXd dynamics_library::continuous_double_integrator_dynamics(
 		VectorXd x, VectorXd u) {
 
 	int nX = x.size();
@@ -45,7 +45,7 @@ VectorXd double_integrator_dynamics::continuous_double_integrator_dynamics(
 
 }
 
-MatrixXd double_integrator_dynamics::numerical_jacobian(VectorXd (*f)(VectorXd, VectorXd), VectorXd x,
+MatrixXd dynamics_library::numerical_jacobian(VectorXd (*f)(VectorXd, VectorXd), VectorXd x,
 								VectorXd u, double delta) {
 
 	double eps = 1e-5;
@@ -83,7 +83,7 @@ MatrixXd double_integrator_dynamics::numerical_jacobian(VectorXd (*f)(VectorXd, 
 
 }
 
-VectorXd double_integrator_dynamics::dynamics_difference(VectorXd (*f)(VectorXd, VectorXd), VectorXd x,
+VectorXd dynamics_library::dynamics_difference(VectorXd (*f)(VectorXd, VectorXd), VectorXd x,
 								 VectorXd x_next, VectorXd u, double delta) {
 
 	int nX = x.size();
@@ -94,7 +94,7 @@ VectorXd double_integrator_dynamics::dynamics_difference(VectorXd (*f)(VectorXd,
 
 }
 
-MatrixXd double_integrator_dynamics::collision_and_jacobian(VectorXd x, double d_safe, MatrixXd obstacles) {
+MatrixXd dynamics_library::collision_and_jacobian(VectorXd x, double d_safe, MatrixXd obstacles) {
 
 	int nO = obstacles.cols();
 	int nX = x.size();
@@ -142,7 +142,7 @@ MatrixXd double_integrator_dynamics::collision_and_jacobian(VectorXd x, double d
 
 }
 
-MatrixXd double_integrator_dynamics::swept_out_volume_collision_and_jacobian(VectorXd x,
+MatrixXd dynamics_library::swept_out_volume_collision_and_jacobian(VectorXd x,
 		VectorXd x_next, double d_safe, MatrixXd obstacles) {
 
 	int nO = obstacles.cols();
@@ -195,7 +195,7 @@ MatrixXd double_integrator_dynamics::swept_out_volume_collision_and_jacobian(Vec
 
 /* UTILS */
 
-int double_integrator_dynamics::sign(double n) {
+int dynamics_library::sign(double n) {
 	if (n < 0) {
 		return -1;
 	} else if (n == 0) {
@@ -205,7 +205,7 @@ int double_integrator_dynamics::sign(double n) {
 	}
 }
 
-MatrixXd double_integrator_dynamics::calcJacobians(VectorXd point, VectorXd x, VectorXd x_next) {
+MatrixXd dynamics_library::calcJacobians(VectorXd point, VectorXd x, VectorXd x_next) {
 
 	// Preprocess: Get dimension of position, and position vectors only.
 	int d = x.size()/2;
@@ -224,4 +224,4 @@ MatrixXd double_integrator_dynamics::calcJacobians(VectorXd point, VectorXd x, V
 
 }
 
-#endif /* DOUBLE_INTEGRATOR_DYNAMICS_HPP_ */
+#endif /* DYNAMICS_LIBRARY_HPP_ */
