@@ -8,6 +8,7 @@
 #ifndef DYNAMICS_LIBRARY_HPP_
 #define DYNAMICS_LIBRARY_HPP_
 
+#include <math.h>
 #include <eigen3/Eigen/Eigen>
 using namespace Eigen;
 
@@ -42,6 +43,38 @@ VectorXd dynamics_library::continuous_double_integrator_dynamics(
 
 	VectorXd x_dot = A*x + B*u;
 	return x_dot;
+
+}
+
+void dynamics_library::set_cartpole_parameters(double mc, double mp, double l) {
+	cp_params.g = 9.81;
+	cp_params.mc = mc;
+	cp_params.mp = mp;
+	cp_params.l = l;
+}
+
+VectorXd dynamics_library::continuous_cartpole_dynamics(VectorXd z, VectorXd u) {
+
+	double control = u(0); // u should be a vector of length 1
+
+	Vector4d zdot; zdot.setZero();
+
+	// Set x_dot and theta_dot first
+	zdot(0) = z(1);
+	zdot(2) = z(3);
+
+	double mp = cp_params.mp;
+	double mc = cp_params.mc;
+	double l =  cp_params.l;
+	double g =  cp_params.g;
+
+	zdot(1) = (2*mp*l*pow(z(3),2)*sin(z(2)) + 3*mp*g*sin(z(2))*cos(z(2)) + 4*control)
+					/ (4*(mc + mp) - 3*mp*pow(cos(z(2)), 2));
+
+	zdot(3) = (-3*mp*l*pow(z(3),2)*sin(z(2))*cos(z(2)) - 6*(mc + mp)*g*sin(z(2)) - 6*control*cos(z(2)))
+					/ (4*l*(mc + mp) - 3*mp*l*pow(cos(z(2)),2));
+
+	return zdot;
 
 }
 

@@ -11,6 +11,13 @@
 #include <eigen3/Eigen/Eigen>
 using namespace Eigen;
 
+struct cartpole_parameters {
+	double g;  // Alway 9.81
+	double mc; // Cart mass
+	double mp; // Pole mass
+	double l;  // Pole length
+};
+
 namespace dynamics_library {
 
 	/*
@@ -31,6 +38,25 @@ namespace dynamics_library {
 	 *  The return value is x_dot.
 	 */
 	VectorXd continuous_double_integrator_dynamics(VectorXd x, VectorXd u);
+
+	/*
+	 *  These fields are for the cartpole dynamics.
+	 */
+ 	cartpole_parameters cp_params;
+
+ 	/*
+ 	 *  Set fields of cartpole parameters
+ 	 */
+ 	void set_cartpole_parameters(double mc, double mp, double l);
+
+	/*
+	 *  This function is a function to calculate the derivative of given a state
+	 *  and input. The input is the current state z = [x, x_dot, theta, theta_dot]
+	 *  and the parameters cart_mass, pole_mass, pole_length.
+	 *
+	 *  The return value is z_dot.
+	 */
+	VectorXd continuous_cartpole_dynamics(VectorXd z, VectorXd u);
 
 	/*
 	 *  This function returns the jacobian of the function f w.r.t. the state,

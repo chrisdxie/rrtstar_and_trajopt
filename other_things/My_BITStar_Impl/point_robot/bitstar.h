@@ -15,6 +15,7 @@ public:
 //	double g_hat;
 //	double f_hat;
 	bool inV;
+	bool old;
 	Node* parent; // Parent node
 	std::set<Node* > children; // A vector of pointers to children nodes
 };
@@ -45,6 +46,8 @@ public:
 
 	double x_min;
 	double x_max;
+
+	int batch_size;
 };
 
 #endif /* BITSTAR_H_ */

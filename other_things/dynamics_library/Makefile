@@ -46,7 +46,7 @@ CFLAGS = -Wall -c
 default: 
 	$(MAKE) test	
 
-test: test.cpp double_integrator_dynamics.h double_integrator_dynamics.hpp
+test: test.cpp dynamics_library.h dynamics_library.hpp
 	$(LDXX) -o test $(LDFLAGS) test.cpp
 
 #-----------------------------------------------------------------------------
