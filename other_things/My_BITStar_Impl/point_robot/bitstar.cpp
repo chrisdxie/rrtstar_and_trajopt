@@ -315,22 +315,6 @@ MatrixXd tree_to_matrix_parents(Node* node) {
 	return parents.leftCols(i);
 }
 
-//int num_nodes(Node* tree) {
-//
-//	int total = 0;
-//	if (tree->children.size() == 0) {
-//		int i = 0;
-//		return 1;
-//	}
-//	for (std::vector<Node*>::iterator child = tree->children.begin();
-//			child != tree->children.end(); child++) {
-//		Node* kid = *child;
-//		total += num_nodes(kid);
-//	}
-//	return total+1;
-//
-//}
-
 /* Returns path from root */
 // HARD CODE FOR 2D
 MatrixXd get_path(Node* x) {
@@ -360,18 +344,6 @@ inline double dist(VectorXd& p1, VectorXd& p2) {
 
 inline int factorial(int n) {
 	return n == 0 ? 1 : n * factorial(n-1);
-}
-
-// Used in calculating high dimensional ellipsoid volume
-inline double unitBallVolume() {
-	// Returns the volume of the unit ball in n dimensions
-	//int n = setup_values.dimension;
-	//	if (n % 2 == 0) { // Even
-	//		return pow(M_PI, n/2) / factorial(n/2 + 1);
-	//	} else { // Odd
-	//		return pow(M_PI, n/2.0) / ( (factorial(2*n)*sqrt(M_PI)) / (pow(4,n) * factorial(n)) );
-	//	}
-	return M_PI;
 }
 
 // Sample from unit ball: http://math.stackexchange.com/questions/87230/picking-random-points-in-the-volume-of-sphere-with-uniform-probability/87238#87238
@@ -430,7 +402,6 @@ inline double c_hat(Node* x, Node* y) { // This is specific to point robot examp
 }
 /* DONE WITH HEURISTICS */
 
-
 Edge* bestPotentialEdge() {
 	std::set<Edge*>::iterator it;
 	Edge* best_edge = NULL;
@@ -475,7 +446,7 @@ void sample_uniform_batch() {
 
 		// Sample the new state
 		VectorXd x_sample(setup_values.dimension);
-		for (int i = 0; i < setup_values.dimension; i++) {
+		for (int i = 0; i < setup_values.dimension; i++) { // This for loop is specific to the square environment
 			x_sample(i) = uniform(setup_values.x_min, setup_values.x_max);
 		}
 
@@ -564,6 +535,9 @@ void pruneSampleSet() {
 			if (inSet(n,G)) {
 				G.erase(n);
 			}
+			if (inSet(n, Q_V) || inSet(n, V)) {
+				int i = 5;
+			}
 			delete n;
 			X_sample.erase(n_it++);
 		} else {
@@ -572,25 +546,51 @@ void pruneSampleSet() {
 	}
 }
 
-void pruneVertexSet() {
-	// Prune leaf vertices that are useless. Pruning other
+// Throw this node and all of its chidren into X_sample
+void pruneVertex(Node* v) {
+
+	// Prune it's children first. Iterate over a copy of the children set
+	std::set<Node*> children(v->children.begin(), v->children.end());
 	std::set<Node*>::iterator n_it;
-	for(n_it = V.begin(); n_it != V.end(); ) {
+	for(n_it = children.begin(); n_it != children.end(); n_it++) {
+		Node* child = *n_it;
+		pruneVertex(child);
+	}
+
+	// Disconnect it's edge
+	Node* p = v->parent;
+	p->children.erase(v);
+	v->parent = NULL;
+
+	// Mark as new, throw into X_sample, erase from other sets.
+	v->old = false;
+	v->inV = false;
+	X_sample.insert(v);
+	V.erase(v);
+	if (inSet(v, G)) {
+		G.erase(v);
+	}
+	if (inSet(v, Q_V)) {
+		Q_V.erase(v);
+	}
+
+}
+
+void pruneVertexSet() {
+	// Prune vertices that are useless, along with their subtrees. Throw them all into X_sample
+	std::set<Node*>::iterator n_it;
+	n_it = V.begin();
+	while (n_it != V.end()) {
 		Node* n = *n_it;
-		if (f_hat(n) > g_T(best_goal_node) && isLeaf(n)) {
+		if (f_hat(n) > g_T(best_goal_node)) {
 			num_vertices_pruned++;
-			Node* p = n->parent;
-			p->children.erase(n);
-			V.erase(n_it++);
-			if (inSet(n, G)) {
-				G.erase(n);
-			}
-			if (inSet(n, Q_V)) {
-				Q_V.erase(n);
-			}
-			delete n;
+			pruneVertex(n);
+
+			// Reset iterator since it will be invalidated
+			n_it = V.begin();
+
 		} else {
-			++n_it;
+			n_it++;
 		}
 	}
 }
@@ -603,6 +603,8 @@ void pruneEdgeQueue(Node* w) {
 			if (g_T(e->v) + e->heuristic_cost >= g_T(w)) {
 				delete e; // Delete memory
 				Q_edge.erase(e_it++);
+			} else {
+				++e_it;
 			}
 		} else {
 			++e_it;
@@ -723,6 +725,11 @@ double costOfBestGoalNode() {
 
 double BITStar() {
 
+	// Time it
+	std::clock_t start;
+	double duration;
+	start = std::clock();
+
 	// f_max from paper
 	f_max = INFTY;
 
@@ -741,9 +748,9 @@ double BITStar() {
 		if (Q_edge.size() == 0) {
 
 			std::cout << "New batch! Batch number: " << num_sample_batches+1 << "\n";
-			
+
+			pruneVertexSet();			
 			pruneSampleSet();
-			pruneVertexSet();
 			clearVertexQueue();
 
 			sample_batch();
@@ -758,8 +765,6 @@ double BITStar() {
 			n = V.size() + X_sample.size();
 			r = setup_values.gamma * pow(log(n)/n, 1.0/setup_values.dimension); // Copied from RRT* code given by Sertac Karaman
 
-			updateQueue();
-
 		}
 
 		// Update Q_edge for vertices in the expansion queue Q_V
@@ -770,16 +775,15 @@ double BITStar() {
 		Q_edge.erase(e);
 		Node* v = e->v; Node* x = e->x;
 
-		// Collision checking happens implicitly here, in c_hat function
 		if (g_T(v) + e->heuristic_cost + h_hat(x) < g_T(best_goal_node)) {
 
 			double cvx = c(v,x); // Calculate true cost of edge
 			
 			if (g_hat(v) + cvx + h_hat(x) < g_T(best_goal_node)) {
 
-				delete e; // After grabbing pointers to v, x and using heuristic cost, we have no need for the Edge e
-
 				if (g_T(v) + cvx < g_T(x)) {
+
+					delete e; // After grabbing pointers to v, x and using heuristic cost, we have no need for the Edge e
 
 					if (x->inV) {
 						Node* p = x->parent;
@@ -814,17 +818,23 @@ double BITStar() {
 
 					pruneEdgeQueue(x);
 
+				} else {
+					delete e; // Don't leak memory
 				}
 
 			} else {
 				delete e; // Don't leak memory
 			}
 		} else {
-			delete e;
+			delete e; // Don't leak memory
 			clearEdgeQueue();
 		}
 		k++;
 	}
+
+	// More timing stuff
+	duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+	std::cout << "Duration of algorithm for " << setup_values.max_iters << " iterations: " << duration << "\n";
 
 	if (g_T(best_goal_node) < INFTY) {
 
@@ -864,7 +874,7 @@ double BITStar() {
 
 int main(int argc, char* argv[]) {
 
-	// Assumes a command line argument of MAX_ITERS RANDOMIZE {true, false}
+	// Assumes a command line	// Assumes an optional command line argument of MAX_ITERS RANDOMIZE {true, false} BATCH_SIZE argument of MAX_ITERS RANDOMIZE {true, false}
 	int max_iters = 5000;
 	std::string randomize = "false";
 	int batch_size = 100;
@@ -891,4 +901,3 @@ int main(int argc, char* argv[]) {
 	std::cout << "Optimal path cost: " << 12.9347 << "\n";
 	std::cout << "exiting\n";
 }
-

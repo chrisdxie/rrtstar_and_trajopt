@@ -7,7 +7,7 @@ using namespace Eigen;
 
 #define INFTY 1e10
 
-#include "../../double_integrator_FORCES/SQP/without_CD/double_integrator_noCD_sqp.hpp"
+#include "../../optcontrol/double_integratorV2/double_integrator_sqp.hpp"
 
 class Node {
 public:
@@ -17,6 +17,7 @@ public:
 //	double g_hat;
 //	double f_hat;
 	bool inV;
+	bool old;
 	Node* parent; // Parent node
 
 	// This represents the edge from the parent state to this state. Only one. Yes, I know it's hacky.
@@ -63,6 +64,8 @@ public:
 	double v_max;
 	double u_min;
 	double u_max;
+
+	int batch_size;
 };
 
 #endif /* BITSTAR_H_ */
