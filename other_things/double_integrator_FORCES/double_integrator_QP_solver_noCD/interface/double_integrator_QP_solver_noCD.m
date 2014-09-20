@@ -100,4 +100,4 @@
 %       INFO.step_cc   - step size (centering direction)
 %       INFO.solvetime - Time needed for solve (wall clock time)
 %
-% See also LICENSE
+% See also COPYING

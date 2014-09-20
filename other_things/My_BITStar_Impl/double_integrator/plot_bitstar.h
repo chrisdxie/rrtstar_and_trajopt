@@ -60,11 +60,11 @@ py::object init_display() {
 	return plotter;
 }
 
-void plot(py::object& plotter, np::ndarray& states, np::ndarray& parents, np::ndarray& goal_path, np::ndarray& obstacles, int iters, double cost) {
+void plot(py::object& plotter, np::ndarray& states, np::ndarray& parents, np::ndarray& goal_path, np::ndarray& goal_region, np::ndarray& obstacles, int iters, double cost) {
 
 	try {
 		// pass control to python now
-		plotter(states, parents, goal_path, obstacles, iters, cost);
+		plotter(states, parents, goal_path, goal_region, obstacles, iters, cost);
 	}
 	catch(py::error_already_set const &) {
 		// will pass python errors to cpp for printing

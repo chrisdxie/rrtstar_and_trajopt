@@ -25,5 +25,5 @@ include_directories(${Boost_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR} ${PYTHON_I
 link_directories(${Boost_LIBRARY_DIRS} ${PYTHON_LIBRARIES})
 
 # create executable and link to necessary subset of libraries
-add_executable(bitstar bitstar.cpp double_integrator_QP_solver_noCD.c.o)
+add_executable(bitstar bitstar.cpp double_integrator_QP_solver.c.o)
 target_link_libraries(bitstar ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${MY_LIBRARIES}) 

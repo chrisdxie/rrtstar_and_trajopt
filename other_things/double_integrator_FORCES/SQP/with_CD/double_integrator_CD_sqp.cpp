@@ -14,8 +14,8 @@ double_integrator_QP_solver_CD_FLOAT **f, **lb, **ub, **A, **b, **z;
 #include <iomanip>
 
 // Include double integrator dynamics
-#include "../../../double_integrator_dynamics_library/double_integrator_dynamics.hpp"
-using namespace double_integrator_dynamics;
+#include "../../../dynamics_library/dynamics_library.hpp"
+using namespace dynamics_library;
 
 #define INFTY 1e10
 
@@ -383,7 +383,7 @@ void fill_in_A_and_b(StdVectorX& X, StdVectorU& U, double* delta, double trust_b
 		curr_row += O_DIM;
 
 		// Swept out Volume Jacobians
-		Matrix<double, O_DIM, 2*X_DIM+1> swval_and_swjacs = double_integrator_dynamics::swept_out_volume_collision_and_jacobian(x, x_next, bounds.d_safe, bounds.obstacles);
+		Matrix<double, O_DIM, 2*X_DIM+1> swval_and_swjacs = dynamics_library::swept_out_volume_collision_and_jacobian(x, x_next, bounds.d_safe, bounds.obstacles);
 		Matrix<double, O_DIM, 1> swval = swval_and_swjacs.leftCols(1);
 		Matrix<double, O_DIM, X_DIM> jacx = swval_and_swjacs.middleCols(1, X_DIM);
 		Matrix<double, O_DIM, X_DIM> jacxnext = swval_and_swjacs.rightCols(X_DIM);
@@ -392,7 +392,7 @@ void fill_in_A_and_b(StdVectorX& X, StdVectorU& U, double* delta, double trust_b
 		curr_row += O_DIM;
 
 		// Grab dynamics jacobian and value
-		Matrix<double, X_DIM, X_DIM+U_DIM+1> jac = -1 * double_integrator_dynamics::numerical_jacobian(continuous_double_integrator_dynamics, x, u, d);
+		Matrix<double, X_DIM, X_DIM+U_DIM+1> jac = -1 * dynamics_library::numerical_jacobian(continuous_double_integrator_dynamics, x, u, d);
 		Matrix<double, X_DIM, X_DIM> DH_X = jac.leftCols(X_DIM);
 		Matrix<double, X_DIM, U_DIM> DH_U = jac.middleCols(X_DIM, U_DIM);
 		Matrix<double, X_DIM, 1> DH_delta = jac.rightCols(1);

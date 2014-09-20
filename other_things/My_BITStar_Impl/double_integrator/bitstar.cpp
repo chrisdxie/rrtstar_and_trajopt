@@ -5,12 +5,15 @@
 #include <eigen3/Eigen/Eigen>
 using namespace Eigen;
 
+#include <fstream>
+#include <iomanip>
 #include <math.h>
 #include <set>
 #include <stack>
 #include <map>
 #include <queue>
 #include <ctime>
+#include <unordered_set>
 
 #include "bitstar.h"
 #include "plot_bitstar.h"
@@ -20,20 +23,21 @@ using namespace Eigen;
 
 #include "../../2d_signed_distance_library_cpp/signedDistancePolygons.hpp"
 
-#include "../../double_integrator_FORCES/SQP/without_CD/double_integrator_noCD_sqp.hpp"
+#include "../../optcontrol/double_integratorV2/double_integrator_sqp.hpp"
 
 // Global variables
 SetupObject setup_values;
-std::vector<Node*> V;
+std::set<Node*> V;
+std::set<Node*> Q_V;
+std::set<Node*> G; // Set of goal nodes in V. It is a strict subset of V
 std::set<Node*> X_sample;
 std::set<Edge*> Q_edge;
-std::set<Edge*> Q_rewire;
 
 double r; // Radius from RRT*, updated every iteration
 int n; // Number of vertices in V, updated every iteration
-double f_max, f_prev;
+double f_max;
 Node* root_node;
-Node* goal_node;
+Node* best_goal_node;
 
 // For sampling in ball
 typedef boost::mt19937 RANDOM_ENGINE;
@@ -48,11 +52,16 @@ U_DIST *u_dist;
 G_GENERATOR *g_sampler;
 U_GENERATOR *u_sampler;
 
-MatrixXd C;
+MatrixXd C_ellipse;
+
+// Cache useless SQP calls
+std::set< std::vector<double> > failedSQPCalls;
 
 int num_true_cost_calls = 0;
 int num_collision_check_calls = 0;
 int num_samples_pruned = 0;
+int num_vertices_pruned = 0;
+int num_sample_batches = 0;
 
 double max_speed = sqrt(2); // Hard coded for this example
 
@@ -60,7 +69,53 @@ inline double uniform(double low, double high) {
 	return (high - low)*(rand() / double(RAND_MAX)) + low;
 }
 
-void setup(int max_iters, std::string& randomize) {
+// Cost of node from root of tree
+inline double g_T(Node* x) {
+	if (x->inV) {
+
+		if (x->state == setup_values.initial_state) {
+			return x->cost; // Should be 0 for root node!
+		} else {
+			return x->cost + g_T(x->parent);
+		}
+
+	} else {
+		return INFTY;
+	}
+}
+
+// This needs to update every time we find a new goal
+void update_C_ellipse_Matrix() {
+	int d = setup_values.dimension;
+	VectorXd goal_state = best_goal_node->state;
+
+	// SVD stuff for ball
+	VectorXd a1 = goal_state - setup_values.initial_state;
+	MatrixXd M(d, d);
+	M.setZero(d,d);
+	M.col(0) = a1;
+
+	// Perform SVD on M
+	MatrixXd U = M.jacobiSvd(ComputeFullU | ComputeFullV).matrixU();
+	MatrixXd V = M.jacobiSvd(ComputeFullU | ComputeFullV).matrixV();
+
+	// Create W matrix
+	MatrixXd W(d, d);
+	W.setZero(d,d);
+	for(int i = 0; i < d; ++i) {
+		if (i == d - 1) {
+			W(i, i) = U.determinant() * V.determinant();
+		} else {
+			W(i, i) = 1;
+		}
+	}
+
+	// Multiply to update C matrix
+	C_ellipse = U * W * V.transpose();
+
+}
+
+void setup(int max_iters, std::string& randomize, int batch_size) {
 
 	// This function populates a matrix of values for setting up the problem.
 	// Setup variables:
@@ -72,10 +127,11 @@ void setup(int max_iters, std::string& randomize) {
 	//		Rectangular obstacle x range
 	// 		Rectangular obstacle y range
 
-	VectorXd initial_state(2);
-	initial_state << 0, 0;
-	VectorXd goal_state(2);
-	goal_state << 9, 9;
+	int d = 4;
+	VectorXd initial_state(d);
+	initial_state << 0, 0, 0, 0;
+	VectorXd goal_region(2*d);
+	goal_region << 9, 1, 9, 1, 0, 2, 0, 2; //x_center, x_size, y_center, y_size, v1_center, v1_size, v2_center, v2_size
 
 	int num_obstacles = 3;
 	MatrixXd obstacles(4, num_obstacles);
@@ -87,13 +143,39 @@ void setup(int max_iters, std::string& randomize) {
 	setup_values.max_iters = max_iters;
 
 	// Dimension of problem
-	setup_values.dimension = 4;
+	setup_values.dimension = d;
 
 	// Initial State
 	setup_values.initial_state = initial_state;
 
 	// Goal Region
-	setup_values.goal_state = goal_state;
+	setup_values.goal_region = goal_region;
+
+	VectorXd temp_goal_state(d);
+	// Top right corner is furthest point from start state. This is hard coded for this example. Note the 0 velocities
+	temp_goal_state << goal_region(0) + .5*goal_region(1),
+					   goal_region(2) + .5*goal_region(3),
+					   0, 0;
+
+	// Setup intial state and add it to V; note that T and E are implicity represented
+	// by root node. Can perform DFS to find T, E are children pointers of every node in T
+	root_node = new Node();
+	root_node->state = setup_values.initial_state;
+	root_node->cost = 0;
+	root_node->parent = root_node; // Convention for function tree_to_matrix_parents()
+	root_node->inV = true;
+	root_node->old = false;
+	V.insert(root_node);
+
+	best_goal_node = new Node;
+	best_goal_node->state = temp_goal_state;
+	best_goal_node->inV = false;
+	best_goal_node->old = false;
+	G.insert(best_goal_node);
+	X_sample.insert(best_goal_node);
+
+	// Update for the first time
+	update_C_ellipse_Matrix();
 
 	// Gamma
 	setup_values.gamma = 6; // Looked up thing in paper
@@ -104,6 +186,9 @@ void setup(int max_iters, std::string& randomize) {
 	} else {
 		setup_values.randomize = false;
 	}
+
+	// Batch size
+	setup_values.batch_size = batch_size;
 
 	// Obstacles
 	setup_values.obstacles = obstacles;
@@ -139,32 +224,6 @@ void setup(int max_iters, std::string& randomize) {
 	u_dist = new U_DIST(0, 1);
 	u_sampler = new U_GENERATOR(*r_eng, *u_dist);
 
-	// SVD stuff for ball
-	int d = 4;
-	VectorXd a1(d);
-	a1 << goal_state - initial_state, 0, 0;
-	MatrixXd M(d, d);
-	M.setZero(d,d);
-	M.col(0) = a1;
-
-	// Perform SVD on M
-	MatrixXd U = M.jacobiSvd(ComputeFullU | ComputeFullV).matrixU();
-	MatrixXd V = M.jacobiSvd(ComputeFullU | ComputeFullV).matrixV();
-
-	// Create W matrix
-	MatrixXd W(d, d);
-	W.setZero(d,d);
-	for(int i = 0; i < d; ++i) {
-		if (i == d - 1) {
-			W(i, i) = U.determinant() * V.determinant();
-		} else {
-			W(i, i) = 1;
-		}
-	}
-
-	// Multiply to update C matrix
-	C = U * W * V.transpose();
-
 }
 
 // Returns true if point is inside rectangular polygon
@@ -183,6 +242,29 @@ inline bool inBounds(VectorXd& state) {
 		return true;
 	}
 	return false;
+}
+
+bool inGoal(Node* x) {
+	VectorXd pos(2), vel(2);
+	pos << x->state(0), x->state(1);
+	vel << x->state(2), x->state(3);
+
+	double pos_x_min = setup_values.goal_region(0) - .5*setup_values.goal_region(1);
+	double pos_x_max = setup_values.goal_region(0) + .5*setup_values.goal_region(1);
+	double pos_y_min = setup_values.goal_region(2) - .5*setup_values.goal_region(3);
+	double pos_y_max = setup_values.goal_region(2) + .5*setup_values.goal_region(3);
+
+	double vel_x_min = setup_values.goal_region(4) - .5*setup_values.goal_region(5);
+	double vel_x_max = setup_values.goal_region(4) + .5*setup_values.goal_region(5);
+	double vel_y_min = setup_values.goal_region(6) - .5*setup_values.goal_region(7);
+	double vel_y_max = setup_values.goal_region(6) + .5*setup_values.goal_region(7);
+
+	return inside_rectangular_obs(pos, pos_x_min, pos_x_max, pos_y_min, pos_y_max) &&
+		   inside_rectangular_obs(vel, vel_x_min, vel_x_max, vel_y_min, vel_y_max);
+}
+
+bool isLeaf(Node* x) {
+	return x->children.size() == 0;
 }
 
 // 2 dimensional collision check. Return true if point is contained inside rectangle
@@ -266,31 +348,13 @@ MatrixXd tree_to_matrix_parents(Node* node) {
 	return parents.leftCols(i);
 }
 
-//int num_nodes(Node* tree) {
-//
-//	int total = 0;
-//	if (tree->children.size() == 0) {
-//		int i = 0;
-//		return 1;
-//	}
-//	for (std::vector<Node*>::iterator child = tree->children.begin();
-//			child != tree->children.end(); child++) {
-//		Node* kid = *child;
-//		total += num_nodes(kid);
-//	}
-//	return total+1;
-//
-//}
-
 /* Returns path from root */
 // Hacks everywhere in this method... not clean at all. Oh well
 MatrixXd get_path(Node* x) {
 	MatrixXd P(setup_values.dimension, V.size()*T);
 	int index = 0;
-	VectorXd extended_initial_state(setup_values.dimension);
-	extended_initial_state << setup_values.initial_state, 0, 0;
 
-	while (x->state != extended_initial_state) {
+	while (x->state != setup_values.initial_state) {
 
 		P.col(index) = x->state; index++;
 		for (int i = T-2; i >= 0; --i) { // Hacked, hard coded
@@ -321,18 +385,6 @@ inline int factorial(int n) {
 	return n == 0 ? 1 : n * factorial(n-1);
 }
 
-// Used in calculating high dimensional ellipsoid volume
-inline double unitBallVolume() {
-	// Returns the volume of the unit ball in n dimensions
-	//int n = setup_values.dimension;
-	//	if (n % 2 == 0) { // Even
-	//		return pow(M_PI, n/2) / factorial(n/2 + 1);
-	//	} else { // Odd
-	//		return pow(M_PI, n/2.0) / ( (factorial(2*n)*sqrt(M_PI)) / (pow(4,n) * factorial(n)) );
-	//	}
-	return M_PI;
-}
-
 // Sample from unit ball: http://math.stackexchange.com/questions/87230/picking-random-points-in-the-volume-of-sphere-with-uniform-probability/87238#87238
 inline VectorXd sample_from_unit_ball() {
 
@@ -361,26 +413,64 @@ inline bool inSet(Node* x, std::set<Node*>& Set) {
 /* HEURISTICS GO HERE */
 
 // Cost to come heuristic
-//inline double g_hat(Node* x) {
-	//return (x->state - setup_values.initial_state).norm();
+inline double g_hat(Node* x) {
+	VectorXd pos(2), init_pos(2);
+	pos << x->state(0), x->state(1);
+	init_pos << setup_values.initial_state(0), setup_values.initial_state(1);
+	return (pos - init_pos).norm()/max_speed;
 	//return x->g_hat;
-//}
+}
 // Cost to go heuristic
-//inline double h_hat(Node* x) {
-	//return (x->state - setup_values.goal_state).norm();
+inline double h_hat(Node* x) {
+	VectorXd pos(2), goal_pos(2);
+	pos << x->state(0), x->state(1);
+	goal_pos << best_goal_node->state(0), best_goal_node->state(1);
+	return (pos - goal_pos).norm()/max_speed;
 	//return x->h_hat;
-//}
+}
 // Cost of x_start to x_goal where path is constrained to go through x heuristic
-//inline double f_hat(Node* x) {
-	//return g_hat(x) + h_hat(x);
+inline double f_hat(Node* x) {
+	return g_hat(x) + h_hat(x);
 	//return x->f_hat;
-//}
+}
 // Exact cost of connecting two nodes
 double c(Edge* e) {
-	num_true_cost_calls++;
 
 	Node* v = e->v;
 	Node* x = e->x;
+
+	// Reject if this was called before and it fails
+	std::vector<double> start_and_end_states;
+	for (int i = 0; i < setup_values.dimension; i++) { // Order doesn't matter, as long as it's consistent
+		start_and_end_states.push_back(v->state(i));
+	}
+	for (int i = 0; i < setup_values.dimension; i++) { // Order doesn't matter, as long as it's consistent
+		start_and_end_states.push_back(x->state(i));
+	}
+	if (failedSQPCalls.find(start_and_end_states) != failedSQPCalls.end()) {
+		return INFTY;
+	}
+
+	// Reject if orientation differs by more than pi/2. HACK to reduce number of useless TrajOpt calls
+	Vector2d v_orien, x_orien;
+	v_orien << v->state(2), v->state(3);
+	x_orien << x->state(2), x->state(3);
+	if (v_orien.any() && x_orien.any()) { // If either of the velocities is 0, 0: it could be an initial/goal state. Always connect
+		v_orien.normalize();
+		x_orien.normalize();
+		if (v_orien.transpose()*x_orien < 0 || v_orien.transpose()*x_orien > 1) {
+			return INFTY;
+		}
+		// If the start state is in front of the goal state, chuck it as well
+		Vector2d x_pos, v_pos;
+		x_pos << x->state(0), x->state(1);
+		v_pos << v->state(0), v->state(1);
+		if (v_orien.transpose() * (x_pos-v_pos) < 0) {
+			return INFTY;
+		}
+	}
+
+	num_true_cost_calls++;
 
 	// Instantiate StdVectorsX and StdVectorU
 	StdVectorX X(T);
@@ -389,33 +479,32 @@ double c(Edge* e) {
 	// Init bounds
 	bounds_t bounds;
 
-	bounds.u_max = setup_values.u_max;
-	bounds.u_min = setup_values.u_min;
-	bounds.x_max = setup_values.x_max;
-	bounds.x_min = setup_values.x_min;
-	bounds.v_max = setup_values.v_max;
-	bounds.v_min = setup_values.v_min;
+	bounds.u_min << setup_values.u_min, setup_values.u_min;
+	bounds.u_max << setup_values.u_max, setup_values.u_max;
+	bounds.x_min << setup_values.x_min, setup_values.x_min, setup_values.v_min, setup_values.v_min;
+	bounds.x_max << setup_values.x_max, setup_values.x_max, setup_values.v_max, setup_values.v_max;
+	bounds.delta_min = 0;
+	bounds.delta_max = 10; // I guess we are putting a max on delta
 	bounds.x_start = v->state;
 	bounds.x_goal = x->state;
 
 	// Initialize pointer to time variable, delta
-	double* delta;
-	double delta_init = 1;
-	delta = &delta_init;
+	double delta = 1;
 
 	// Call SQP (Redundant call, whatever. fix later)
-	int success = solve_double_integrator_noCD_BVP(bounds.x_start, bounds.x_goal, X, U, delta, bounds);
+	int success = solve_double_integrator_BVP(X, U, delta, bounds);
 
 	// If not success, say the cost is infinity
 	if (success == 0) {
 		//std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start << "\nGoal state:\n" << bounds.x_goal << "\n";
+		failedSQPCalls.insert(start_and_end_states);
 		return INFTY;
 	}
 
 	StdVectorX allButLastState(X.begin(), X.begin()+T-1);
 	e->states = allButLastState;
 	e->controls = U;
-	return *delta * (T-1);
+	return delta * (T-1);
 
 }
 // Cost of connecting two nodes heuristic
@@ -431,7 +520,6 @@ inline double c_hat(Node* x, Node* y) { // This is specific to double integrator
 }
 /* DONE WITH HEURISTICS */
 
-
 Edge* bestPotentialEdge() {
 	std::set<Edge*>::iterator it;
 	Edge* best_edge = NULL;
@@ -439,7 +527,7 @@ Edge* bestPotentialEdge() {
 	double curr_cost = 0;
 	for(it = Q_edge.begin(); it != Q_edge.end(); ++it) {
 		Edge* e = *it;
-		curr_cost = g_T(e->v) + e->heuristic_cost + (e->x->h_hat);
+		curr_cost = g_T(e->v) + e->heuristic_cost + h_hat(e->x);
 		if (best_edge == NULL || curr_cost < best_cost) {
 			best_edge = e;
 			best_cost = curr_cost;
@@ -451,97 +539,95 @@ Edge* bestPotentialEdge() {
 	return best_edge;
 }
 
-Edge* bestPotentialRewiring() {
-	std::set<Edge*>::iterator it;
-	Edge* best_edge = NULL;
+Node* bestPotentialNode() {
+	std::set<Node*>::iterator it;
+	Node* best_node = NULL;
 	double best_cost = INFTY;
 	double curr_cost = 0;
-	for(it = Q_rewire.begin(); it != Q_rewire.end(); ++it) {
-		Edge* e = *it;
-		curr_cost = g_T(e->v) + e->heuristic_cost + (e->x->h_hat);
-		if (best_edge == NULL || curr_cost < best_cost) {
-			best_edge = e;
+	for(it = Q_V.begin(); it != Q_V.end(); ++it) {
+		Node* v = *it;
+		curr_cost = g_T(v) + h_hat(v);
+		if (best_node == NULL || curr_cost < best_cost) {
+			best_node = v;
 			best_cost = curr_cost;
 		}
 	}
-	return best_edge;
+	return best_node;
 }
 
-// Lol, fancy name. These calculations are found using the radii of the ellipse. The
-// radii of the ellipse are found by techniques in the Informed RRT* paper.
-double prolateHyperSpheroidShellVolume(double smaller_diameter, double bigger_diameter) {
+// Sample uniformly from sample space. Specific to double integrator with square environment
+void sample_uniform_batch() {
 
-	double ubv = unitBallVolume();
-	double c_min = (goal_node->g_hat);
+	int num_samples = 0;
 
-	double small_vol = ubv * pow(sqrt((smaller_diameter*smaller_diameter) - (c_min*c_min))*0.5, setup_values.dimension-1) * smaller_diameter * 0.5;
-	if (smaller_diameter < c_min) {
-		small_vol = 0;
-	}
-	double big_vol = ubv * pow(sqrt((bigger_diameter*bigger_diameter) - (c_min*c_min))*0.5, setup_values.dimension-1) * bigger_diameter * 0.5;
+	while (num_samples < setup_values.batch_size) {
 
-	return big_vol - small_vol;
+		// Sample the new state
+		VectorXd x_sample(setup_values.dimension);
+
+		// This is specific to the square environment (and 4d state)
+		x_sample(0) = uniform(setup_values.x_min, setup_values.x_max);
+		x_sample(1) = uniform(setup_values.x_min, setup_values.x_max);
+		x_sample(2) = uniform(setup_values.v_min, setup_values.v_max);
+		x_sample(3) = uniform(setup_values.v_min, setup_values.v_max);
+
+
+		// Create the node and insert it into X_sample
+		Node* n = new Node();
+		n->state = x_sample;
+		n->inV = false;
+		n->old = false;
+		X_sample.insert(n);
+		num_samples++;
+
+	}	
 
 }
 
-void sample_batch(double smaller_diameter, double bigger_diameter, double rho)
-{
-	double c_min = (goal_node->g_hat);
-	if (smaller_diameter > c_min) {
+// Sample from bounding ellipse
+void sample_batch() {
+
+	num_sample_batches++;
+
+	double best_cost = g_T(best_goal_node);
+	double c_min = g_hat(best_goal_node);
+
+	if (best_cost == INFTY) { // Just sample uniformly from state space
+		sample_uniform_batch();
 		return;
 	}
 
 	int num_samples = 0;
-	double lambda_shell_vol = prolateHyperSpheroidShellVolume(smaller_diameter, bigger_diameter);
-	VectorXd x_center(4); // Hard coded
-	x_center << (setup_values.initial_state + setup_values.goal_state)/2.0, 0, 0;
+	VectorXd x_center = (setup_values.initial_state + best_goal_node->state)/2.0;
 
 	// Create L matrix from bigger radius
-	MatrixXd L_big(setup_values.dimension, setup_values.dimension);
-	L_big.setZero(setup_values.dimension, setup_values.dimension);
-	MatrixXd L_small(setup_values.dimension, setup_values.dimension);
-	L_small.setZero(setup_values.dimension, setup_values.dimension);
+	MatrixXd L(setup_values.dimension, setup_values.dimension);
+	L.setZero(setup_values.dimension, setup_values.dimension);
 	for(int i = 0; i < setup_values.dimension; ++i) {
 		if (i == 0) {
-			L_big(i, i) = bigger_diameter*0.5;
-			L_small(i,i) = smaller_diameter*0.5;
+			L(i, i) = best_cost*0.5;
 		} else {
-			L_big(i, i) = sqrt((bigger_diameter*bigger_diameter) - (c_min*c_min))*0.5;
-			L_small(i, i) = sqrt((smaller_diameter*smaller_diameter) - (c_min*c_min))*0.5;
+			L(i, i) = sqrt((best_cost*best_cost) - (c_min*c_min))*0.5;
 		}
 	}
 
-	std::cout << "c_min: " << c_min << " smaller_diameter: " << smaller_diameter << " bigger_diameter: " << bigger_diameter << " lambda shell: " << lambda_shell_vol << " rho: " << rho << " num samples: " << rho * lambda_shell_vol << std::endl;
+	//std::cout << "c_min: " << c_min << " best_cost: " << best_cost << std::endl;
 
-	MatrixXd CLLTCTInv = (C*L_small*L_small.transpose()*C.transpose()).inverse();
-	MatrixXd CLBig = C*L_big;
-	// Perform rejection sampling on the big ellipse until ratio is satisfied
-	while (num_samples < rho * lambda_shell_vol) {
+	MatrixXd CL = C_ellipse*L;
+	while (num_samples < setup_values.batch_size) {
 		VectorXd x_ball = sample_from_unit_ball();
-		VectorXd x_sample = CLBig*x_ball + x_center;
+		VectorXd x_sample = CL*x_ball + x_center;
 
-		// Check whether it's in the smaller ellipse by using the formula for quadratic form
-		// This can ONLY be done when smaller radius is greater than c_min. Otherwise L_small will have stuff
-		// Also, it's correct to just sample from total ellipse otherwise
 		if (inBounds(x_sample)) {
-			if (/*(smaller_diameter > c_min) && */ ((x_sample - x_center).transpose() * CLLTCTInv * (x_sample - x_center) < 1)) {
-				continue;
-			} else {
-				Node* n = new Node;
-				n->state = x_sample;
-				VectorXd temp_state(2);
-				temp_state << n->state(0), n->state(1);
-				n->g_hat = (temp_state - setup_values.initial_state).norm()/max_speed;
-				n->h_hat = (temp_state - setup_values.goal_state).norm()/max_speed;
-				n->f_hat = n->g_hat + n->h_hat;
-				X_sample.insert(n);
-				num_samples++;
-			}
+			Node* n = new Node();
+			n->state = x_sample;
+			n->inV = false;
+			n->old = false;
+			X_sample.insert(n);
+			num_samples++;
 		}
 
 	}
-
-	//std::cout << "Num samples in batch: " << num_samples << std::endl;
 
 }
 
@@ -556,15 +642,9 @@ void clearEdgeQueue() {
 	Q_edge.clear();
 }
 
-void clearRewiringQueue() {
-	// Delete all edges, then clear rewire queue
-	std::set<Edge*>::iterator e_it;
-	for(e_it = Q_rewire.begin(); e_it != Q_rewire.end(); ) {
-		Edge* e = *e_it;
-		delete e;
-		Q_rewire.erase(e_it++);
-	}
-	Q_rewire.clear();
+void clearVertexQueue() {
+	// Delete pointers to nodes. These nodes live in the tree, so DON'T ACTUALLY DELETE
+	Q_V.clear(); // Make sure this doesn't dynamically delete objects.
 }
 
 void pruneSampleSet() {
@@ -572,8 +652,11 @@ void pruneSampleSet() {
 	std::set<Node*>::iterator n_it;
 	for(n_it = X_sample.begin(); n_it != X_sample.end(); ) {
 		Node* n = *n_it;
-		if (n->f_hat > g_T(goal_node)) {
+		if (f_hat(n) > g_T(best_goal_node)) {
 			num_samples_pruned++;
+			if (inSet(n,G)) {
+				G.erase(n);
+			}
 			delete n;
 			X_sample.erase(n_it++);
 		} else {
@@ -582,116 +665,181 @@ void pruneSampleSet() {
 	}
 }
 
-void updateFreeQueue(Node* v) {
+// Throw this node and all of its chidren into X_sample
+void pruneVertex(Node* v) {
 
-	double f_sample = std::min((v->f_hat) + 2*r, f_max);
-	// f_reqd or f_sample?
-	if (f_sample > f_prev) {
-		double lambda_sample = prolateHyperSpheroidShellVolume(f_prev, f_sample);
-		double rho = (double)n / lambda_sample;
-		sample_batch(f_prev, f_sample, rho);
-		f_prev = f_sample;
+	// Prune it's children first. Iterate over a copy of the children set
+	std::set<Node*> children(v->children.begin(), v->children.end());
+	std::set<Node*>::iterator n_it;
+	for(n_it = children.begin(); n_it != children.end(); n_it++) {
+		Node* child = *n_it;
+		pruneVertex(child);
+	}
+
+	// Disconnect it's edge
+	Node* p = v->parent;
+	p->children.erase(v);
+	v->parent = NULL;
+
+	// Mark as new, throw into X_sample, erase from other sets.
+	v->old = false;
+	v->inV = false;
+	X_sample.insert(v);
+	V.erase(v);
+	if (inSet(v, G)) {
+		G.erase(v);
+	}
+	if (inSet(v, Q_V)) {
+		Q_V.erase(v);
 	}
 
 }
 
-void updateEdgeQueue(Node* v) {
-	updateFreeQueue(v);
+void pruneVertexSet() {
+	// Prune vertices that are useless, along with their subtrees. Throw them all into X_sample
+	std::set<Node*>::iterator n_it;
+	n_it = V.begin();
+	while (n_it != V.end()) {
+		Node* n = *n_it;
+		if (f_hat(n) > g_T(best_goal_node)) {
+			num_vertices_pruned++;
+			pruneVertex(n);
 
-	// Remove all edges with v in it
+			// Reset iterator since it will be invalidated
+			n_it = V.begin();
+
+		} else {
+			n_it++;
+		}
+	}
+}
+
+void pruneEdgeQueue(Node* w) {
 	std::set<Edge*>::iterator e_it;
 	for(e_it = Q_edge.begin(); e_it != Q_edge.end(); ) {
 		Edge* e = *e_it;
-		if (e->v == v || e->x == v) {
-			delete e; // Delete memory
-			Q_edge.erase(e_it++);
+		if (e->x == w) {
+			if (g_T(e->v) + e->heuristic_cost >= g_T(w)) {
+				delete e; // Delete memory
+				Q_edge.erase(e_it++);
+			} else {
+				++e_it;
+			}
 		} else {
 			++e_it;
 		}
 	}
+}
+
+void updateEdgeQueue(Node* v) {
+
+	Q_V.erase(v);
 
 	// Find all samples in X_sample in ball of radius r w/ center v
-	std::set<Node*> X_n;
+	std::set<Node*> X_near;
 	std::set<Node*>::iterator n_it;
 	for(n_it = X_sample.begin(); n_it != X_sample.end(); ++n_it) {
 		Node* x = *n_it;
 		if (dist(x->state, v->state) <= r) {
-			X_n.insert(x);
+			X_near.insert(x);
 		}
 	}
 
 	// Add all potential edges to Q_edge
-	for(n_it = X_n.begin(); n_it != X_n.end(); ++n_it) {
+	for(n_it = X_near.begin(); n_it != X_near.end(); ++n_it) {
 		Node* x = *n_it;
 		double heuristic_edge_cost = c_hat(v, x);
-		if ((v->g_hat) + heuristic_edge_cost + (x->h_hat) < g_T(goal_node)) {
+		if (g_hat(v) + heuristic_edge_cost + h_hat(x) < g_T(best_goal_node)) {
 			Edge* e = new Edge(v, x);
 			e->heuristic_cost = heuristic_edge_cost;
-			//double cost = g_T(e->v) + e->heuristic_cost + (e->x->h_hat);
 			Q_edge.insert(e);
 		}
 	}
 
-}
+	// New vertices, adding to rewire queue happens here
+	if (!v->old) {
 
-void updateRewireQueue(Node* v) {
-
-	// Find all nodes in V in a ball of radius r w/ center v
-	std::vector<Node*> V_n;
-	std::vector<Node*>::iterator n_it;
-	for(n_it = V.begin(); n_it != V.end(); ++n_it) {
-		Node* w = *n_it;
-		if (dist(w->state, v->state) <= r) {
-			V_n.push_back(w);
+		// Find all nodes in V in ball of radius r w/ center v
+		std::set<Node*> V_near;
+		for(n_it = V.begin(); n_it != V.end(); ++n_it) {
+			Node* w = *n_it;
+			if (dist(w->state, v->state) <= r) {
+				V_near.insert(w);
+			}
 		}
+
+		// Add some of these potential rewirings
+		for(n_it = V_near.begin(); n_it != V_near.end(); ++n_it) {
+			Node* w = *n_it;
+			double heuristic_edge_cost = c_hat(v, w);
+			if (g_hat(v) + heuristic_edge_cost + h_hat(w) < g_T(best_goal_node)) { // Same condition as above
+				if (g_T(v) + heuristic_edge_cost < g_T(w)) { // could improve cost-to-come to the target child
+					if (v != w->parent && w != v->parent) { // Make sure this edge isn't already in the tree
+						Edge* e = new Edge(v, w);
+						e->heuristic_cost = heuristic_edge_cost;
+						Q_edge.insert(e);
+					}
+				}
+			}
+		}
+
+		v->old = true;
 	}
 
-	// Add all potential rewirings to Q_rewire
-	for(n_it = V_n.begin(); n_it != V_n.end(); ++n_it) {
-		Node* w = *n_it;
-		double heuristic_edge_cost = c_hat(v, w);
-		if (g_T(v) + heuristic_edge_cost < g_T(w)) {
-			Edge* e = new Edge(v, w);
-			e->heuristic_cost = heuristic_edge_cost;
-			//double cost = g_T(e->v) + e->heuristic_cost + (e->x->h_hat);
-			Q_rewire.insert(e);
-		}
-	}
-
 }
 
-void Rewire()
-{
-	while (Q_rewire.size() > 0) {
+// Lines 9-10 in the pseudocode
+void updateQueue() {
 
-		Edge* e = bestPotentialRewiring();
-		Q_rewire.erase(e);
-		Node* u = e->v; Node* w = e->x;
+	bool expand = true;
+	while (expand) {
+		if (Q_V.size() > 0) {
 
-		if (g_T(u) + e->heuristic_cost + (w->h_hat) < g_T(goal_node))
-		{
-			double wcost = g_T(u) + c(e);
-			if (wcost < g_T(w)) {
-				w->states = e->states;
-				w->controls = e->controls;
-				delete e; // After grabbing pointers to v, x and using heuristic cost, we have no need for the Edge e
+			Edge* best_edge = bestPotentialEdge();
+			double best_edge_cost;
+			if (best_edge == NULL) {
+				best_edge_cost = INFTY;
+			} else {
+				best_edge_cost = g_T(best_edge->v) + best_edge->heuristic_cost + h_hat(best_edge->x);
+			}
 
-				//if (exists_collision(u->state, w->state)) {
-				//	continue;
-				//}
+			Node* best_node = bestPotentialNode();
+			double best_node_cost = g_T(best_node) + h_hat(best_node);
 
-				// Erase edge (w_parent, w) from tree, set new edge (u, w)
-				Node* w_parent = w->parent; // First erase parent->child pointer
-				w_parent->children.erase(w);
-				w->parent = u; // This erases child->parent pointer and sets new one
-				w->cost = wcost;
+			if (best_node_cost <= best_edge_cost) {
+				updateEdgeQueue(best_node);
+			} else {
+				expand = false;
 			}
 
 		} else {
-			clearRewiringQueue();
+			expand = false;
 		}
 	}
 
+}
+
+// Iterate through all goal nodes and find best one
+double costOfBestGoalNode() {
+
+	bool changed = false;
+	double best_cost = g_T(best_goal_node);
+	std::set<Node*>::iterator n_it;
+
+	for(n_it = G.begin(); n_it != G.end(); n_it++) {
+		Node* candidate = *n_it;
+		if (g_T(candidate) < best_cost) {
+			best_goal_node = candidate;
+			best_cost = g_T(candidate);
+			changed = true;
+		}
+	}
+	// Now update C matrix if need be
+	if (changed) {
+		update_C_ellipse_Matrix();
+	}
+
+	return best_cost;
 }
 
 double BITStar() {
@@ -701,117 +849,132 @@ double BITStar() {
 	double duration;
 	start = std::clock();
 
-	// Initialize random seed using current time.
-	// Uncomment this line if you want feed the random number generator a seed based on time.
-
-	// Setup intial state and add it to V; note that T and E are implicity represented
-	// by root node. Can perform DFS to find T, E are children pointers of every node in T
-	root_node = new Node();
-	VectorXd extended_initial_state(setup_values.dimension);
-	extended_initial_state << setup_values.initial_state, 0, 0; // Tack on 0 velocities
-	root_node->state = extended_initial_state;
-	root_node->g_hat = 0;
-	root_node->h_hat = (setup_values.initial_state - setup_values.goal_state).norm()/max_speed;
-	root_node->f_hat = root_node->h_hat;
-	root_node->cost = 0;
-	root_node->parent = root_node; // Convention for function tree_to_matrix_parents()
-	root_node->inV = true;
-	V.push_back(root_node);
-
-	// Add goal state to X_sample
-	goal_node = new Node;
-	VectorXd extended_goal_state(setup_values.dimension);
-	extended_goal_state << setup_values.goal_state, 0, 0; // Tack on 0 velocities
-	goal_node->state = extended_goal_state;
-	goal_node->g_hat = (setup_values.goal_state - setup_values.initial_state).norm()/max_speed;
-	goal_node->h_hat = 0;
-	goal_node->f_hat = root_node->g_hat;
-	X_sample.insert(goal_node);
-
 	// f_max from paper
 	f_max = INFTY;
 
 	// Begin iterations here
 	int k = 1;
 
-	while (k <= setup_values.max_iters) {
+	while (k <= setup_values.max_iters) { // Max_iters will be much more now. Maybe put some other termination condition here
 
-		std::cout << "Iteration: " << k << "\n";
-
-		pruneSampleSet();
-		std::cout << "Size of sample set: " << X_sample.size() << "\n";
-
-		// Set values
-		n = V.size();
-		r = setup_values.gamma * pow(log(n)/n, 1.0/setup_values.dimension); // Copied from RRT* code given by Sertac Karaman
-		if (r == 0) { // Radius hack to fight degeneracy of first iteration
-			r = setup_values.gamma * pow(log(2)/2, 1.0/setup_values.dimension);
+		if (k % 100 == 0) {
+			std::cout << "Iteration: " << k << "\n";
+			std::cout << "Size of sample set: " << X_sample.size() << "\n";
+			std::cout << "Size of vertex set: " << V.size() << "\n";
 		}
 
-		// Set f_prev to 0 for this iteration
-		f_prev = 0;
+		// New Batch of samples!!
+		if (Q_edge.size() == 0) {
 
-		// Update Q_edge for all nodes in V
-		std::vector<Node*>::iterator it;
-		for( it = V.begin(); it != V.end(); ++it) {
-			updateEdgeQueue(*it);
+			std::cout << "New batch! Batch number: " << num_sample_batches+1 << "\n";
+
+			pruneVertexSet();			
+			pruneSampleSet();
+			clearVertexQueue();
+
+			sample_batch();
+
+			for (std::set<Node*>::iterator n_it = V.begin(); n_it != V.end(); n_it++) {
+				Node* n = *n_it;
+				Q_V.insert(n);
+				n->old = true; // Mark them as old
+			}
+
+			// Set radius value
+			n = V.size() + X_sample.size();
+			r = setup_values.gamma * pow(log(n)/n, 1.0/setup_values.dimension); // Copied from RRT* code given by Sertac Karaman
+
 		}
 
-		// Process edges in order of potential
-		while (Q_edge.size() > 0) {
+		// Update Q_edge for vertices in the expansion queue Q_V
+		updateQueue();
 
 			// Grab best potential edge
-			Edge* e = bestPotentialEdge();
-			Q_edge.erase(e);
-			Node* v = e->v; Node* x = e->x;
+		Edge* e = bestPotentialEdge();
+		Q_edge.erase(e);
+		Node* v = e->v; Node* x = e->x;
 
-			// Collision checking happens implicitly here, in c_hat function
-			if (g_T(v) + e->heuristic_cost + (x->h_hat) < g_T(goal_node)) {
-				double cvx = c(e);
-				if ((v->g_hat) + cvx + (x->h_hat) < g_T(goal_node)) {
+		if (g_T(v) + e->heuristic_cost + h_hat(x) < g_T(best_goal_node)) {
+
+			double cvx = c(e); // Calculate true cost of edge
+			
+			if (g_hat(v) + cvx + h_hat(x) < g_T(best_goal_node)) {
+
+				if (g_T(v) + cvx < g_T(x)) {
+
+					// Update the new controls
 					x->states = e->states;
 					x->controls = e->controls;
-					delete e; // After grabbing pointers to v, x and using heuristic cost, we have no need for the Edge e
+					delete e; // After grabbing pointers to v, x, heuristic cost, and using states/controls, we have no need for the Edge e
 
-					//if (exists_collision(v->state, x->state)) {
-					//	continue;
-					//}
+					if (x->inV) {
+						Node* p = x->parent;
+						p->children.erase(x); // Erase child pointer
+					} else {
+						// Remove x from sample
+						X_sample.erase(x);
+						// Insert x into V and Q_V
+						V.insert(x);
+						Q_V.insert(x);
+					}
 
-					// Update costs, insert node, create edge (parent and child pointer)
-					x->cost = g_T(v) + cvx;
-					V.push_back(x);
-					x->inV = true;
+					// Update costs, create edge (parent and child pointer)
+					x->cost = cvx;
 					x->parent = v;
 					v->children.insert(x);
 
-					// Remove x from sample
-					X_sample.erase(x);
+					// Check if node is in goal
+					if (inGoal(x) && !x->inV) {
+						G.insert(x);
+						std::cout << "New goal state found:\n" << x->state << "\n";
+					}
+					x->inV = true;
 
-					// Stuff in paper
-					updateEdgeQueue(x);
-					updateRewireQueue(x);
-					Rewire();
-					f_max = g_T(goal_node);
+					// Update best cost stuff
+					double old_cost = f_max;
+					f_max = costOfBestGoalNode(); // Best goal node is update here too
+					if (f_max < old_cost) {
+						std::cout << "New goal cost: " << f_max << "\n";
+						//std::cout << "State of goal:\n" << best_goal_node->state << "\n";
+					}
 
+					pruneEdgeQueue(x);
+
+					// Write time, # of nodes, cost to file
+					ofstream outfile("statistics_" + std::to_string(setup_values.max_iters) + "_iters.txt", ios::app);
+					if (outfile.is_open()) {
+						outfile << std::setprecision(10) << ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+						outfile << ", " << V.size();
+						outfile << ", " << f_max << std::endl;
+						outfile.close();
+					}
+
+				} else {
+					delete e; // Don't leak memory
 				}
+
 			} else {
-				clearEdgeQueue();
+				delete e; // Don't leak memory
 			}
+		} else {
+			delete e; // Don't leak memory
+			clearEdgeQueue();
 		}
 		k++;
-		std::cout << "cost of goal node: " << g_T(goal_node) << std::endl;
 	}
 
 	// More timing stuff
 	duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 	std::cout << "Duration of algorithm for " << setup_values.max_iters << " iterations: " << duration << "\n";
 
-	if (g_T(goal_node) < INFTY) {
+	if (g_T(best_goal_node) < INFTY) {
 
 		std::cout << "Size of V: " << V.size() << "\n";
 		std::cout << "Number of samples pruned: " << num_samples_pruned << "\n";
+		std::cout << "Number of vertices pruned: " << num_vertices_pruned << "\n";
+		std::cout << "Number of batches: " << num_sample_batches << "\n";
 
-		MatrixXd goal_path = get_path(goal_node);
+		MatrixXd goal_path = get_path(best_goal_node);
 
 		// Plot in Python
 		std::cout << "Solution found!\n";
@@ -822,14 +985,14 @@ double BITStar() {
 		np::ndarray states_np = eigen_to_ndarray(tree_to_matrix_states(root_node));
 		np::ndarray parents_np = eigen_to_ndarray(tree_to_matrix_parents(root_node));
 		np::ndarray goal_path_np = eigen_to_ndarray(goal_path);
+		np::ndarray goal_region_np = eigen_to_ndarray(setup_values.goal_region);
 		np::ndarray obstacles_np = eigen_to_ndarray(setup_values.obstacles);
 
 		std::cout << "Plotting...\n";
-		plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, setup_values.max_iters, g_T(goal_node));
+		plot(plotter, states_np, parents_np, goal_path_np, goal_region_np, obstacles_np, setup_values.max_iters, g_T(best_goal_node));
 
 	}
-
-	return g_T(goal_node);
+	return g_T(best_goal_node);
 
 }
 
@@ -837,22 +1000,28 @@ double BITStar() {
  * Just a note: This function MUST be called from directory that
  * plot_sst.cpp lives in.
  *
- * USAGE: build/bin/plot_sst <MAX_ITERS> <RANDOMIZE>
+ * USAGE: build/bin/plot_sst <MAX_ITERS> <RANDOMIZE> <BATCH_SIZE>
  */
 
 int main(int argc, char* argv[]) {
 
-	// Assumes a command line argument of MAX_ITERS RANDOMIZE {true, false}
-	int max_iters = atoi(argv[1]);
-	std::string randomize;
+	// Assumes an optional command line argument of MAX_ITERS RANDOMIZE {true, false} BATCH_SIZE
+	int max_iters = 1000;
+	std::string randomize = "false";
+	int batch_size = 100;
+
+	if (argc >= 2) {
+		max_iters = atoi(argv[1]);
+	}
 	if (argc >= 3) {
 		randomize = argv[2];
-	} else {
-		randomize = "false";
+	} 
+	if (argc >= 4) {
+		batch_size = atoi(argv[3]);
 	}
 
 	// Setup function
-	setup(max_iters, randomize);
+	setup(max_iters, randomize, batch_size);
 
 	// Running of BIT*
 	std::cout << "Running BIT*...\n";
@@ -863,4 +1032,3 @@ int main(int argc, char* argv[]) {
 	std::cout << "Best path cost: " << path_length << "\n";
 	std::cout << "exiting\n";
 }
-

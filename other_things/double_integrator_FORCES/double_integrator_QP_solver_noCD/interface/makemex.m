@@ -1,19 +1,24 @@
-% FORCES - Fast interior point code generation for multistage problems.
-% Copyright (C) 2011-14 Alexander Domahidi [domahidi@control.ee.ethz.ch],
-% Automatic Control Laboratory, ETH Zurich.
+% double_integrator_QP_solver_noCD : A fast customized optimization solver.
 % 
-% This program is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License, or
-% (at your option) any later version.
+% Copyright (C) 2014 EMBOTECH GMBH [info@embotech.com]
 % 
-% This program is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
 % 
-% You should have received a copy of the GNU General Public License
-% along with this program.  If not, see <http://www.gnu.org/licenses/>.
+% This software is intended for simulation and testing purposes only. 
+% Use of this software for any commercial purpose is prohibited.
+% 
+% This program is distributed in the hope that it will be useful.
+% EMBOTECH makes NO WARRANTIES with respect to the use of the software 
+% without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+% PARTICULAR PURPOSE. 
+% 
+% EMBOTECH shall not have any liability for any damage arising from the use
+% of the software.
+% 
+% This Agreement shall exclusively be governed by and interpreted in 
+% accordance with the laws of Switzerland, excluding its principles
+% of conflict of laws. The Courts of Zurich-City shall have exclusive 
+% jurisdiction in case of any dispute.
+% 
 
 mex -c -O -DUSEMEXPRINTS ../src/double_integrator_QP_solver_noCD.c 
 mex -c -O -DMEXARGMUENTCHECKS double_integrator_QP_solver_noCD_mex.c

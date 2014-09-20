@@ -9,8 +9,8 @@ double_integrator_QP_solver_noCD_FLOAT **f, **lb, **ub, **A, **b, **z;
 #include <iostream>
 
 // Include double integrator dynamics
-#include "../../../double_integrator_dynamics_library/double_integrator_dynamics.hpp"
-using namespace double_integrator_dynamics;
+#include "../../../dynamics_library/dynamics_library.hpp"
+using namespace dynamics_library;
 
 #define INFTY 1e10
 
@@ -353,7 +353,7 @@ void fill_in_A_and_b(StdVectorX& X, StdVectorU& U, double* delta, double trust_b
 		int curr_row = 0;
 
 		// Grab dynamics jacobian and value
-		Matrix<double, X_DIM, X_DIM+U_DIM+1> jac = -1 * double_integrator_dynamics::numerical_jacobian(continuous_double_integrator_dynamics, x, u, d);
+		Matrix<double, X_DIM, X_DIM+U_DIM+1> jac = -1 * dynamics_library::numerical_jacobian(continuous_double_integrator_dynamics, x, u, d);
 		Matrix<double, X_DIM, X_DIM> DH_X = jac.leftCols(X_DIM);
 		Matrix<double, X_DIM, U_DIM> DH_U = jac.middleCols(X_DIM, U_DIM);
 		Matrix<double, X_DIM, 1> DH_delta = jac.rightCols(1);

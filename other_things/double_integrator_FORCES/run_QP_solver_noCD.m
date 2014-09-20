@@ -233,7 +233,9 @@ function [output, exitflag, info] = run_QP_solver_noCD(args)
     %--------------------- DONE ---------------------%
     
     % Solve
+    s = cputime;
     [output exitflag info] = double_integrator_QP_solver_noCD(params);
-    
+    e = cputime - s;
+    disp(['Time elapsed for QP solver (in seconds): ' num2str(e)]);
     
 end
