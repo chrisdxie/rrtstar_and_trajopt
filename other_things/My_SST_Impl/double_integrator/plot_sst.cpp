@@ -18,6 +18,7 @@ using namespace Eigen;
 #include <ctime>
 #include <iomanip>
 #include <fstream>
+#include <stack>
 
 #include "../../dynamics_library/dynamics_library.hpp"
 using namespace dynamics_library;
@@ -169,8 +170,9 @@ bool exists_collision(VectorXd x_near, VectorXd x_new) {
 
 	// ONLY WORKS WITH EIGEN3. IF FOR SOME REASON YOU ARE RUNNING THIS SOMEWHERE ELSE,
 	// HARD CODE THIS
-	x_near = x_near.head(2);
-	x_new = x_new.head(2);
+	Vector2d pos_near, pos_new;
+	pos_near << x_near(0), x_near(1);
+	pos_new << x_new(0), x_new(1);
 
 	MatrixXd obstacles = setup_values.obstacles;
 	int num_obstacles = obstacles.cols();
@@ -184,10 +186,10 @@ bool exists_collision(VectorXd x_near, VectorXd x_new) {
 
 		// Determine if point is inside obstacle by discretization
 		float dis_num = 20;
-		VectorXd direction = (x_new - x_near)/(x_new - x_near).norm();
-		double length = (x_new - x_near).norm();
+		VectorXd direction = (pos_new - pos_near)/(pos_new - pos_near).norm();
+		double length = (pos_new - pos_near).norm();
 		for (int i = 1;i <= dis_num; i++) {
-			Vector2d point = x_near + length * i/dis_num * direction;
+			Vector2d point = pos_near + length * i/dis_num * direction;
 			if (inside_rectangular_obs(point, x_min, x_max, y_min, y_max)) {
 				return true;
 			}
@@ -200,8 +202,8 @@ bool exists_collision(VectorXd x_near, VectorXd x_new) {
 
 bool inBounds(VectorXd state) {
 	Vector2d pos, vel;
-	pos = state.head(2);
-	vel = state.tail(2);
+	pos << state(0), state(1);
+	vel << state(2), state(3);
 	if (inside_rectangular_obs(pos, setup_values.x_min, setup_values.x_max,
 			setup_values.x_min, setup_values.x_max) &&
 		inside_rectangular_obs(vel, setup_values.v_min, setup_values.v_max,
@@ -383,7 +385,7 @@ bool inSet(Node* x, std::set<Node*> Set) {
 
 bool inGoal(Node* x) {
 	VectorXd goal_region = setup_values.goal_region;
-	Vector2d state = x->state.head(2);
+	Vector2d state << x->state(0), x->state(1);
 
 	double x_min = goal_region(0) - .5*goal_region(1);
 	double x_max = goal_region(0) + .5*goal_region(1);

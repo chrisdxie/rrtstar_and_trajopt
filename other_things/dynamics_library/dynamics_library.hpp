@@ -46,11 +46,14 @@ VectorXd dynamics_library::continuous_double_integrator_dynamics(
 
 }
 
-void dynamics_library::set_cartpole_parameters(double mc, double mp, double l) {
-	cp_params.g = 9.81;
+void dynamics_library::set_cartpole_parameters(double mc, double mp, double l, double b, double cw, double ch) {
+	cp_params.g = 9.82;
 	cp_params.mc = mc;
 	cp_params.mp = mp;
 	cp_params.l = l;
+	cp_params.b = b;
+	cp_params.cw = cw;
+	cp_params.ch = ch;
 }
 
 VectorXd dynamics_library::continuous_cartpole_dynamics(VectorXd z, VectorXd u) {
@@ -59,19 +62,22 @@ VectorXd dynamics_library::continuous_cartpole_dynamics(VectorXd z, VectorXd u) 
 
 	Vector4d zdot; zdot.setZero();
 
+	// Format: z = [w, v, theta, x] = [theta_dot, x_dot, theta, x]
+	// So, z_dot = [angular_accel, pos_accel, w, v] = [theta_double_dot, x_double_dot, theta_dot, x_dot]
 	// Set x_dot and theta_dot first
-	zdot(0) = z(1);
-	zdot(2) = z(3);
+	zdot(2) = z(0);
+	zdot(3) = z(1);
 
 	double mp = cp_params.mp;
 	double mc = cp_params.mc;
 	double l =  cp_params.l;
+	double b =  cp_params.b;
 	double g =  cp_params.g;
 
-	zdot(1) = (2*mp*l*pow(z(3),2)*sin(z(2)) + 3*mp*g*sin(z(2))*cos(z(2)) + 4*control)
+	zdot(1) = (2*mp*l*pow(z(0),2)*sin(z(2)) + 3*mp*g*sin(z(2))*cos(z(2)) + 4*control - 4*b*z(1))
 					/ (4*(mc + mp) - 3*mp*pow(cos(z(2)), 2));
 
-	zdot(3) = (-3*mp*l*pow(z(3),2)*sin(z(2))*cos(z(2)) - 6*(mc + mp)*g*sin(z(2)) - 6*control*cos(z(2)))
+	zdot(0) = (-3*mp*l*pow(z(0),2)*sin(z(2))*cos(z(2)) - 6*(mc + mp)*g*sin(z(2)) - 6*(control - b*z(1))*cos(z(2)))
 					/ (4*l*(mc + mp) - 3*mp*l*pow(cos(z(2)),2));
 
 	return zdot;

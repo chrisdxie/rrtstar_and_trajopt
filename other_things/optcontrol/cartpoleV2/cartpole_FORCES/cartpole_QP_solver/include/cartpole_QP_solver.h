@@ -249,56 +249,11 @@ typedef struct cartpole_QP_solver_params
     /* vector of size 5 */
     cartpole_QP_solver_FLOAT e11[5];
 
-    /* vector of size 14 */
-    cartpole_QP_solver_FLOAT f12[14];
-
-    /* vector of size 14 */
-    cartpole_QP_solver_FLOAT lb12[14];
-
-    /* vector of size 6 */
-    cartpole_QP_solver_FLOAT ub12[6];
-
-    /* matrix of size [5 x 14] (column major format) */
-    cartpole_QP_solver_FLOAT C12[70];
+    /* vector of size 5 */
+    cartpole_QP_solver_FLOAT lb12[5];
 
     /* vector of size 5 */
-    cartpole_QP_solver_FLOAT e12[5];
-
-    /* vector of size 14 */
-    cartpole_QP_solver_FLOAT f13[14];
-
-    /* vector of size 14 */
-    cartpole_QP_solver_FLOAT lb13[14];
-
-    /* vector of size 6 */
-    cartpole_QP_solver_FLOAT ub13[6];
-
-    /* matrix of size [5 x 14] (column major format) */
-    cartpole_QP_solver_FLOAT C13[70];
-
-    /* vector of size 5 */
-    cartpole_QP_solver_FLOAT e13[5];
-
-    /* vector of size 14 */
-    cartpole_QP_solver_FLOAT f14[14];
-
-    /* vector of size 14 */
-    cartpole_QP_solver_FLOAT lb14[14];
-
-    /* vector of size 6 */
-    cartpole_QP_solver_FLOAT ub14[6];
-
-    /* matrix of size [5 x 14] (column major format) */
-    cartpole_QP_solver_FLOAT C14[70];
-
-    /* vector of size 5 */
-    cartpole_QP_solver_FLOAT e14[5];
-
-    /* vector of size 5 */
-    cartpole_QP_solver_FLOAT lb15[5];
-
-    /* vector of size 5 */
-    cartpole_QP_solver_FLOAT ub15[5];
+    cartpole_QP_solver_FLOAT ub12[5];
 
 } cartpole_QP_solver_params;
 
@@ -340,17 +295,8 @@ typedef struct cartpole_QP_solver_output
     /* vector of size 6 */
     cartpole_QP_solver_FLOAT z11[6];
 
-    /* vector of size 6 */
-    cartpole_QP_solver_FLOAT z12[6];
-
-    /* vector of size 6 */
-    cartpole_QP_solver_FLOAT z13[6];
-
-    /* vector of size 6 */
-    cartpole_QP_solver_FLOAT z14[6];
-
     /* vector of size 5 */
-    cartpole_QP_solver_FLOAT z15[5];
+    cartpole_QP_solver_FLOAT z12[5];
 
 } cartpole_QP_solver_output;
 

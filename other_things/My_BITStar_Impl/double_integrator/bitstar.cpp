@@ -178,7 +178,7 @@ void setup(int max_iters, std::string& randomize, int batch_size) {
 	update_C_ellipse_Matrix();
 
 	// Gamma
-	setup_values.gamma = 6; // Looked up thing in paper
+	setup_values.gamma = 10; // Looked up thing in paper
 
 	// Randomize argument
 	if (randomize == "true") {
@@ -555,6 +555,45 @@ Node* bestPotentialNode() {
 	return best_node;
 }
 
+// Sample uniformly from goal region
+void sample_from_goal_region() {
+
+	int num_samples = 0;
+	int goal_region_batch_size = setup_values.batch_size/10;
+
+	double pos_x_min = setup_values.goal_region(0) - .5*setup_values.goal_region(1);
+	double pos_x_max = setup_values.goal_region(0) + .5*setup_values.goal_region(1);
+	double pos_y_min = setup_values.goal_region(2) - .5*setup_values.goal_region(3);
+	double pos_y_max = setup_values.goal_region(2) + .5*setup_values.goal_region(3);
+
+	double vel_x_min = setup_values.goal_region(4) - .5*setup_values.goal_region(5);
+	double vel_x_max = setup_values.goal_region(4) + .5*setup_values.goal_region(5);
+	double vel_y_min = setup_values.goal_region(6) - .5*setup_values.goal_region(7);
+	double vel_y_max = setup_values.goal_region(6) + .5*setup_values.goal_region(7);
+
+	while (num_samples < goal_region_batch_size) {
+
+		// Sample the new state
+		VectorXd x_sample(setup_values.dimension);
+
+		// This is specific to the square environment (and 4d state)
+		x_sample(0) = uniform(pos_x_min, pos_x_max);
+		x_sample(1) = uniform(pos_y_min, pos_y_max);
+		x_sample(2) = uniform(vel_x_min, vel_x_max);
+		x_sample(3) = uniform(vel_y_min, vel_y_max);
+
+		// Create the node and insert it into X_sample
+		Node* n = new Node();
+		n->state = x_sample;
+		n->inV = false;
+		n->old = false;
+		X_sample.insert(n);
+		num_samples++;
+
+	}	
+
+}
+
 // Sample uniformly from sample space. Specific to double integrator with square environment
 void sample_uniform_batch() {
 
@@ -591,6 +630,8 @@ void sample_batch() {
 
 	double best_cost = g_T(best_goal_node);
 	double c_min = g_hat(best_goal_node);
+
+	sample_from_goal_region();
 
 	if (best_cost == INFTY) { // Just sample uniformly from state space
 		sample_uniform_batch();
