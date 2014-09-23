@@ -6,15 +6,14 @@ cartpole_QP_solver_FLOAT **f, **lb, **ub, **C, **e, **z;
 #include <iostream>
 #include <vector>
 
-#include "util/logging.h"
-#include "util/Timer.h"
+#include "../util/logging.h"
 
-#include "cartpole_dynamics.h"
-using namespace cartpole;
+#include "../../dynamics_library/dynamics_library.hpp"
+using namespace dynamics_library;
 
 #define INFTY 1e10
 
-#define TIMESTEPS 15
+#define TIMESTEPS 12
 const int T = TIMESTEPS;
 
 #define X_DIM 4
@@ -232,7 +231,7 @@ void fill_lb_and_ub(StdVectorX& X, StdVectorU& U, double& delta, double trust_bo
 
 	VectorXd lbT_temp(X_DIM+1);
 	VectorXd ubT_temp(X_DIM+1);
-	for(int i = 0; i < X_DIM+1; ++i) {
+	for(int i = 0; i < X_DIM; ++i) {
 		lbT_temp(i) = MAX(bounds.x_goal(i) - eps, xT[i] - trust_box_size);
 		ubT_temp(i) = MIN(bounds.x_goal(i) + eps, xT[i] + trust_box_size);
 	}
@@ -250,7 +249,7 @@ void fill_in_C_and_e(StdVectorX& X, StdVectorU& U, double& delta, double trust_b
 	VectorU& u0 = U[0];
 
 	VectorX xt1;
-	Matrix<double, X_DIM, X_DIM+U_DIM+1> jac = cartpole::numerical_jacobian(continuous_dynamics, x0, u0, delta);
+	Matrix<double, X_DIM, X_DIM+U_DIM+1> jac = numerical_jacobian(continuous_cartpole_dynamics, x0, u0, delta);
 	Matrix<double, X_DIM, X_DIM> DH_X = jac.leftCols(X_DIM);
 	Matrix<double, X_DIM, U_DIM> DH_U = jac.middleCols(X_DIM, U_DIM);
 	Matrix<double, X_DIM, 1> DH_delta = jac.rightCols(1);
@@ -258,7 +257,7 @@ void fill_in_C_and_e(StdVectorX& X, StdVectorU& U, double& delta, double trust_b
 	Matrix<double, 2*X_DIM+1,3*X_DIM+U_DIM+1> C0_temp;
 	Matrix<double, 2*X_DIM+1, 1> e0_temp;
 
-	C0_temp.setZero(2*X_DIM+1,3*X_DIM+U_DIM+1);
+	C0_temp.setZero();
 
 	C0_temp.block<X_DIM,X_DIM>(0,0) = I;
 
@@ -271,9 +270,9 @@ void fill_in_C_and_e(StdVectorX& X, StdVectorU& U, double& delta, double trust_b
 
 	fill_col_major(C[0], C0_temp);
 
-	xt1 = cartpole::rk4(continuous_dynamics, x0, u0, delta);
+	xt1 = rk4(continuous_cartpole_dynamics, x0, u0, delta);
 
-	e0_temp.setZero(2*X_DIM+1,0);
+	e0_temp.setZero();
 	e0_temp.head(X_DIM) = bounds.x_start;
 	e0_temp.block<X_DIM,1>(X_DIM,0) = -xt1 + DH_X*x0 + DH_U*u0 + delta*DH_delta;
 
@@ -287,13 +286,13 @@ void fill_in_C_and_e(StdVectorX& X, StdVectorU& U, double& delta, double trust_b
 		VectorX& xt = X[t];
 		VectorU& ut = U[t];
 
-		xt1 = cartpole::rk4(continuous_dynamics, xt, ut, delta);
-		jac = cartpole::numerical_jacobian(continuous_dynamics, xt, ut, delta);
+		xt1 = rk4(continuous_cartpole_dynamics, xt, ut, delta);
+		jac = numerical_jacobian(continuous_cartpole_dynamics, xt, ut, delta);
 		DH_X = jac.leftCols(X_DIM);
 		DH_U = jac.middleCols(X_DIM, U_DIM);
 		DH_delta = jac.rightCols(1);
 
-		Ct_temp.setZero(X_DIM+1,3*X_DIM+U_DIM+1);
+		Ct_temp.setZero();
 
 		Ct_temp.block<X_DIM,X_DIM>(0,0) = DH_X;
 		Ct_temp.block<X_DIM,1>(0,X_DIM) = DH_delta;
@@ -312,7 +311,7 @@ void fill_in_C_and_e(StdVectorX& X, StdVectorU& U, double& delta, double trust_b
 
 		fill_col_major(C[t], Ct_temp);
 
-		et_temp.setZero(X_DIM+1,0);
+		et_temp.setZero();
 		et_temp.head(X_DIM) = -xt1 + DH_X*xt + DH_U*ut + delta*DH_delta;
 		fill_col_major(e[t], et_temp);
 	}
@@ -326,7 +325,7 @@ double computeObjective(double& delta, StdVectorX& X, StdVectorU& U) {
 double computeMerit(double& delta, StdVectorX& X, StdVectorU& U, double penalty_coeff) {
 	double merit = computeObjective(delta, X, U);
 	for(int t = 0; t < T-1; ++t) {
-		VectorXd hval = cartpole::dynamics_difference(continuous_dynamics, X[t], X[t+1], U[t], delta);
+		VectorXd hval = dynamics_difference(continuous_cartpole_dynamics, X[t], X[t+1], U[t], delta);
 		merit += penalty_coeff*(hval.cwiseAbs()).sum();
 	}
 	return merit;
@@ -394,7 +393,7 @@ bool minimize_merit_function(StdVectorX& X, StdVectorU& U, double& delta, bounds
 				//int num;
 				//std::cin >> num;
 			} else {
-				LOG_FATAL("Some problem in solver");
+				LOG_ERROR("Some problem in solver");
 				success = false;
 				return success;
 			}
@@ -447,12 +446,12 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bounds,
 		success = minimize_merit_function(X, U, delta, bounds, penalty_coeff, problem, output, info);
 
 		if (!success) {
-			printf("Merit function not minimized successfully\n");
+			LOG_ERROR("Merit function not minimized successfully\n");
 			break;
 		}
 
 		double constraint_violation = (computeMerit(delta, X, U, penalty_coeff) - computeObjective(delta, X, U))/penalty_coeff;
-		printf("Constraint violation: %.5f\n", constraint_violation);
+		LOG_INFO("Constraint violation: %.5f\n", constraint_violation);
 
 		if (constraint_violation <= cfg::cnt_tolerance) {
 			break;
@@ -460,7 +459,7 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bounds,
 			penalty_increases++;
 			penalty_coeff *= cfg::penalty_coeff_increase_ratio;
 			if (penalty_increases == cfg::max_penalty_coeff_increases) {
-				printf("Number of penalty coefficient increases exceeded maximum allowed.\n");
+				LOG_ERROR("Number of penalty coefficient increases exceeded maximum allowed.\n");
 				success = false;
 				break;
 			}
@@ -470,19 +469,55 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bounds,
 	return success;
 }
 
-/*
- *  This function serves as a testing function for the methods written above
- */
-int main() {
+int solve_cartpole_BVP(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bounds) {
 
 	cartpole_QP_solver_params problem;
 	cartpole_QP_solver_output output;
 	cartpole_QP_solver_info info;
 	setup_state_vars(problem, output);
 
+	// Smart initialization
+	delta = std::min((bounds.x_start - bounds.x_goal).norm()/10, .5);
+
+	std::cout << "Initial delta: " << delta << "\n";
+
+	// Initialize X variable
+	Matrix<double, X_DIM, T> init;
+	for(int i = 0; i < X_DIM; ++i) {
+		init.row(i).setLinSpaced(T, bounds.x_start(i), bounds.x_goal(i));
+	}
+
+	for(int t = 0; t < T; ++t) {
+		X[t] = init.col(t);
+	}
+
+	// Initialize U variable
+	//double c = (bounds.x_goal(3) - bounds.x_start(3)); // Trying this
+	for(int t = 0; t < T-1; ++t) {
+		U[t] = MatrixXd::Zero(U_DIM, 1);
+	}
+
+	bool success = penalty_sqp(X, U, delta, bounds, problem, output, info);
+
+	cleanup_state_vars();
+
+	if (success) {
+		return 1;
+	} else {
+		return 0;
+	}
+
+}
+
+
+/*
+ *  This function serves as a testing function for the methods written above
+ */
+int main(int argc, char* argv[]) {
+
 	StdVectorX X(T);
 	StdVectorU U(T-1);
-	double delta = 0.6;
+	double delta = 1;
 
 	// Start and goal state
 	VectorX x_start, x_goal;
@@ -490,50 +525,43 @@ int main() {
 	//double initial_state[NX] = { 0.0, 0.0, -0.00116139991132, 0.312921810594 };
 	//double initial_state[NX] = { 0.0, 0.0, 0.010977943328, 0.120180320014 };
 
-	x_start << 0.0, 0.0, -0.00116139991132, 0.312921810594;
-	//x_start << 0.0, 0.0, 3.0, 0.0;
-	x_goal << 0.0, 0.0, 3.14159265359, 0.0;
-
-	// Initialize X variable
-	Matrix<double, X_DIM, T> init;
-	for(int i = 0; i < X_DIM; ++i) {
-		init.row(i).setLinSpaced(T, x_start(i), x_goal(i));
-	}
-
-	//	std::cout << "init:\n" << init << "\n";
-
-	for(int t = 0; t < T; ++t) {
-		X[t] = init.col(t);
-	}
-
-	// Initialize U variable
-	for(int t = 0; t < T-1; ++t) {
-		U[t] = .5*MatrixXd::Zero(U_DIM, 1);
-	}
+	//x_start << 0.0, 0.0, -0.00116139991132, 0.312921810594;
+	//x_goal << 0.0, 0.0, 3.14159265359, 0.0;
+	x_start << atof(argv[1]), atof(argv[2]), atof(argv[3]), atof(argv[4]);
+	x_goal << atof(argv[5]), atof(argv[6]), atof(argv[7]), atof(argv[8]);
 
 	// Init bounds
 	bounds_t bounds;
 
-	bounds.u_min << -1;
-	bounds.u_max << 1;
-	bounds.x_min << -10, -10, -2*M_PI, -25;
-	bounds.x_max << 10, 10, 2*M_PI, 25;
+	bounds.u_min << -10;
+	bounds.u_max << 10;
+	bounds.x_min << -2, -10, -2*M_PI, -5;
+	bounds.x_max << 2, 10, 4*M_PI, 5;
 	bounds.delta_min = 0;
 	bounds.delta_max = 10;
 	bounds.x_goal = x_goal;
 	bounds.x_start = x_start;
 
-	util::Timer solveTimer;
-	util::Timer_tic(&solveTimer);
+	// Taken from PILCO manual
+	double mc = .5;
+	double mp = .5;
+	double l = .5;
+	double b = .1;
+	double cw = 0;
+	double ch = 0;
+	set_cartpole_parameters(mc, mp, l, b, cw, ch);
 
-	bool success = penalty_sqp(X, U, delta, bounds, problem, output, info);
+	// Time it
+	std::clock_t start;
+	start = std::clock();
 
-	double solvetime = util::Timer_toc(&solveTimer);
-	printf("Solve time: %5.3f ms\n", solvetime*1000);
+	bool success = solve_cartpole_BVP(X, U, delta, bounds);
+
+	double solvetime = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+	printf("Solve time: %5.3f seconds\n", solvetime);
 
 	if (success) {
 		printf("Success!!\n");
+		printf("Delta value: %f\n", delta);
 	}
-
-	cleanup_state_vars();
 }

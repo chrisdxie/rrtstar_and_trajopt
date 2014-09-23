@@ -57,23 +57,8 @@
 %       PARAMS.ub11 - column vector of length 6
 %       PARAMS.C11 - matrix of size [5 x 14]
 %       PARAMS.e11 - column vector of length 5
-%       PARAMS.f12 - column vector of length 14
-%       PARAMS.lb12 - column vector of length 14
-%       PARAMS.ub12 - column vector of length 6
-%       PARAMS.C12 - matrix of size [5 x 14]
-%       PARAMS.e12 - column vector of length 5
-%       PARAMS.f13 - column vector of length 14
-%       PARAMS.lb13 - column vector of length 14
-%       PARAMS.ub13 - column vector of length 6
-%       PARAMS.C13 - matrix of size [5 x 14]
-%       PARAMS.e13 - column vector of length 5
-%       PARAMS.f14 - column vector of length 14
-%       PARAMS.lb14 - column vector of length 14
-%       PARAMS.ub14 - column vector of length 6
-%       PARAMS.C14 - matrix of size [5 x 14]
-%       PARAMS.e14 - column vector of length 5
-%       PARAMS.lb15 - column vector of length 5
-%       PARAMS.ub15 - column vector of length 5
+%       PARAMS.lb12 - column vector of length 5
+%       PARAMS.ub12 - column vector of length 5
 %
 %   OUTPUT returns the values of the last iteration of the solver where
 %       OUTPUT.z1 - column vector of size 6
@@ -87,10 +72,7 @@
 %       OUTPUT.z9 - column vector of size 6
 %       OUTPUT.z10 - column vector of size 6
 %       OUTPUT.z11 - column vector of size 6
-%       OUTPUT.z12 - column vector of size 6
-%       OUTPUT.z13 - column vector of size 6
-%       OUTPUT.z14 - column vector of size 6
-%       OUTPUT.z15 - column vector of size 5
+%       OUTPUT.z12 - column vector of size 5
 %
 %   [OUTPUT, EXITFLAG] = cartpole_QP_solver(PARAMS) returns additionally
 %   the integer EXITFLAG indicating the state of the solution with 

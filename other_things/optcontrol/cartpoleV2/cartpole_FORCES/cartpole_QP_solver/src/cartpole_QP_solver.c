@@ -178,12 +178,12 @@ double cartpole_QP_solver_toc(cartpole_QP_solver_timer* t)
 
 /* LINEAR ALGEBRA LIBRARY ---------------------------------------------- */
 /*
- * Initializes a vector of length 201 with a value.
+ * Initializes a vector of length 159 with a value.
  */
-void cartpole_QP_solver_LA_INITIALIZEVECTOR_201(cartpole_QP_solver_FLOAT* vec, cartpole_QP_solver_FLOAT value)
+void cartpole_QP_solver_LA_INITIALIZEVECTOR_159(cartpole_QP_solver_FLOAT* vec, cartpole_QP_solver_FLOAT value)
 {
 	int i;
-	for( i=0; i<201; i++ )
+	for( i=0; i<159; i++ )
 	{
 		vec[i] = value;
 	}
@@ -191,12 +191,12 @@ void cartpole_QP_solver_LA_INITIALIZEVECTOR_201(cartpole_QP_solver_FLOAT* vec, c
 
 
 /*
- * Initializes a vector of length 74 with a value.
+ * Initializes a vector of length 59 with a value.
  */
-void cartpole_QP_solver_LA_INITIALIZEVECTOR_74(cartpole_QP_solver_FLOAT* vec, cartpole_QP_solver_FLOAT value)
+void cartpole_QP_solver_LA_INITIALIZEVECTOR_59(cartpole_QP_solver_FLOAT* vec, cartpole_QP_solver_FLOAT value)
 {
 	int i;
-	for( i=0; i<74; i++ )
+	for( i=0; i<59; i++ )
 	{
 		vec[i] = value;
 	}
@@ -204,12 +204,12 @@ void cartpole_QP_solver_LA_INITIALIZEVECTOR_74(cartpole_QP_solver_FLOAT* vec, ca
 
 
 /*
- * Initializes a vector of length 290 with a value.
+ * Initializes a vector of length 230 with a value.
  */
-void cartpole_QP_solver_LA_INITIALIZEVECTOR_290(cartpole_QP_solver_FLOAT* vec, cartpole_QP_solver_FLOAT value)
+void cartpole_QP_solver_LA_INITIALIZEVECTOR_230(cartpole_QP_solver_FLOAT* vec, cartpole_QP_solver_FLOAT value)
 {
 	int i;
-	for( i=0; i<290; i++ )
+	for( i=0; i<230; i++ )
 	{
 		vec[i] = value;
 	}
@@ -218,12 +218,12 @@ void cartpole_QP_solver_LA_INITIALIZEVECTOR_290(cartpole_QP_solver_FLOAT* vec, c
 
 /* 
  * Calculates a dot product and adds it to a variable: z += x'*y; 
- * This function is for vectors of length 290.
+ * This function is for vectors of length 230.
  */
-void cartpole_QP_solver_LA_DOTACC_290(cartpole_QP_solver_FLOAT *x, cartpole_QP_solver_FLOAT *y, cartpole_QP_solver_FLOAT *z)
+void cartpole_QP_solver_LA_DOTACC_230(cartpole_QP_solver_FLOAT *x, cartpole_QP_solver_FLOAT *y, cartpole_QP_solver_FLOAT *z)
 {
 	int i;
-	for( i=0; i<290; i++ ){
+	for( i=0; i<230; i++ ){
 		*z += x[i]*y[i];
 	}
 }
@@ -652,12 +652,12 @@ void cartpole_QP_solver_LA_INEQ_B_GRAD_5_5_5(cartpole_QP_solver_FLOAT *lu, cartp
 
 /*
  * Addition of three vectors  z = u + w + v
- * of length 201.
+ * of length 159.
  */
-void cartpole_QP_solver_LA_VVADD3_201(cartpole_QP_solver_FLOAT *u, cartpole_QP_solver_FLOAT *v, cartpole_QP_solver_FLOAT *w, cartpole_QP_solver_FLOAT *z)
+void cartpole_QP_solver_LA_VVADD3_159(cartpole_QP_solver_FLOAT *u, cartpole_QP_solver_FLOAT *v, cartpole_QP_solver_FLOAT *w, cartpole_QP_solver_FLOAT *z)
 {
 	int i;
-	for( i=0; i<201; i++ ){
+	for( i=0; i<159; i++ ){
 		z[i] = u[i] + v[i] + w[i];
 	}
 }
@@ -1550,12 +1550,12 @@ void cartpole_QP_solver_LA_DENSE_BACKWARDSUB_9(cartpole_QP_solver_FLOAT *L, cart
 
 
 /*
- * Vector subtraction z = -x - y for vectors of length 201.
+ * Vector subtraction z = -x - y for vectors of length 159.
  */
-void cartpole_QP_solver_LA_VSUB2_201(cartpole_QP_solver_FLOAT *x, cartpole_QP_solver_FLOAT *y, cartpole_QP_solver_FLOAT *z)
+void cartpole_QP_solver_LA_VSUB2_159(cartpole_QP_solver_FLOAT *x, cartpole_QP_solver_FLOAT *y, cartpole_QP_solver_FLOAT *z)
 {
 	int i;
-	for( i=0; i<201; i++){
+	for( i=0; i<159; i++){
 		z[i] = -x[i] - y[i];
 	}
 }
@@ -1709,7 +1709,7 @@ int cartpole_QP_solver_LINESEARCH_BACKTRACKING_AFFINE(cartpole_QP_solver_FLOAT *
          * values might be in registers, so it should be cheaper.
          */
         mymu = 0;
-        for( i=0; i<290; i++ ){
+        for( i=0; i<230; i++ ){
             dltemp = l[i] + mya*dl[i];
             dstemp = s[i] + mya*ds[i];
             if( dltemp < 0 || dstemp < 0 ){
@@ -1724,7 +1724,7 @@ int cartpole_QP_solver_LINESEARCH_BACKTRACKING_AFFINE(cartpole_QP_solver_FLOAT *
          * If no early termination of the for-loop above occurred, we
          * found the required value of a and we can quit the while loop.
          */
-        if( i == 290 ){
+        if( i == 230 ){
             break;
         } else {
             mya *= cartpole_QP_solver_SET_LS_SCALE_AFF;
@@ -1736,19 +1736,19 @@ int cartpole_QP_solver_LINESEARCH_BACKTRACKING_AFFINE(cartpole_QP_solver_FLOAT *
     
     /* return new values and iteration counter */
     *a = mya;
-    *mu_aff = mymu / (cartpole_QP_solver_FLOAT)290;
+    *mu_aff = mymu / (cartpole_QP_solver_FLOAT)230;
     return lsIt;
 }
 
 
 /*
  * Vector subtraction x = (u.*v - mu)*sigma where a is a scalar
-*  and x,u,v are vectors of length 290.
+*  and x,u,v are vectors of length 230.
  */
-void cartpole_QP_solver_LA_VSUB5_290(cartpole_QP_solver_FLOAT *u, cartpole_QP_solver_FLOAT *v, cartpole_QP_solver_FLOAT mu,  cartpole_QP_solver_FLOAT sigma, cartpole_QP_solver_FLOAT *x)
+void cartpole_QP_solver_LA_VSUB5_230(cartpole_QP_solver_FLOAT *u, cartpole_QP_solver_FLOAT *v, cartpole_QP_solver_FLOAT mu,  cartpole_QP_solver_FLOAT sigma, cartpole_QP_solver_FLOAT *x)
 {
 	int i;
-	for( i=0; i<290; i++){
+	for( i=0; i<230; i++){
 		x[i] = u[i]*v[i] - mu;
 		x[i] *= sigma;
 	}
@@ -1872,12 +1872,12 @@ void cartpole_QP_solver_LA_DENSE_DIAGZERO_2MVMADD_5_14_5(cartpole_QP_solver_FLOA
 
 
 /*
- * Vector subtraction z = x - y for vectors of length 201.
+ * Vector subtraction z = x - y for vectors of length 159.
  */
-void cartpole_QP_solver_LA_VSUB_201(cartpole_QP_solver_FLOAT *x, cartpole_QP_solver_FLOAT *y, cartpole_QP_solver_FLOAT *z)
+void cartpole_QP_solver_LA_VSUB_159(cartpole_QP_solver_FLOAT *x, cartpole_QP_solver_FLOAT *y, cartpole_QP_solver_FLOAT *z)
 {
 	int i;
-	for( i=0; i<201; i++){
+	for( i=0; i<159; i++){
 		z[i] = x[i] - y[i];
 	}
 }
@@ -1936,48 +1936,48 @@ void cartpole_QP_solver_LA_VEC_DIVSUB_MULTADD_INDEXED_5(cartpole_QP_solver_FLOAT
 
 
 /*
- * Computes ds = -l.\(r + s.*dl) for vectors of length 290.
+ * Computes ds = -l.\(r + s.*dl) for vectors of length 230.
  */
-void cartpole_QP_solver_LA_VSUB7_290(cartpole_QP_solver_FLOAT *l, cartpole_QP_solver_FLOAT *r, cartpole_QP_solver_FLOAT *s, cartpole_QP_solver_FLOAT *dl, cartpole_QP_solver_FLOAT *ds)
+void cartpole_QP_solver_LA_VSUB7_230(cartpole_QP_solver_FLOAT *l, cartpole_QP_solver_FLOAT *r, cartpole_QP_solver_FLOAT *s, cartpole_QP_solver_FLOAT *dl, cartpole_QP_solver_FLOAT *ds)
 {
 	int i;
-	for( i=0; i<290; i++){
+	for( i=0; i<230; i++){
 		ds[i] = -(r[i] + s[i]*dl[i])/l[i];
 	}
 }
 
 
 /*
- * Vector addition x = x + y for vectors of length 201.
+ * Vector addition x = x + y for vectors of length 159.
  */
-void cartpole_QP_solver_LA_VADD_201(cartpole_QP_solver_FLOAT *x, cartpole_QP_solver_FLOAT *y)
+void cartpole_QP_solver_LA_VADD_159(cartpole_QP_solver_FLOAT *x, cartpole_QP_solver_FLOAT *y)
 {
 	int i;
-	for( i=0; i<201; i++){
+	for( i=0; i<159; i++){
 		x[i] += y[i];
 	}
 }
 
 
 /*
- * Vector addition x = x + y for vectors of length 74.
+ * Vector addition x = x + y for vectors of length 59.
  */
-void cartpole_QP_solver_LA_VADD_74(cartpole_QP_solver_FLOAT *x, cartpole_QP_solver_FLOAT *y)
+void cartpole_QP_solver_LA_VADD_59(cartpole_QP_solver_FLOAT *x, cartpole_QP_solver_FLOAT *y)
 {
 	int i;
-	for( i=0; i<74; i++){
+	for( i=0; i<59; i++){
 		x[i] += y[i];
 	}
 }
 
 
 /*
- * Vector addition x = x + y for vectors of length 290.
+ * Vector addition x = x + y for vectors of length 230.
  */
-void cartpole_QP_solver_LA_VADD_290(cartpole_QP_solver_FLOAT *x, cartpole_QP_solver_FLOAT *y)
+void cartpole_QP_solver_LA_VADD_230(cartpole_QP_solver_FLOAT *x, cartpole_QP_solver_FLOAT *y)
 {
 	int i;
-	for( i=0; i<290; i++){
+	for( i=0; i<230; i++){
 		x[i] += y[i];
 	}
 }
@@ -1999,7 +1999,7 @@ int cartpole_QP_solver_LINESEARCH_BACKTRACKING_COMBINED(cartpole_QP_solver_FLOAT
     while( 1 ){                        
 
         /* check whether search criterion is fulfilled */
-        for( i=0; i<290; i++ ){
+        for( i=0; i<230; i++ ){
             dltemp = l[i] + (*a)*dl[i];
             dstemp = s[i] + (*a)*ds[i];
             if( dltemp < 0 || dstemp < 0 ){
@@ -2012,7 +2012,7 @@ int cartpole_QP_solver_LINESEARCH_BACKTRACKING_COMBINED(cartpole_QP_solver_FLOAT
          * If no early termination of the for-loop above occurred, we
          * found the required value of a and we can quit the while loop.
          */
-        if( i == 290 ){
+        if( i == 230 ){
             break;
         } else {
             *a *= cartpole_QP_solver_SET_LS_SCALE;
@@ -2026,25 +2026,25 @@ int cartpole_QP_solver_LINESEARCH_BACKTRACKING_COMBINED(cartpole_QP_solver_FLOAT
     a_gamma = (*a)*cartpole_QP_solver_SET_LS_MAXSTEP;
     
     /* primal variables */
-    for( i=0; i<201; i++ ){
+    for( i=0; i<159; i++ ){
         z[i] += a_gamma*dz[i];
     }
     
     /* equality constraint multipliers */
-    for( i=0; i<74; i++ ){
+    for( i=0; i<59; i++ ){
         v[i] += a_gamma*dv[i];
     }
     
     /* inequality constraint multipliers & slacks, also update mu */
     *mu = 0;
-    for( i=0; i<290; i++ ){
+    for( i=0; i<230; i++ ){
         dltemp = l[i] + a_gamma*dl[i]; l[i] = dltemp;
         dstemp = s[i] + a_gamma*ds[i]; s[i] = dstemp;
         *mu += dltemp*dstemp;
     }
     
     *a = a_gamma;
-    *mu /= (cartpole_QP_solver_FLOAT)290;
+    *mu /= (cartpole_QP_solver_FLOAT)230;
     return lsIt;
 }
 
@@ -2052,24 +2052,24 @@ int cartpole_QP_solver_LINESEARCH_BACKTRACKING_COMBINED(cartpole_QP_solver_FLOAT
 
 
 /* VARIABLE DEFINITIONS ------------------------------------------------ */
-cartpole_QP_solver_FLOAT cartpole_QP_solver_z[201];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_v[74];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_dz_aff[201];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_dv_aff[74];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_grad_cost[201];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_grad_eq[201];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_rd[201];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_l[290];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_s[290];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_lbys[290];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_dl_aff[290];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_ds_aff[290];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_dz_cc[201];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_dv_cc[74];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_dl_cc[290];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_ds_cc[290];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_ccrhs[290];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_grad_ineq[201];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_z[159];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_v[59];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_dz_aff[159];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_dv_aff[59];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_grad_cost[159];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_grad_eq[159];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_rd[159];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_l[230];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_s[230];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_lbys[230];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_dl_aff[230];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_ds_aff[230];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_dz_cc[159];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_dv_cc[59];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_dl_cc[230];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_ds_cc[230];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_ccrhs[230];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_grad_ineq[159];
 cartpole_QP_solver_FLOAT cartpole_QP_solver_H00[14] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_z00 = cartpole_QP_solver_z + 0;
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_dzaff00 = cartpole_QP_solver_dz_aff + 0;
@@ -2571,176 +2571,44 @@ cartpole_QP_solver_FLOAT cartpole_QP_solver_Phi10[14];
 cartpole_QP_solver_FLOAT cartpole_QP_solver_W10[14];
 cartpole_QP_solver_FLOAT cartpole_QP_solver_Ysd10[25];
 cartpole_QP_solver_FLOAT cartpole_QP_solver_Lsd10[25];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_H11[5] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
+cartpole_QP_solver_FLOAT cartpole_QP_solver_f11[5] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_z11 = cartpole_QP_solver_z + 154;
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_dzaff11 = cartpole_QP_solver_dz_aff + 154;
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_dzcc11 = cartpole_QP_solver_dz_cc + 154;
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_rd11 = cartpole_QP_solver_rd + 154;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Lbyrd11[14];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_Lbyrd11[5];
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_grad_cost11 = cartpole_QP_solver_grad_cost + 154;
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_grad_eq11 = cartpole_QP_solver_grad_eq + 154;
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_grad_ineq11 = cartpole_QP_solver_grad_ineq + 154;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_ctv11[14];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_v11 = cartpole_QP_solver_v + 59;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_re11[5];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_beta11[5];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_betacc11[5];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dvaff11 = cartpole_QP_solver_dv_aff + 59;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dvcc11 = cartpole_QP_solver_dv_cc + 59;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_V11[70];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Yd11[15];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Ld11[15];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_yy11[5];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_bmy11[5];
-int cartpole_QP_solver_lbIdx11[14] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+cartpole_QP_solver_FLOAT cartpole_QP_solver_ctv11[5];
+int cartpole_QP_solver_lbIdx11[5] = {0, 1, 2, 3, 4};
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_llb11 = cartpole_QP_solver_l + 220;
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_slb11 = cartpole_QP_solver_s + 220;
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_llbbyslb11 = cartpole_QP_solver_lbys + 220;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_rilb11[14];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_rilb11[5];
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_dllbaff11 = cartpole_QP_solver_dl_aff + 220;
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_dslbaff11 = cartpole_QP_solver_ds_aff + 220;
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_dllbcc11 = cartpole_QP_solver_dl_cc + 220;
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_dslbcc11 = cartpole_QP_solver_ds_cc + 220;
 cartpole_QP_solver_FLOAT* cartpole_QP_solver_ccrhsl11 = cartpole_QP_solver_ccrhs + 220;
-int cartpole_QP_solver_ubIdx11[6] = {0, 1, 2, 3, 4, 5};
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_lub11 = cartpole_QP_solver_l + 234;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_sub11 = cartpole_QP_solver_s + 234;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_lubbysub11 = cartpole_QP_solver_lbys + 234;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_riub11[6];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dlubaff11 = cartpole_QP_solver_dl_aff + 234;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dsubaff11 = cartpole_QP_solver_ds_aff + 234;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dlubcc11 = cartpole_QP_solver_dl_cc + 234;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dsubcc11 = cartpole_QP_solver_ds_cc + 234;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_ccrhsub11 = cartpole_QP_solver_ccrhs + 234;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Phi11[14];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_W11[14];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Ysd11[25];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Lsd11[25];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_z12 = cartpole_QP_solver_z + 168;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dzaff12 = cartpole_QP_solver_dz_aff + 168;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dzcc12 = cartpole_QP_solver_dz_cc + 168;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_rd12 = cartpole_QP_solver_rd + 168;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Lbyrd12[14];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_grad_cost12 = cartpole_QP_solver_grad_cost + 168;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_grad_eq12 = cartpole_QP_solver_grad_eq + 168;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_grad_ineq12 = cartpole_QP_solver_grad_ineq + 168;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_ctv12[14];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_v12 = cartpole_QP_solver_v + 64;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_re12[5];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_beta12[5];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_betacc12[5];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dvaff12 = cartpole_QP_solver_dv_aff + 64;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dvcc12 = cartpole_QP_solver_dv_cc + 64;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_V12[70];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Yd12[15];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Ld12[15];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_yy12[5];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_bmy12[5];
-int cartpole_QP_solver_lbIdx12[14] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_llb12 = cartpole_QP_solver_l + 240;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_slb12 = cartpole_QP_solver_s + 240;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_llbbyslb12 = cartpole_QP_solver_lbys + 240;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_rilb12[14];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dllbaff12 = cartpole_QP_solver_dl_aff + 240;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dslbaff12 = cartpole_QP_solver_ds_aff + 240;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dllbcc12 = cartpole_QP_solver_dl_cc + 240;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dslbcc12 = cartpole_QP_solver_ds_cc + 240;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_ccrhsl12 = cartpole_QP_solver_ccrhs + 240;
-int cartpole_QP_solver_ubIdx12[6] = {0, 1, 2, 3, 4, 5};
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_lub12 = cartpole_QP_solver_l + 254;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_sub12 = cartpole_QP_solver_s + 254;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_lubbysub12 = cartpole_QP_solver_lbys + 254;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_riub12[6];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dlubaff12 = cartpole_QP_solver_dl_aff + 254;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dsubaff12 = cartpole_QP_solver_ds_aff + 254;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dlubcc12 = cartpole_QP_solver_dl_cc + 254;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dsubcc12 = cartpole_QP_solver_ds_cc + 254;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_ccrhsub12 = cartpole_QP_solver_ccrhs + 254;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Phi12[14];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_W12[14];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Ysd12[25];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Lsd12[25];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_z13 = cartpole_QP_solver_z + 182;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dzaff13 = cartpole_QP_solver_dz_aff + 182;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dzcc13 = cartpole_QP_solver_dz_cc + 182;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_rd13 = cartpole_QP_solver_rd + 182;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Lbyrd13[14];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_grad_cost13 = cartpole_QP_solver_grad_cost + 182;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_grad_eq13 = cartpole_QP_solver_grad_eq + 182;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_grad_ineq13 = cartpole_QP_solver_grad_ineq + 182;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_ctv13[14];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_v13 = cartpole_QP_solver_v + 69;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_re13[5];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_beta13[5];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_betacc13[5];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dvaff13 = cartpole_QP_solver_dv_aff + 69;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dvcc13 = cartpole_QP_solver_dv_cc + 69;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_V13[70];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Yd13[15];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Ld13[15];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_yy13[5];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_bmy13[5];
-int cartpole_QP_solver_lbIdx13[14] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_llb13 = cartpole_QP_solver_l + 260;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_slb13 = cartpole_QP_solver_s + 260;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_llbbyslb13 = cartpole_QP_solver_lbys + 260;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_rilb13[14];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dllbaff13 = cartpole_QP_solver_dl_aff + 260;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dslbaff13 = cartpole_QP_solver_ds_aff + 260;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dllbcc13 = cartpole_QP_solver_dl_cc + 260;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dslbcc13 = cartpole_QP_solver_ds_cc + 260;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_ccrhsl13 = cartpole_QP_solver_ccrhs + 260;
-int cartpole_QP_solver_ubIdx13[6] = {0, 1, 2, 3, 4, 5};
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_lub13 = cartpole_QP_solver_l + 274;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_sub13 = cartpole_QP_solver_s + 274;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_lubbysub13 = cartpole_QP_solver_lbys + 274;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_riub13[6];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dlubaff13 = cartpole_QP_solver_dl_aff + 274;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dsubaff13 = cartpole_QP_solver_ds_aff + 274;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dlubcc13 = cartpole_QP_solver_dl_cc + 274;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dsubcc13 = cartpole_QP_solver_ds_cc + 274;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_ccrhsub13 = cartpole_QP_solver_ccrhs + 274;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Phi13[14];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_W13[14];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Ysd13[25];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Lsd13[25];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_H14[5] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
-cartpole_QP_solver_FLOAT cartpole_QP_solver_f14[5] = {0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000, 0.0000000000000000E+000};
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_z14 = cartpole_QP_solver_z + 196;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dzaff14 = cartpole_QP_solver_dz_aff + 196;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dzcc14 = cartpole_QP_solver_dz_cc + 196;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_rd14 = cartpole_QP_solver_rd + 196;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Lbyrd14[5];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_grad_cost14 = cartpole_QP_solver_grad_cost + 196;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_grad_eq14 = cartpole_QP_solver_grad_eq + 196;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_grad_ineq14 = cartpole_QP_solver_grad_ineq + 196;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_ctv14[5];
-int cartpole_QP_solver_lbIdx14[5] = {0, 1, 2, 3, 4};
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_llb14 = cartpole_QP_solver_l + 280;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_slb14 = cartpole_QP_solver_s + 280;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_llbbyslb14 = cartpole_QP_solver_lbys + 280;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_rilb14[5];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dllbaff14 = cartpole_QP_solver_dl_aff + 280;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dslbaff14 = cartpole_QP_solver_ds_aff + 280;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dllbcc14 = cartpole_QP_solver_dl_cc + 280;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dslbcc14 = cartpole_QP_solver_ds_cc + 280;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_ccrhsl14 = cartpole_QP_solver_ccrhs + 280;
-int cartpole_QP_solver_ubIdx14[5] = {0, 1, 2, 3, 4};
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_lub14 = cartpole_QP_solver_l + 285;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_sub14 = cartpole_QP_solver_s + 285;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_lubbysub14 = cartpole_QP_solver_lbys + 285;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_riub14[5];
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dlubaff14 = cartpole_QP_solver_dl_aff + 285;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dsubaff14 = cartpole_QP_solver_ds_aff + 285;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dlubcc14 = cartpole_QP_solver_dl_cc + 285;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_dsubcc14 = cartpole_QP_solver_ds_cc + 285;
-cartpole_QP_solver_FLOAT* cartpole_QP_solver_ccrhsub14 = cartpole_QP_solver_ccrhs + 285;
-cartpole_QP_solver_FLOAT cartpole_QP_solver_Phi14[5];
-cartpole_QP_solver_FLOAT cartpole_QP_solver_D14[5] = {-1.0000000000000000E+000, 
+int cartpole_QP_solver_ubIdx11[5] = {0, 1, 2, 3, 4};
+cartpole_QP_solver_FLOAT* cartpole_QP_solver_lub11 = cartpole_QP_solver_l + 225;
+cartpole_QP_solver_FLOAT* cartpole_QP_solver_sub11 = cartpole_QP_solver_s + 225;
+cartpole_QP_solver_FLOAT* cartpole_QP_solver_lubbysub11 = cartpole_QP_solver_lbys + 225;
+cartpole_QP_solver_FLOAT cartpole_QP_solver_riub11[5];
+cartpole_QP_solver_FLOAT* cartpole_QP_solver_dlubaff11 = cartpole_QP_solver_dl_aff + 225;
+cartpole_QP_solver_FLOAT* cartpole_QP_solver_dsubaff11 = cartpole_QP_solver_ds_aff + 225;
+cartpole_QP_solver_FLOAT* cartpole_QP_solver_dlubcc11 = cartpole_QP_solver_dl_cc + 225;
+cartpole_QP_solver_FLOAT* cartpole_QP_solver_dsubcc11 = cartpole_QP_solver_ds_cc + 225;
+cartpole_QP_solver_FLOAT* cartpole_QP_solver_ccrhsub11 = cartpole_QP_solver_ccrhs + 225;
+cartpole_QP_solver_FLOAT cartpole_QP_solver_Phi11[5];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_D11[5] = {-1.0000000000000000E+000, 
 -1.0000000000000000E+000, 
 -1.0000000000000000E+000, 
 -1.0000000000000000E+000, 
 -1.0000000000000000E+000};
-cartpole_QP_solver_FLOAT cartpole_QP_solver_W14[5];
+cartpole_QP_solver_FLOAT cartpole_QP_solver_W11[5];
 cartpole_QP_solver_FLOAT musigma;
 cartpole_QP_solver_FLOAT sigma_3rdroot;
 cartpole_QP_solver_FLOAT cartpole_QP_solver_Diag1_0[14];
@@ -2761,13 +2629,13 @@ int exitcode;
 #endif
 /* FUNCTION CALLS INTO LA LIBRARY -------------------------------------- */
 info->it = 0;
-cartpole_QP_solver_LA_INITIALIZEVECTOR_201(cartpole_QP_solver_z, 0);
-cartpole_QP_solver_LA_INITIALIZEVECTOR_74(cartpole_QP_solver_v, 1);
-cartpole_QP_solver_LA_INITIALIZEVECTOR_290(cartpole_QP_solver_l, 10);
-cartpole_QP_solver_LA_INITIALIZEVECTOR_290(cartpole_QP_solver_s, 10);
+cartpole_QP_solver_LA_INITIALIZEVECTOR_159(cartpole_QP_solver_z, 0);
+cartpole_QP_solver_LA_INITIALIZEVECTOR_59(cartpole_QP_solver_v, 1);
+cartpole_QP_solver_LA_INITIALIZEVECTOR_230(cartpole_QP_solver_l, 10);
+cartpole_QP_solver_LA_INITIALIZEVECTOR_230(cartpole_QP_solver_s, 10);
 info->mu = 0;
-cartpole_QP_solver_LA_DOTACC_290(cartpole_QP_solver_l, cartpole_QP_solver_s, &info->mu);
-info->mu /= 290;
+cartpole_QP_solver_LA_DOTACC_230(cartpole_QP_solver_l, cartpole_QP_solver_s, &info->mu);
+info->mu /= 230;
 while( 1 ){
 info->pobj = 0;
 cartpole_QP_solver_LA_DIAG_QUADFCN_14(cartpole_QP_solver_H00, params->f1, cartpole_QP_solver_z00, cartpole_QP_solver_grad_cost00, &info->pobj);
@@ -2781,10 +2649,7 @@ cartpole_QP_solver_LA_DIAG_QUADFCN_14(cartpole_QP_solver_H00, params->f8, cartpo
 cartpole_QP_solver_LA_DIAG_QUADFCN_14(cartpole_QP_solver_H00, params->f9, cartpole_QP_solver_z08, cartpole_QP_solver_grad_cost08, &info->pobj);
 cartpole_QP_solver_LA_DIAG_QUADFCN_14(cartpole_QP_solver_H00, params->f10, cartpole_QP_solver_z09, cartpole_QP_solver_grad_cost09, &info->pobj);
 cartpole_QP_solver_LA_DIAG_QUADFCN_14(cartpole_QP_solver_H00, params->f11, cartpole_QP_solver_z10, cartpole_QP_solver_grad_cost10, &info->pobj);
-cartpole_QP_solver_LA_DIAG_QUADFCN_14(cartpole_QP_solver_H00, params->f12, cartpole_QP_solver_z11, cartpole_QP_solver_grad_cost11, &info->pobj);
-cartpole_QP_solver_LA_DIAG_QUADFCN_14(cartpole_QP_solver_H00, params->f13, cartpole_QP_solver_z12, cartpole_QP_solver_grad_cost12, &info->pobj);
-cartpole_QP_solver_LA_DIAG_QUADFCN_14(cartpole_QP_solver_H00, params->f14, cartpole_QP_solver_z13, cartpole_QP_solver_grad_cost13, &info->pobj);
-cartpole_QP_solver_LA_DIAG_QUADFCN_5(cartpole_QP_solver_H14, cartpole_QP_solver_f14, cartpole_QP_solver_z14, cartpole_QP_solver_grad_cost14, &info->pobj);
+cartpole_QP_solver_LA_DIAG_QUADFCN_5(cartpole_QP_solver_H11, cartpole_QP_solver_f11, cartpole_QP_solver_z11, cartpole_QP_solver_grad_cost11, &info->pobj);
 info->res_eq = 0;
 info->dgap = 0;
 cartpole_QP_solver_LA_DENSE_MVMSUB3_9_14_14(params->C1, cartpole_QP_solver_z00, cartpole_QP_solver_D01, cartpole_QP_solver_z01, params->e1, cartpole_QP_solver_v00, cartpole_QP_solver_re00, &info->dgap, &info->res_eq);
@@ -2797,10 +2662,7 @@ cartpole_QP_solver_LA_DENSE_DIAGZERO_MVMSUB3_5_14_14(params->C7, cartpole_QP_sol
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MVMSUB3_5_14_14(params->C8, cartpole_QP_solver_z07, cartpole_QP_solver_D02, cartpole_QP_solver_z08, params->e8, cartpole_QP_solver_v07, cartpole_QP_solver_re07, &info->dgap, &info->res_eq);
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MVMSUB3_5_14_14(params->C9, cartpole_QP_solver_z08, cartpole_QP_solver_D02, cartpole_QP_solver_z09, params->e9, cartpole_QP_solver_v08, cartpole_QP_solver_re08, &info->dgap, &info->res_eq);
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MVMSUB3_5_14_14(params->C10, cartpole_QP_solver_z09, cartpole_QP_solver_D02, cartpole_QP_solver_z10, params->e10, cartpole_QP_solver_v09, cartpole_QP_solver_re09, &info->dgap, &info->res_eq);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MVMSUB3_5_14_14(params->C11, cartpole_QP_solver_z10, cartpole_QP_solver_D02, cartpole_QP_solver_z11, params->e11, cartpole_QP_solver_v10, cartpole_QP_solver_re10, &info->dgap, &info->res_eq);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MVMSUB3_5_14_14(params->C12, cartpole_QP_solver_z11, cartpole_QP_solver_D02, cartpole_QP_solver_z12, params->e12, cartpole_QP_solver_v11, cartpole_QP_solver_re11, &info->dgap, &info->res_eq);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MVMSUB3_5_14_14(params->C13, cartpole_QP_solver_z12, cartpole_QP_solver_D02, cartpole_QP_solver_z13, params->e13, cartpole_QP_solver_v12, cartpole_QP_solver_re12, &info->dgap, &info->res_eq);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MVMSUB3_5_14_5(params->C14, cartpole_QP_solver_z13, cartpole_QP_solver_D14, cartpole_QP_solver_z14, params->e14, cartpole_QP_solver_v13, cartpole_QP_solver_re13, &info->dgap, &info->res_eq);
+cartpole_QP_solver_LA_DENSE_DIAGZERO_MVMSUB3_5_14_5(params->C11, cartpole_QP_solver_z10, cartpole_QP_solver_D11, cartpole_QP_solver_z11, params->e11, cartpole_QP_solver_v10, cartpole_QP_solver_re10, &info->dgap, &info->res_eq);
 cartpole_QP_solver_LA_DENSE_MTVM_9_14(params->C1, cartpole_QP_solver_v00, cartpole_QP_solver_grad_eq00);
 cartpole_QP_solver_LA_DENSE_MTVM2_5_14_9(params->C2, cartpole_QP_solver_v01, cartpole_QP_solver_D01, cartpole_QP_solver_v00, cartpole_QP_solver_grad_eq01);
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C3, cartpole_QP_solver_v02, cartpole_QP_solver_D02, cartpole_QP_solver_v01, cartpole_QP_solver_grad_eq02);
@@ -2812,10 +2674,7 @@ cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C8, cartpole_QP_solver
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C9, cartpole_QP_solver_v08, cartpole_QP_solver_D02, cartpole_QP_solver_v07, cartpole_QP_solver_grad_eq08);
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C10, cartpole_QP_solver_v09, cartpole_QP_solver_D02, cartpole_QP_solver_v08, cartpole_QP_solver_grad_eq09);
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C11, cartpole_QP_solver_v10, cartpole_QP_solver_D02, cartpole_QP_solver_v09, cartpole_QP_solver_grad_eq10);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C12, cartpole_QP_solver_v11, cartpole_QP_solver_D02, cartpole_QP_solver_v10, cartpole_QP_solver_grad_eq11);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C13, cartpole_QP_solver_v12, cartpole_QP_solver_D02, cartpole_QP_solver_v11, cartpole_QP_solver_grad_eq12);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C14, cartpole_QP_solver_v13, cartpole_QP_solver_D02, cartpole_QP_solver_v12, cartpole_QP_solver_grad_eq13);
-cartpole_QP_solver_LA_DIAGZERO_MTVM_5_5(cartpole_QP_solver_D14, cartpole_QP_solver_v13, cartpole_QP_solver_grad_eq14);
+cartpole_QP_solver_LA_DIAGZERO_MTVM_5_5(cartpole_QP_solver_D11, cartpole_QP_solver_v10, cartpole_QP_solver_grad_eq11);
 info->res_ineq = 0;
 cartpole_QP_solver_LA_VSUBADD3_14(params->lb1, cartpole_QP_solver_z00, cartpole_QP_solver_lbIdx00, cartpole_QP_solver_llb00, cartpole_QP_solver_slb00, cartpole_QP_solver_rilb00, &info->dgap, &info->res_ineq);
 cartpole_QP_solver_LA_VSUBADD2_6(cartpole_QP_solver_z00, cartpole_QP_solver_ubIdx00, params->ub1, cartpole_QP_solver_lub00, cartpole_QP_solver_sub00, cartpole_QP_solver_riub00, &info->dgap, &info->res_ineq);
@@ -2839,14 +2698,8 @@ cartpole_QP_solver_LA_VSUBADD3_14(params->lb10, cartpole_QP_solver_z09, cartpole
 cartpole_QP_solver_LA_VSUBADD2_6(cartpole_QP_solver_z09, cartpole_QP_solver_ubIdx09, params->ub10, cartpole_QP_solver_lub09, cartpole_QP_solver_sub09, cartpole_QP_solver_riub09, &info->dgap, &info->res_ineq);
 cartpole_QP_solver_LA_VSUBADD3_14(params->lb11, cartpole_QP_solver_z10, cartpole_QP_solver_lbIdx10, cartpole_QP_solver_llb10, cartpole_QP_solver_slb10, cartpole_QP_solver_rilb10, &info->dgap, &info->res_ineq);
 cartpole_QP_solver_LA_VSUBADD2_6(cartpole_QP_solver_z10, cartpole_QP_solver_ubIdx10, params->ub11, cartpole_QP_solver_lub10, cartpole_QP_solver_sub10, cartpole_QP_solver_riub10, &info->dgap, &info->res_ineq);
-cartpole_QP_solver_LA_VSUBADD3_14(params->lb12, cartpole_QP_solver_z11, cartpole_QP_solver_lbIdx11, cartpole_QP_solver_llb11, cartpole_QP_solver_slb11, cartpole_QP_solver_rilb11, &info->dgap, &info->res_ineq);
-cartpole_QP_solver_LA_VSUBADD2_6(cartpole_QP_solver_z11, cartpole_QP_solver_ubIdx11, params->ub12, cartpole_QP_solver_lub11, cartpole_QP_solver_sub11, cartpole_QP_solver_riub11, &info->dgap, &info->res_ineq);
-cartpole_QP_solver_LA_VSUBADD3_14(params->lb13, cartpole_QP_solver_z12, cartpole_QP_solver_lbIdx12, cartpole_QP_solver_llb12, cartpole_QP_solver_slb12, cartpole_QP_solver_rilb12, &info->dgap, &info->res_ineq);
-cartpole_QP_solver_LA_VSUBADD2_6(cartpole_QP_solver_z12, cartpole_QP_solver_ubIdx12, params->ub13, cartpole_QP_solver_lub12, cartpole_QP_solver_sub12, cartpole_QP_solver_riub12, &info->dgap, &info->res_ineq);
-cartpole_QP_solver_LA_VSUBADD3_14(params->lb14, cartpole_QP_solver_z13, cartpole_QP_solver_lbIdx13, cartpole_QP_solver_llb13, cartpole_QP_solver_slb13, cartpole_QP_solver_rilb13, &info->dgap, &info->res_ineq);
-cartpole_QP_solver_LA_VSUBADD2_6(cartpole_QP_solver_z13, cartpole_QP_solver_ubIdx13, params->ub14, cartpole_QP_solver_lub13, cartpole_QP_solver_sub13, cartpole_QP_solver_riub13, &info->dgap, &info->res_ineq);
-cartpole_QP_solver_LA_VSUBADD3_5(params->lb15, cartpole_QP_solver_z14, cartpole_QP_solver_lbIdx14, cartpole_QP_solver_llb14, cartpole_QP_solver_slb14, cartpole_QP_solver_rilb14, &info->dgap, &info->res_ineq);
-cartpole_QP_solver_LA_VSUBADD2_5(cartpole_QP_solver_z14, cartpole_QP_solver_ubIdx14, params->ub15, cartpole_QP_solver_lub14, cartpole_QP_solver_sub14, cartpole_QP_solver_riub14, &info->dgap, &info->res_ineq);
+cartpole_QP_solver_LA_VSUBADD3_5(params->lb12, cartpole_QP_solver_z11, cartpole_QP_solver_lbIdx11, cartpole_QP_solver_llb11, cartpole_QP_solver_slb11, cartpole_QP_solver_rilb11, &info->dgap, &info->res_ineq);
+cartpole_QP_solver_LA_VSUBADD2_5(cartpole_QP_solver_z11, cartpole_QP_solver_ubIdx11, params->ub12, cartpole_QP_solver_lub11, cartpole_QP_solver_sub11, cartpole_QP_solver_riub11, &info->dgap, &info->res_ineq);
 cartpole_QP_solver_LA_INEQ_B_GRAD_14_14_6(cartpole_QP_solver_lub00, cartpole_QP_solver_sub00, cartpole_QP_solver_riub00, cartpole_QP_solver_llb00, cartpole_QP_solver_slb00, cartpole_QP_solver_rilb00, cartpole_QP_solver_lbIdx00, cartpole_QP_solver_ubIdx00, cartpole_QP_solver_grad_ineq00, cartpole_QP_solver_lubbysub00, cartpole_QP_solver_llbbyslb00);
 cartpole_QP_solver_LA_INEQ_B_GRAD_14_14_6(cartpole_QP_solver_lub01, cartpole_QP_solver_sub01, cartpole_QP_solver_riub01, cartpole_QP_solver_llb01, cartpole_QP_solver_slb01, cartpole_QP_solver_rilb01, cartpole_QP_solver_lbIdx01, cartpole_QP_solver_ubIdx01, cartpole_QP_solver_grad_ineq01, cartpole_QP_solver_lubbysub01, cartpole_QP_solver_llbbyslb01);
 cartpole_QP_solver_LA_INEQ_B_GRAD_14_14_6(cartpole_QP_solver_lub02, cartpole_QP_solver_sub02, cartpole_QP_solver_riub02, cartpole_QP_solver_llb02, cartpole_QP_solver_slb02, cartpole_QP_solver_rilb02, cartpole_QP_solver_lbIdx02, cartpole_QP_solver_ubIdx02, cartpole_QP_solver_grad_ineq02, cartpole_QP_solver_lubbysub02, cartpole_QP_solver_llbbyslb02);
@@ -2858,10 +2711,7 @@ cartpole_QP_solver_LA_INEQ_B_GRAD_14_14_6(cartpole_QP_solver_lub07, cartpole_QP_
 cartpole_QP_solver_LA_INEQ_B_GRAD_14_14_6(cartpole_QP_solver_lub08, cartpole_QP_solver_sub08, cartpole_QP_solver_riub08, cartpole_QP_solver_llb08, cartpole_QP_solver_slb08, cartpole_QP_solver_rilb08, cartpole_QP_solver_lbIdx08, cartpole_QP_solver_ubIdx08, cartpole_QP_solver_grad_ineq08, cartpole_QP_solver_lubbysub08, cartpole_QP_solver_llbbyslb08);
 cartpole_QP_solver_LA_INEQ_B_GRAD_14_14_6(cartpole_QP_solver_lub09, cartpole_QP_solver_sub09, cartpole_QP_solver_riub09, cartpole_QP_solver_llb09, cartpole_QP_solver_slb09, cartpole_QP_solver_rilb09, cartpole_QP_solver_lbIdx09, cartpole_QP_solver_ubIdx09, cartpole_QP_solver_grad_ineq09, cartpole_QP_solver_lubbysub09, cartpole_QP_solver_llbbyslb09);
 cartpole_QP_solver_LA_INEQ_B_GRAD_14_14_6(cartpole_QP_solver_lub10, cartpole_QP_solver_sub10, cartpole_QP_solver_riub10, cartpole_QP_solver_llb10, cartpole_QP_solver_slb10, cartpole_QP_solver_rilb10, cartpole_QP_solver_lbIdx10, cartpole_QP_solver_ubIdx10, cartpole_QP_solver_grad_ineq10, cartpole_QP_solver_lubbysub10, cartpole_QP_solver_llbbyslb10);
-cartpole_QP_solver_LA_INEQ_B_GRAD_14_14_6(cartpole_QP_solver_lub11, cartpole_QP_solver_sub11, cartpole_QP_solver_riub11, cartpole_QP_solver_llb11, cartpole_QP_solver_slb11, cartpole_QP_solver_rilb11, cartpole_QP_solver_lbIdx11, cartpole_QP_solver_ubIdx11, cartpole_QP_solver_grad_ineq11, cartpole_QP_solver_lubbysub11, cartpole_QP_solver_llbbyslb11);
-cartpole_QP_solver_LA_INEQ_B_GRAD_14_14_6(cartpole_QP_solver_lub12, cartpole_QP_solver_sub12, cartpole_QP_solver_riub12, cartpole_QP_solver_llb12, cartpole_QP_solver_slb12, cartpole_QP_solver_rilb12, cartpole_QP_solver_lbIdx12, cartpole_QP_solver_ubIdx12, cartpole_QP_solver_grad_ineq12, cartpole_QP_solver_lubbysub12, cartpole_QP_solver_llbbyslb12);
-cartpole_QP_solver_LA_INEQ_B_GRAD_14_14_6(cartpole_QP_solver_lub13, cartpole_QP_solver_sub13, cartpole_QP_solver_riub13, cartpole_QP_solver_llb13, cartpole_QP_solver_slb13, cartpole_QP_solver_rilb13, cartpole_QP_solver_lbIdx13, cartpole_QP_solver_ubIdx13, cartpole_QP_solver_grad_ineq13, cartpole_QP_solver_lubbysub13, cartpole_QP_solver_llbbyslb13);
-cartpole_QP_solver_LA_INEQ_B_GRAD_5_5_5(cartpole_QP_solver_lub14, cartpole_QP_solver_sub14, cartpole_QP_solver_riub14, cartpole_QP_solver_llb14, cartpole_QP_solver_slb14, cartpole_QP_solver_rilb14, cartpole_QP_solver_lbIdx14, cartpole_QP_solver_ubIdx14, cartpole_QP_solver_grad_ineq14, cartpole_QP_solver_lubbysub14, cartpole_QP_solver_llbbyslb14);
+cartpole_QP_solver_LA_INEQ_B_GRAD_5_5_5(cartpole_QP_solver_lub11, cartpole_QP_solver_sub11, cartpole_QP_solver_riub11, cartpole_QP_solver_llb11, cartpole_QP_solver_slb11, cartpole_QP_solver_rilb11, cartpole_QP_solver_lbIdx11, cartpole_QP_solver_ubIdx11, cartpole_QP_solver_grad_ineq11, cartpole_QP_solver_lubbysub11, cartpole_QP_solver_llbbyslb11);
 info->dobj = info->pobj - info->dgap;
 info->rdgap = info->pobj ? info->dgap / info->pobj : 1e6;
 if( info->rdgap < 0 ) info->rdgap = -info->rdgap;
@@ -2872,7 +2722,7 @@ if( info->mu < cartpole_QP_solver_SET_ACC_KKTCOMPL
 exitcode = cartpole_QP_solver_OPTIMAL; break; }
 if( info->it == cartpole_QP_solver_SET_MAXIT ){
 exitcode = cartpole_QP_solver_MAXITREACHED; break; }
-cartpole_QP_solver_LA_VVADD3_201(cartpole_QP_solver_grad_cost, cartpole_QP_solver_grad_eq, cartpole_QP_solver_grad_ineq, cartpole_QP_solver_rd);
+cartpole_QP_solver_LA_VVADD3_159(cartpole_QP_solver_grad_cost, cartpole_QP_solver_grad_eq, cartpole_QP_solver_grad_ineq, cartpole_QP_solver_rd);
 cartpole_QP_solver_LA_DIAG_CHOL_LBUB_14_14_6(cartpole_QP_solver_H00, cartpole_QP_solver_llbbyslb00, cartpole_QP_solver_lbIdx00, cartpole_QP_solver_lubbysub00, cartpole_QP_solver_ubIdx00, cartpole_QP_solver_Phi00);
 cartpole_QP_solver_LA_DIAG_MATRIXFORWARDSUB_9_14(cartpole_QP_solver_Phi00, params->C1, cartpole_QP_solver_V00);
 cartpole_QP_solver_LA_DIAG_FORWARDSUB_14(cartpole_QP_solver_Phi00, cartpole_QP_solver_rd00, cartpole_QP_solver_Lbyrd00);
@@ -2926,24 +2776,9 @@ cartpole_QP_solver_LA_DIAG_MATRIXFORWARDSUB_5_14(cartpole_QP_solver_Phi10, param
 cartpole_QP_solver_LA_DIAG_DIAGZERO_MATRIXTFORWARDSUB_5_14(cartpole_QP_solver_Phi10, cartpole_QP_solver_D02, cartpole_QP_solver_W10);
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MMTM_5_14_5(cartpole_QP_solver_W10, cartpole_QP_solver_V10, cartpole_QP_solver_Ysd10);
 cartpole_QP_solver_LA_DIAG_FORWARDSUB_14(cartpole_QP_solver_Phi10, cartpole_QP_solver_rd10, cartpole_QP_solver_Lbyrd10);
-cartpole_QP_solver_LA_DIAG_CHOL_LBUB_14_14_6(cartpole_QP_solver_H00, cartpole_QP_solver_llbbyslb11, cartpole_QP_solver_lbIdx11, cartpole_QP_solver_lubbysub11, cartpole_QP_solver_ubIdx11, cartpole_QP_solver_Phi11);
-cartpole_QP_solver_LA_DIAG_MATRIXFORWARDSUB_5_14(cartpole_QP_solver_Phi11, params->C12, cartpole_QP_solver_V11);
-cartpole_QP_solver_LA_DIAG_DIAGZERO_MATRIXTFORWARDSUB_5_14(cartpole_QP_solver_Phi11, cartpole_QP_solver_D02, cartpole_QP_solver_W11);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MMTM_5_14_5(cartpole_QP_solver_W11, cartpole_QP_solver_V11, cartpole_QP_solver_Ysd11);
-cartpole_QP_solver_LA_DIAG_FORWARDSUB_14(cartpole_QP_solver_Phi11, cartpole_QP_solver_rd11, cartpole_QP_solver_Lbyrd11);
-cartpole_QP_solver_LA_DIAG_CHOL_LBUB_14_14_6(cartpole_QP_solver_H00, cartpole_QP_solver_llbbyslb12, cartpole_QP_solver_lbIdx12, cartpole_QP_solver_lubbysub12, cartpole_QP_solver_ubIdx12, cartpole_QP_solver_Phi12);
-cartpole_QP_solver_LA_DIAG_MATRIXFORWARDSUB_5_14(cartpole_QP_solver_Phi12, params->C13, cartpole_QP_solver_V12);
-cartpole_QP_solver_LA_DIAG_DIAGZERO_MATRIXTFORWARDSUB_5_14(cartpole_QP_solver_Phi12, cartpole_QP_solver_D02, cartpole_QP_solver_W12);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MMTM_5_14_5(cartpole_QP_solver_W12, cartpole_QP_solver_V12, cartpole_QP_solver_Ysd12);
-cartpole_QP_solver_LA_DIAG_FORWARDSUB_14(cartpole_QP_solver_Phi12, cartpole_QP_solver_rd12, cartpole_QP_solver_Lbyrd12);
-cartpole_QP_solver_LA_DIAG_CHOL_LBUB_14_14_6(cartpole_QP_solver_H00, cartpole_QP_solver_llbbyslb13, cartpole_QP_solver_lbIdx13, cartpole_QP_solver_lubbysub13, cartpole_QP_solver_ubIdx13, cartpole_QP_solver_Phi13);
-cartpole_QP_solver_LA_DIAG_MATRIXFORWARDSUB_5_14(cartpole_QP_solver_Phi13, params->C14, cartpole_QP_solver_V13);
-cartpole_QP_solver_LA_DIAG_DIAGZERO_MATRIXTFORWARDSUB_5_14(cartpole_QP_solver_Phi13, cartpole_QP_solver_D02, cartpole_QP_solver_W13);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MMTM_5_14_5(cartpole_QP_solver_W13, cartpole_QP_solver_V13, cartpole_QP_solver_Ysd13);
-cartpole_QP_solver_LA_DIAG_FORWARDSUB_14(cartpole_QP_solver_Phi13, cartpole_QP_solver_rd13, cartpole_QP_solver_Lbyrd13);
-cartpole_QP_solver_LA_DIAG_CHOL_ONELOOP_LBUB_5_5_5(cartpole_QP_solver_H14, cartpole_QP_solver_llbbyslb14, cartpole_QP_solver_lbIdx14, cartpole_QP_solver_lubbysub14, cartpole_QP_solver_ubIdx14, cartpole_QP_solver_Phi14);
-cartpole_QP_solver_LA_DIAG_DIAGZERO_MATRIXTFORWARDSUB_5_5(cartpole_QP_solver_Phi14, cartpole_QP_solver_D14, cartpole_QP_solver_W14);
-cartpole_QP_solver_LA_DIAG_FORWARDSUB_5(cartpole_QP_solver_Phi14, cartpole_QP_solver_rd14, cartpole_QP_solver_Lbyrd14);
+cartpole_QP_solver_LA_DIAG_CHOL_ONELOOP_LBUB_5_5_5(cartpole_QP_solver_H11, cartpole_QP_solver_llbbyslb11, cartpole_QP_solver_lbIdx11, cartpole_QP_solver_lubbysub11, cartpole_QP_solver_ubIdx11, cartpole_QP_solver_Phi11);
+cartpole_QP_solver_LA_DIAG_DIAGZERO_MATRIXTFORWARDSUB_5_5(cartpole_QP_solver_Phi11, cartpole_QP_solver_D11, cartpole_QP_solver_W11);
+cartpole_QP_solver_LA_DIAG_FORWARDSUB_5(cartpole_QP_solver_Phi11, cartpole_QP_solver_rd11, cartpole_QP_solver_Lbyrd11);
 cartpole_QP_solver_LA_DENSE_MMT2_9_14_14(cartpole_QP_solver_V00, cartpole_QP_solver_W01, cartpole_QP_solver_Yd00);
 cartpole_QP_solver_LA_DENSE_MVMSUB2_9_14_14(cartpole_QP_solver_V00, cartpole_QP_solver_Lbyrd00, cartpole_QP_solver_W01, cartpole_QP_solver_Lbyrd01, cartpole_QP_solver_re00, cartpole_QP_solver_beta00);
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MMT2_5_14_14(cartpole_QP_solver_V01, cartpole_QP_solver_W02, cartpole_QP_solver_Yd01);
@@ -2964,14 +2799,8 @@ cartpole_QP_solver_LA_DENSE_DIAGZERO_MMT2_5_14_14(cartpole_QP_solver_V08, cartpo
 cartpole_QP_solver_LA_DENSE_DIAGZERO_2MVMSUB2_5_14_14(cartpole_QP_solver_V08, cartpole_QP_solver_Lbyrd08, cartpole_QP_solver_W09, cartpole_QP_solver_Lbyrd09, cartpole_QP_solver_re08, cartpole_QP_solver_beta08);
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MMT2_5_14_14(cartpole_QP_solver_V09, cartpole_QP_solver_W10, cartpole_QP_solver_Yd09);
 cartpole_QP_solver_LA_DENSE_DIAGZERO_2MVMSUB2_5_14_14(cartpole_QP_solver_V09, cartpole_QP_solver_Lbyrd09, cartpole_QP_solver_W10, cartpole_QP_solver_Lbyrd10, cartpole_QP_solver_re09, cartpole_QP_solver_beta09);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MMT2_5_14_14(cartpole_QP_solver_V10, cartpole_QP_solver_W11, cartpole_QP_solver_Yd10);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_2MVMSUB2_5_14_14(cartpole_QP_solver_V10, cartpole_QP_solver_Lbyrd10, cartpole_QP_solver_W11, cartpole_QP_solver_Lbyrd11, cartpole_QP_solver_re10, cartpole_QP_solver_beta10);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MMT2_5_14_14(cartpole_QP_solver_V11, cartpole_QP_solver_W12, cartpole_QP_solver_Yd11);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_2MVMSUB2_5_14_14(cartpole_QP_solver_V11, cartpole_QP_solver_Lbyrd11, cartpole_QP_solver_W12, cartpole_QP_solver_Lbyrd12, cartpole_QP_solver_re11, cartpole_QP_solver_beta11);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MMT2_5_14_14(cartpole_QP_solver_V12, cartpole_QP_solver_W13, cartpole_QP_solver_Yd12);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_2MVMSUB2_5_14_14(cartpole_QP_solver_V12, cartpole_QP_solver_Lbyrd12, cartpole_QP_solver_W13, cartpole_QP_solver_Lbyrd13, cartpole_QP_solver_re12, cartpole_QP_solver_beta12);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MMT2_5_14_5(cartpole_QP_solver_V13, cartpole_QP_solver_W14, cartpole_QP_solver_Yd13);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_2MVMSUB2_5_14_5(cartpole_QP_solver_V13, cartpole_QP_solver_Lbyrd13, cartpole_QP_solver_W14, cartpole_QP_solver_Lbyrd14, cartpole_QP_solver_re13, cartpole_QP_solver_beta13);
+cartpole_QP_solver_LA_DENSE_DIAGZERO_MMT2_5_14_5(cartpole_QP_solver_V10, cartpole_QP_solver_W11, cartpole_QP_solver_Yd10);
+cartpole_QP_solver_LA_DENSE_DIAGZERO_2MVMSUB2_5_14_5(cartpole_QP_solver_V10, cartpole_QP_solver_Lbyrd10, cartpole_QP_solver_W11, cartpole_QP_solver_Lbyrd11, cartpole_QP_solver_re10, cartpole_QP_solver_beta10);
 cartpole_QP_solver_LA_DENSE_CHOL_9(cartpole_QP_solver_Yd00, cartpole_QP_solver_Ld00);
 cartpole_QP_solver_LA_DENSE_FORWARDSUB_9(cartpole_QP_solver_Ld00, cartpole_QP_solver_beta00, cartpole_QP_solver_yy00);
 cartpole_QP_solver_LA_DENSE_MATRIXTFORWARDSUB_5_9(cartpole_QP_solver_Ld00, cartpole_QP_solver_Ysd01, cartpole_QP_solver_Lsd01);
@@ -3024,28 +2853,7 @@ cartpole_QP_solver_LA_DENSE_MMTSUB_5_5(cartpole_QP_solver_Lsd10, cartpole_QP_sol
 cartpole_QP_solver_LA_DENSE_CHOL_5(cartpole_QP_solver_Yd10, cartpole_QP_solver_Ld10);
 cartpole_QP_solver_LA_DENSE_MVMSUB1_5_5(cartpole_QP_solver_Lsd10, cartpole_QP_solver_yy09, cartpole_QP_solver_beta10, cartpole_QP_solver_bmy10);
 cartpole_QP_solver_LA_DENSE_FORWARDSUB_5(cartpole_QP_solver_Ld10, cartpole_QP_solver_bmy10, cartpole_QP_solver_yy10);
-cartpole_QP_solver_LA_DENSE_MATRIXTFORWARDSUB_5_5(cartpole_QP_solver_Ld10, cartpole_QP_solver_Ysd11, cartpole_QP_solver_Lsd11);
-cartpole_QP_solver_LA_DENSE_MMTSUB_5_5(cartpole_QP_solver_Lsd11, cartpole_QP_solver_Yd11);
-cartpole_QP_solver_LA_DENSE_CHOL_5(cartpole_QP_solver_Yd11, cartpole_QP_solver_Ld11);
-cartpole_QP_solver_LA_DENSE_MVMSUB1_5_5(cartpole_QP_solver_Lsd11, cartpole_QP_solver_yy10, cartpole_QP_solver_beta11, cartpole_QP_solver_bmy11);
-cartpole_QP_solver_LA_DENSE_FORWARDSUB_5(cartpole_QP_solver_Ld11, cartpole_QP_solver_bmy11, cartpole_QP_solver_yy11);
-cartpole_QP_solver_LA_DENSE_MATRIXTFORWARDSUB_5_5(cartpole_QP_solver_Ld11, cartpole_QP_solver_Ysd12, cartpole_QP_solver_Lsd12);
-cartpole_QP_solver_LA_DENSE_MMTSUB_5_5(cartpole_QP_solver_Lsd12, cartpole_QP_solver_Yd12);
-cartpole_QP_solver_LA_DENSE_CHOL_5(cartpole_QP_solver_Yd12, cartpole_QP_solver_Ld12);
-cartpole_QP_solver_LA_DENSE_MVMSUB1_5_5(cartpole_QP_solver_Lsd12, cartpole_QP_solver_yy11, cartpole_QP_solver_beta12, cartpole_QP_solver_bmy12);
-cartpole_QP_solver_LA_DENSE_FORWARDSUB_5(cartpole_QP_solver_Ld12, cartpole_QP_solver_bmy12, cartpole_QP_solver_yy12);
-cartpole_QP_solver_LA_DENSE_MATRIXTFORWARDSUB_5_5(cartpole_QP_solver_Ld12, cartpole_QP_solver_Ysd13, cartpole_QP_solver_Lsd13);
-cartpole_QP_solver_LA_DENSE_MMTSUB_5_5(cartpole_QP_solver_Lsd13, cartpole_QP_solver_Yd13);
-cartpole_QP_solver_LA_DENSE_CHOL_5(cartpole_QP_solver_Yd13, cartpole_QP_solver_Ld13);
-cartpole_QP_solver_LA_DENSE_MVMSUB1_5_5(cartpole_QP_solver_Lsd13, cartpole_QP_solver_yy12, cartpole_QP_solver_beta13, cartpole_QP_solver_bmy13);
-cartpole_QP_solver_LA_DENSE_FORWARDSUB_5(cartpole_QP_solver_Ld13, cartpole_QP_solver_bmy13, cartpole_QP_solver_yy13);
-cartpole_QP_solver_LA_DENSE_BACKWARDSUB_5(cartpole_QP_solver_Ld13, cartpole_QP_solver_yy13, cartpole_QP_solver_dvaff13);
-cartpole_QP_solver_LA_DENSE_MTVMSUB_5_5(cartpole_QP_solver_Lsd13, cartpole_QP_solver_dvaff13, cartpole_QP_solver_yy12, cartpole_QP_solver_bmy12);
-cartpole_QP_solver_LA_DENSE_BACKWARDSUB_5(cartpole_QP_solver_Ld12, cartpole_QP_solver_bmy12, cartpole_QP_solver_dvaff12);
-cartpole_QP_solver_LA_DENSE_MTVMSUB_5_5(cartpole_QP_solver_Lsd12, cartpole_QP_solver_dvaff12, cartpole_QP_solver_yy11, cartpole_QP_solver_bmy11);
-cartpole_QP_solver_LA_DENSE_BACKWARDSUB_5(cartpole_QP_solver_Ld11, cartpole_QP_solver_bmy11, cartpole_QP_solver_dvaff11);
-cartpole_QP_solver_LA_DENSE_MTVMSUB_5_5(cartpole_QP_solver_Lsd11, cartpole_QP_solver_dvaff11, cartpole_QP_solver_yy10, cartpole_QP_solver_bmy10);
-cartpole_QP_solver_LA_DENSE_BACKWARDSUB_5(cartpole_QP_solver_Ld10, cartpole_QP_solver_bmy10, cartpole_QP_solver_dvaff10);
+cartpole_QP_solver_LA_DENSE_BACKWARDSUB_5(cartpole_QP_solver_Ld10, cartpole_QP_solver_yy10, cartpole_QP_solver_dvaff10);
 cartpole_QP_solver_LA_DENSE_MTVMSUB_5_5(cartpole_QP_solver_Lsd10, cartpole_QP_solver_dvaff10, cartpole_QP_solver_yy09, cartpole_QP_solver_bmy09);
 cartpole_QP_solver_LA_DENSE_BACKWARDSUB_5(cartpole_QP_solver_Ld09, cartpole_QP_solver_bmy09, cartpole_QP_solver_dvaff09);
 cartpole_QP_solver_LA_DENSE_MTVMSUB_5_5(cartpole_QP_solver_Lsd09, cartpole_QP_solver_dvaff09, cartpole_QP_solver_yy08, cartpole_QP_solver_bmy08);
@@ -3077,11 +2885,8 @@ cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C8, cartpole_QP_solver
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C9, cartpole_QP_solver_dvaff08, cartpole_QP_solver_D02, cartpole_QP_solver_dvaff07, cartpole_QP_solver_grad_eq08);
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C10, cartpole_QP_solver_dvaff09, cartpole_QP_solver_D02, cartpole_QP_solver_dvaff08, cartpole_QP_solver_grad_eq09);
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C11, cartpole_QP_solver_dvaff10, cartpole_QP_solver_D02, cartpole_QP_solver_dvaff09, cartpole_QP_solver_grad_eq10);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C12, cartpole_QP_solver_dvaff11, cartpole_QP_solver_D02, cartpole_QP_solver_dvaff10, cartpole_QP_solver_grad_eq11);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C13, cartpole_QP_solver_dvaff12, cartpole_QP_solver_D02, cartpole_QP_solver_dvaff11, cartpole_QP_solver_grad_eq12);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C14, cartpole_QP_solver_dvaff13, cartpole_QP_solver_D02, cartpole_QP_solver_dvaff12, cartpole_QP_solver_grad_eq13);
-cartpole_QP_solver_LA_DIAGZERO_MTVM_5_5(cartpole_QP_solver_D14, cartpole_QP_solver_dvaff13, cartpole_QP_solver_grad_eq14);
-cartpole_QP_solver_LA_VSUB2_201(cartpole_QP_solver_rd, cartpole_QP_solver_grad_eq, cartpole_QP_solver_rd);
+cartpole_QP_solver_LA_DIAGZERO_MTVM_5_5(cartpole_QP_solver_D11, cartpole_QP_solver_dvaff10, cartpole_QP_solver_grad_eq11);
+cartpole_QP_solver_LA_VSUB2_159(cartpole_QP_solver_rd, cartpole_QP_solver_grad_eq, cartpole_QP_solver_rd);
 cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi00, cartpole_QP_solver_rd00, cartpole_QP_solver_dzaff00);
 cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi01, cartpole_QP_solver_rd01, cartpole_QP_solver_dzaff01);
 cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi02, cartpole_QP_solver_rd02, cartpole_QP_solver_dzaff02);
@@ -3093,10 +2898,7 @@ cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi07, cartp
 cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi08, cartpole_QP_solver_rd08, cartpole_QP_solver_dzaff08);
 cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi09, cartpole_QP_solver_rd09, cartpole_QP_solver_dzaff09);
 cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi10, cartpole_QP_solver_rd10, cartpole_QP_solver_dzaff10);
-cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi11, cartpole_QP_solver_rd11, cartpole_QP_solver_dzaff11);
-cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi12, cartpole_QP_solver_rd12, cartpole_QP_solver_dzaff12);
-cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi13, cartpole_QP_solver_rd13, cartpole_QP_solver_dzaff13);
-cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_5(cartpole_QP_solver_Phi14, cartpole_QP_solver_rd14, cartpole_QP_solver_dzaff14);
+cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_5(cartpole_QP_solver_Phi11, cartpole_QP_solver_rd11, cartpole_QP_solver_dzaff11);
 cartpole_QP_solver_LA_VSUB_INDEXED_14(cartpole_QP_solver_dzaff00, cartpole_QP_solver_lbIdx00, cartpole_QP_solver_rilb00, cartpole_QP_solver_dslbaff00);
 cartpole_QP_solver_LA_VSUB3_14(cartpole_QP_solver_llbbyslb00, cartpole_QP_solver_dslbaff00, cartpole_QP_solver_llb00, cartpole_QP_solver_dllbaff00);
 cartpole_QP_solver_LA_VSUB2_INDEXED_6(cartpole_QP_solver_riub00, cartpole_QP_solver_dzaff00, cartpole_QP_solver_ubIdx00, cartpole_QP_solver_dsubaff00);
@@ -3141,22 +2943,10 @@ cartpole_QP_solver_LA_VSUB_INDEXED_14(cartpole_QP_solver_dzaff10, cartpole_QP_so
 cartpole_QP_solver_LA_VSUB3_14(cartpole_QP_solver_llbbyslb10, cartpole_QP_solver_dslbaff10, cartpole_QP_solver_llb10, cartpole_QP_solver_dllbaff10);
 cartpole_QP_solver_LA_VSUB2_INDEXED_6(cartpole_QP_solver_riub10, cartpole_QP_solver_dzaff10, cartpole_QP_solver_ubIdx10, cartpole_QP_solver_dsubaff10);
 cartpole_QP_solver_LA_VSUB3_6(cartpole_QP_solver_lubbysub10, cartpole_QP_solver_dsubaff10, cartpole_QP_solver_lub10, cartpole_QP_solver_dlubaff10);
-cartpole_QP_solver_LA_VSUB_INDEXED_14(cartpole_QP_solver_dzaff11, cartpole_QP_solver_lbIdx11, cartpole_QP_solver_rilb11, cartpole_QP_solver_dslbaff11);
-cartpole_QP_solver_LA_VSUB3_14(cartpole_QP_solver_llbbyslb11, cartpole_QP_solver_dslbaff11, cartpole_QP_solver_llb11, cartpole_QP_solver_dllbaff11);
-cartpole_QP_solver_LA_VSUB2_INDEXED_6(cartpole_QP_solver_riub11, cartpole_QP_solver_dzaff11, cartpole_QP_solver_ubIdx11, cartpole_QP_solver_dsubaff11);
-cartpole_QP_solver_LA_VSUB3_6(cartpole_QP_solver_lubbysub11, cartpole_QP_solver_dsubaff11, cartpole_QP_solver_lub11, cartpole_QP_solver_dlubaff11);
-cartpole_QP_solver_LA_VSUB_INDEXED_14(cartpole_QP_solver_dzaff12, cartpole_QP_solver_lbIdx12, cartpole_QP_solver_rilb12, cartpole_QP_solver_dslbaff12);
-cartpole_QP_solver_LA_VSUB3_14(cartpole_QP_solver_llbbyslb12, cartpole_QP_solver_dslbaff12, cartpole_QP_solver_llb12, cartpole_QP_solver_dllbaff12);
-cartpole_QP_solver_LA_VSUB2_INDEXED_6(cartpole_QP_solver_riub12, cartpole_QP_solver_dzaff12, cartpole_QP_solver_ubIdx12, cartpole_QP_solver_dsubaff12);
-cartpole_QP_solver_LA_VSUB3_6(cartpole_QP_solver_lubbysub12, cartpole_QP_solver_dsubaff12, cartpole_QP_solver_lub12, cartpole_QP_solver_dlubaff12);
-cartpole_QP_solver_LA_VSUB_INDEXED_14(cartpole_QP_solver_dzaff13, cartpole_QP_solver_lbIdx13, cartpole_QP_solver_rilb13, cartpole_QP_solver_dslbaff13);
-cartpole_QP_solver_LA_VSUB3_14(cartpole_QP_solver_llbbyslb13, cartpole_QP_solver_dslbaff13, cartpole_QP_solver_llb13, cartpole_QP_solver_dllbaff13);
-cartpole_QP_solver_LA_VSUB2_INDEXED_6(cartpole_QP_solver_riub13, cartpole_QP_solver_dzaff13, cartpole_QP_solver_ubIdx13, cartpole_QP_solver_dsubaff13);
-cartpole_QP_solver_LA_VSUB3_6(cartpole_QP_solver_lubbysub13, cartpole_QP_solver_dsubaff13, cartpole_QP_solver_lub13, cartpole_QP_solver_dlubaff13);
-cartpole_QP_solver_LA_VSUB_INDEXED_5(cartpole_QP_solver_dzaff14, cartpole_QP_solver_lbIdx14, cartpole_QP_solver_rilb14, cartpole_QP_solver_dslbaff14);
-cartpole_QP_solver_LA_VSUB3_5(cartpole_QP_solver_llbbyslb14, cartpole_QP_solver_dslbaff14, cartpole_QP_solver_llb14, cartpole_QP_solver_dllbaff14);
-cartpole_QP_solver_LA_VSUB2_INDEXED_5(cartpole_QP_solver_riub14, cartpole_QP_solver_dzaff14, cartpole_QP_solver_ubIdx14, cartpole_QP_solver_dsubaff14);
-cartpole_QP_solver_LA_VSUB3_5(cartpole_QP_solver_lubbysub14, cartpole_QP_solver_dsubaff14, cartpole_QP_solver_lub14, cartpole_QP_solver_dlubaff14);
+cartpole_QP_solver_LA_VSUB_INDEXED_5(cartpole_QP_solver_dzaff11, cartpole_QP_solver_lbIdx11, cartpole_QP_solver_rilb11, cartpole_QP_solver_dslbaff11);
+cartpole_QP_solver_LA_VSUB3_5(cartpole_QP_solver_llbbyslb11, cartpole_QP_solver_dslbaff11, cartpole_QP_solver_llb11, cartpole_QP_solver_dllbaff11);
+cartpole_QP_solver_LA_VSUB2_INDEXED_5(cartpole_QP_solver_riub11, cartpole_QP_solver_dzaff11, cartpole_QP_solver_ubIdx11, cartpole_QP_solver_dsubaff11);
+cartpole_QP_solver_LA_VSUB3_5(cartpole_QP_solver_lubbysub11, cartpole_QP_solver_dsubaff11, cartpole_QP_solver_lub11, cartpole_QP_solver_dlubaff11);
 info->lsit_aff = cartpole_QP_solver_LINESEARCH_BACKTRACKING_AFFINE(cartpole_QP_solver_l, cartpole_QP_solver_s, cartpole_QP_solver_dl_aff, cartpole_QP_solver_ds_aff, &info->step_aff, &info->mu_aff);
 if( info->lsit_aff == cartpole_QP_solver_NOPROGRESS ){
 exitcode = cartpole_QP_solver_NOPROGRESS; break;
@@ -3164,7 +2954,7 @@ exitcode = cartpole_QP_solver_NOPROGRESS; break;
 sigma_3rdroot = info->mu_aff / info->mu;
 info->sigma = sigma_3rdroot*sigma_3rdroot*sigma_3rdroot;
 musigma = info->mu * info->sigma;
-cartpole_QP_solver_LA_VSUB5_290(cartpole_QP_solver_ds_aff, cartpole_QP_solver_dl_aff, info->mu, info->sigma, cartpole_QP_solver_ccrhs);
+cartpole_QP_solver_LA_VSUB5_230(cartpole_QP_solver_ds_aff, cartpole_QP_solver_dl_aff, info->mu, info->sigma, cartpole_QP_solver_ccrhs);
 cartpole_QP_solver_LA_VSUB6_INDEXED_14_6_14(cartpole_QP_solver_ccrhsub00, cartpole_QP_solver_sub00, cartpole_QP_solver_ubIdx00, cartpole_QP_solver_ccrhsl00, cartpole_QP_solver_slb00, cartpole_QP_solver_lbIdx00, cartpole_QP_solver_rd00);
 cartpole_QP_solver_LA_VSUB6_INDEXED_14_6_14(cartpole_QP_solver_ccrhsub01, cartpole_QP_solver_sub01, cartpole_QP_solver_ubIdx01, cartpole_QP_solver_ccrhsl01, cartpole_QP_solver_slb01, cartpole_QP_solver_lbIdx01, cartpole_QP_solver_rd01);
 cartpole_QP_solver_LA_DIAG_FORWARDSUB_14(cartpole_QP_solver_Phi00, cartpole_QP_solver_rd00, cartpole_QP_solver_Lbyrd00);
@@ -3216,33 +3006,12 @@ cartpole_QP_solver_LA_DIAG_FORWARDSUB_14(cartpole_QP_solver_Phi10, cartpole_QP_s
 cartpole_QP_solver_LA_DENSE_DIAGZERO_2MVMADD_5_14_14(cartpole_QP_solver_V09, cartpole_QP_solver_Lbyrd09, cartpole_QP_solver_W10, cartpole_QP_solver_Lbyrd10, cartpole_QP_solver_beta09);
 cartpole_QP_solver_LA_DENSE_MVMSUB1_5_5(cartpole_QP_solver_Lsd09, cartpole_QP_solver_yy08, cartpole_QP_solver_beta09, cartpole_QP_solver_bmy09);
 cartpole_QP_solver_LA_DENSE_FORWARDSUB_5(cartpole_QP_solver_Ld09, cartpole_QP_solver_bmy09, cartpole_QP_solver_yy09);
-cartpole_QP_solver_LA_VSUB6_INDEXED_14_6_14(cartpole_QP_solver_ccrhsub11, cartpole_QP_solver_sub11, cartpole_QP_solver_ubIdx11, cartpole_QP_solver_ccrhsl11, cartpole_QP_solver_slb11, cartpole_QP_solver_lbIdx11, cartpole_QP_solver_rd11);
-cartpole_QP_solver_LA_DIAG_FORWARDSUB_14(cartpole_QP_solver_Phi11, cartpole_QP_solver_rd11, cartpole_QP_solver_Lbyrd11);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_2MVMADD_5_14_14(cartpole_QP_solver_V10, cartpole_QP_solver_Lbyrd10, cartpole_QP_solver_W11, cartpole_QP_solver_Lbyrd11, cartpole_QP_solver_beta10);
+cartpole_QP_solver_LA_VSUB6_INDEXED_5_5_5(cartpole_QP_solver_ccrhsub11, cartpole_QP_solver_sub11, cartpole_QP_solver_ubIdx11, cartpole_QP_solver_ccrhsl11, cartpole_QP_solver_slb11, cartpole_QP_solver_lbIdx11, cartpole_QP_solver_rd11);
+cartpole_QP_solver_LA_DIAG_FORWARDSUB_5(cartpole_QP_solver_Phi11, cartpole_QP_solver_rd11, cartpole_QP_solver_Lbyrd11);
+cartpole_QP_solver_LA_DENSE_DIAGZERO_2MVMADD_5_14_5(cartpole_QP_solver_V10, cartpole_QP_solver_Lbyrd10, cartpole_QP_solver_W11, cartpole_QP_solver_Lbyrd11, cartpole_QP_solver_beta10);
 cartpole_QP_solver_LA_DENSE_MVMSUB1_5_5(cartpole_QP_solver_Lsd10, cartpole_QP_solver_yy09, cartpole_QP_solver_beta10, cartpole_QP_solver_bmy10);
 cartpole_QP_solver_LA_DENSE_FORWARDSUB_5(cartpole_QP_solver_Ld10, cartpole_QP_solver_bmy10, cartpole_QP_solver_yy10);
-cartpole_QP_solver_LA_VSUB6_INDEXED_14_6_14(cartpole_QP_solver_ccrhsub12, cartpole_QP_solver_sub12, cartpole_QP_solver_ubIdx12, cartpole_QP_solver_ccrhsl12, cartpole_QP_solver_slb12, cartpole_QP_solver_lbIdx12, cartpole_QP_solver_rd12);
-cartpole_QP_solver_LA_DIAG_FORWARDSUB_14(cartpole_QP_solver_Phi12, cartpole_QP_solver_rd12, cartpole_QP_solver_Lbyrd12);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_2MVMADD_5_14_14(cartpole_QP_solver_V11, cartpole_QP_solver_Lbyrd11, cartpole_QP_solver_W12, cartpole_QP_solver_Lbyrd12, cartpole_QP_solver_beta11);
-cartpole_QP_solver_LA_DENSE_MVMSUB1_5_5(cartpole_QP_solver_Lsd11, cartpole_QP_solver_yy10, cartpole_QP_solver_beta11, cartpole_QP_solver_bmy11);
-cartpole_QP_solver_LA_DENSE_FORWARDSUB_5(cartpole_QP_solver_Ld11, cartpole_QP_solver_bmy11, cartpole_QP_solver_yy11);
-cartpole_QP_solver_LA_VSUB6_INDEXED_14_6_14(cartpole_QP_solver_ccrhsub13, cartpole_QP_solver_sub13, cartpole_QP_solver_ubIdx13, cartpole_QP_solver_ccrhsl13, cartpole_QP_solver_slb13, cartpole_QP_solver_lbIdx13, cartpole_QP_solver_rd13);
-cartpole_QP_solver_LA_DIAG_FORWARDSUB_14(cartpole_QP_solver_Phi13, cartpole_QP_solver_rd13, cartpole_QP_solver_Lbyrd13);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_2MVMADD_5_14_14(cartpole_QP_solver_V12, cartpole_QP_solver_Lbyrd12, cartpole_QP_solver_W13, cartpole_QP_solver_Lbyrd13, cartpole_QP_solver_beta12);
-cartpole_QP_solver_LA_DENSE_MVMSUB1_5_5(cartpole_QP_solver_Lsd12, cartpole_QP_solver_yy11, cartpole_QP_solver_beta12, cartpole_QP_solver_bmy12);
-cartpole_QP_solver_LA_DENSE_FORWARDSUB_5(cartpole_QP_solver_Ld12, cartpole_QP_solver_bmy12, cartpole_QP_solver_yy12);
-cartpole_QP_solver_LA_VSUB6_INDEXED_5_5_5(cartpole_QP_solver_ccrhsub14, cartpole_QP_solver_sub14, cartpole_QP_solver_ubIdx14, cartpole_QP_solver_ccrhsl14, cartpole_QP_solver_slb14, cartpole_QP_solver_lbIdx14, cartpole_QP_solver_rd14);
-cartpole_QP_solver_LA_DIAG_FORWARDSUB_5(cartpole_QP_solver_Phi14, cartpole_QP_solver_rd14, cartpole_QP_solver_Lbyrd14);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_2MVMADD_5_14_5(cartpole_QP_solver_V13, cartpole_QP_solver_Lbyrd13, cartpole_QP_solver_W14, cartpole_QP_solver_Lbyrd14, cartpole_QP_solver_beta13);
-cartpole_QP_solver_LA_DENSE_MVMSUB1_5_5(cartpole_QP_solver_Lsd13, cartpole_QP_solver_yy12, cartpole_QP_solver_beta13, cartpole_QP_solver_bmy13);
-cartpole_QP_solver_LA_DENSE_FORWARDSUB_5(cartpole_QP_solver_Ld13, cartpole_QP_solver_bmy13, cartpole_QP_solver_yy13);
-cartpole_QP_solver_LA_DENSE_BACKWARDSUB_5(cartpole_QP_solver_Ld13, cartpole_QP_solver_yy13, cartpole_QP_solver_dvcc13);
-cartpole_QP_solver_LA_DENSE_MTVMSUB_5_5(cartpole_QP_solver_Lsd13, cartpole_QP_solver_dvcc13, cartpole_QP_solver_yy12, cartpole_QP_solver_bmy12);
-cartpole_QP_solver_LA_DENSE_BACKWARDSUB_5(cartpole_QP_solver_Ld12, cartpole_QP_solver_bmy12, cartpole_QP_solver_dvcc12);
-cartpole_QP_solver_LA_DENSE_MTVMSUB_5_5(cartpole_QP_solver_Lsd12, cartpole_QP_solver_dvcc12, cartpole_QP_solver_yy11, cartpole_QP_solver_bmy11);
-cartpole_QP_solver_LA_DENSE_BACKWARDSUB_5(cartpole_QP_solver_Ld11, cartpole_QP_solver_bmy11, cartpole_QP_solver_dvcc11);
-cartpole_QP_solver_LA_DENSE_MTVMSUB_5_5(cartpole_QP_solver_Lsd11, cartpole_QP_solver_dvcc11, cartpole_QP_solver_yy10, cartpole_QP_solver_bmy10);
-cartpole_QP_solver_LA_DENSE_BACKWARDSUB_5(cartpole_QP_solver_Ld10, cartpole_QP_solver_bmy10, cartpole_QP_solver_dvcc10);
+cartpole_QP_solver_LA_DENSE_BACKWARDSUB_5(cartpole_QP_solver_Ld10, cartpole_QP_solver_yy10, cartpole_QP_solver_dvcc10);
 cartpole_QP_solver_LA_DENSE_MTVMSUB_5_5(cartpole_QP_solver_Lsd10, cartpole_QP_solver_dvcc10, cartpole_QP_solver_yy09, cartpole_QP_solver_bmy09);
 cartpole_QP_solver_LA_DENSE_BACKWARDSUB_5(cartpole_QP_solver_Ld09, cartpole_QP_solver_bmy09, cartpole_QP_solver_dvcc09);
 cartpole_QP_solver_LA_DENSE_MTVMSUB_5_5(cartpole_QP_solver_Lsd09, cartpole_QP_solver_dvcc09, cartpole_QP_solver_yy08, cartpole_QP_solver_bmy08);
@@ -3274,11 +3043,8 @@ cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C8, cartpole_QP_solver
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C9, cartpole_QP_solver_dvcc08, cartpole_QP_solver_D02, cartpole_QP_solver_dvcc07, cartpole_QP_solver_grad_eq08);
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C10, cartpole_QP_solver_dvcc09, cartpole_QP_solver_D02, cartpole_QP_solver_dvcc08, cartpole_QP_solver_grad_eq09);
 cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C11, cartpole_QP_solver_dvcc10, cartpole_QP_solver_D02, cartpole_QP_solver_dvcc09, cartpole_QP_solver_grad_eq10);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C12, cartpole_QP_solver_dvcc11, cartpole_QP_solver_D02, cartpole_QP_solver_dvcc10, cartpole_QP_solver_grad_eq11);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C13, cartpole_QP_solver_dvcc12, cartpole_QP_solver_D02, cartpole_QP_solver_dvcc11, cartpole_QP_solver_grad_eq12);
-cartpole_QP_solver_LA_DENSE_DIAGZERO_MTVM2_5_14_5(params->C14, cartpole_QP_solver_dvcc13, cartpole_QP_solver_D02, cartpole_QP_solver_dvcc12, cartpole_QP_solver_grad_eq13);
-cartpole_QP_solver_LA_DIAGZERO_MTVM_5_5(cartpole_QP_solver_D14, cartpole_QP_solver_dvcc13, cartpole_QP_solver_grad_eq14);
-cartpole_QP_solver_LA_VSUB_201(cartpole_QP_solver_rd, cartpole_QP_solver_grad_eq, cartpole_QP_solver_rd);
+cartpole_QP_solver_LA_DIAGZERO_MTVM_5_5(cartpole_QP_solver_D11, cartpole_QP_solver_dvcc10, cartpole_QP_solver_grad_eq11);
+cartpole_QP_solver_LA_VSUB_159(cartpole_QP_solver_rd, cartpole_QP_solver_grad_eq, cartpole_QP_solver_rd);
 cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi00, cartpole_QP_solver_rd00, cartpole_QP_solver_dzcc00);
 cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi01, cartpole_QP_solver_rd01, cartpole_QP_solver_dzcc01);
 cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi02, cartpole_QP_solver_rd02, cartpole_QP_solver_dzcc02);
@@ -3290,10 +3056,7 @@ cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi07, cartp
 cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi08, cartpole_QP_solver_rd08, cartpole_QP_solver_dzcc08);
 cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi09, cartpole_QP_solver_rd09, cartpole_QP_solver_dzcc09);
 cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi10, cartpole_QP_solver_rd10, cartpole_QP_solver_dzcc10);
-cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi11, cartpole_QP_solver_rd11, cartpole_QP_solver_dzcc11);
-cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi12, cartpole_QP_solver_rd12, cartpole_QP_solver_dzcc12);
-cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_14(cartpole_QP_solver_Phi13, cartpole_QP_solver_rd13, cartpole_QP_solver_dzcc13);
-cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_5(cartpole_QP_solver_Phi14, cartpole_QP_solver_rd14, cartpole_QP_solver_dzcc14);
+cartpole_QP_solver_LA_DIAG_FORWARDBACKWARDSUB_5(cartpole_QP_solver_Phi11, cartpole_QP_solver_rd11, cartpole_QP_solver_dzcc11);
 cartpole_QP_solver_LA_VEC_DIVSUB_MULTSUB_INDEXED_14(cartpole_QP_solver_ccrhsl00, cartpole_QP_solver_slb00, cartpole_QP_solver_llbbyslb00, cartpole_QP_solver_dzcc00, cartpole_QP_solver_lbIdx00, cartpole_QP_solver_dllbcc00);
 cartpole_QP_solver_LA_VEC_DIVSUB_MULTADD_INDEXED_6(cartpole_QP_solver_ccrhsub00, cartpole_QP_solver_sub00, cartpole_QP_solver_lubbysub00, cartpole_QP_solver_dzcc00, cartpole_QP_solver_ubIdx00, cartpole_QP_solver_dlubcc00);
 cartpole_QP_solver_LA_VEC_DIVSUB_MULTSUB_INDEXED_14(cartpole_QP_solver_ccrhsl01, cartpole_QP_solver_slb01, cartpole_QP_solver_llbbyslb01, cartpole_QP_solver_dzcc01, cartpole_QP_solver_lbIdx01, cartpole_QP_solver_dllbcc01);
@@ -3316,19 +3079,13 @@ cartpole_QP_solver_LA_VEC_DIVSUB_MULTSUB_INDEXED_14(cartpole_QP_solver_ccrhsl09,
 cartpole_QP_solver_LA_VEC_DIVSUB_MULTADD_INDEXED_6(cartpole_QP_solver_ccrhsub09, cartpole_QP_solver_sub09, cartpole_QP_solver_lubbysub09, cartpole_QP_solver_dzcc09, cartpole_QP_solver_ubIdx09, cartpole_QP_solver_dlubcc09);
 cartpole_QP_solver_LA_VEC_DIVSUB_MULTSUB_INDEXED_14(cartpole_QP_solver_ccrhsl10, cartpole_QP_solver_slb10, cartpole_QP_solver_llbbyslb10, cartpole_QP_solver_dzcc10, cartpole_QP_solver_lbIdx10, cartpole_QP_solver_dllbcc10);
 cartpole_QP_solver_LA_VEC_DIVSUB_MULTADD_INDEXED_6(cartpole_QP_solver_ccrhsub10, cartpole_QP_solver_sub10, cartpole_QP_solver_lubbysub10, cartpole_QP_solver_dzcc10, cartpole_QP_solver_ubIdx10, cartpole_QP_solver_dlubcc10);
-cartpole_QP_solver_LA_VEC_DIVSUB_MULTSUB_INDEXED_14(cartpole_QP_solver_ccrhsl11, cartpole_QP_solver_slb11, cartpole_QP_solver_llbbyslb11, cartpole_QP_solver_dzcc11, cartpole_QP_solver_lbIdx11, cartpole_QP_solver_dllbcc11);
-cartpole_QP_solver_LA_VEC_DIVSUB_MULTADD_INDEXED_6(cartpole_QP_solver_ccrhsub11, cartpole_QP_solver_sub11, cartpole_QP_solver_lubbysub11, cartpole_QP_solver_dzcc11, cartpole_QP_solver_ubIdx11, cartpole_QP_solver_dlubcc11);
-cartpole_QP_solver_LA_VEC_DIVSUB_MULTSUB_INDEXED_14(cartpole_QP_solver_ccrhsl12, cartpole_QP_solver_slb12, cartpole_QP_solver_llbbyslb12, cartpole_QP_solver_dzcc12, cartpole_QP_solver_lbIdx12, cartpole_QP_solver_dllbcc12);
-cartpole_QP_solver_LA_VEC_DIVSUB_MULTADD_INDEXED_6(cartpole_QP_solver_ccrhsub12, cartpole_QP_solver_sub12, cartpole_QP_solver_lubbysub12, cartpole_QP_solver_dzcc12, cartpole_QP_solver_ubIdx12, cartpole_QP_solver_dlubcc12);
-cartpole_QP_solver_LA_VEC_DIVSUB_MULTSUB_INDEXED_14(cartpole_QP_solver_ccrhsl13, cartpole_QP_solver_slb13, cartpole_QP_solver_llbbyslb13, cartpole_QP_solver_dzcc13, cartpole_QP_solver_lbIdx13, cartpole_QP_solver_dllbcc13);
-cartpole_QP_solver_LA_VEC_DIVSUB_MULTADD_INDEXED_6(cartpole_QP_solver_ccrhsub13, cartpole_QP_solver_sub13, cartpole_QP_solver_lubbysub13, cartpole_QP_solver_dzcc13, cartpole_QP_solver_ubIdx13, cartpole_QP_solver_dlubcc13);
-cartpole_QP_solver_LA_VEC_DIVSUB_MULTSUB_INDEXED_5(cartpole_QP_solver_ccrhsl14, cartpole_QP_solver_slb14, cartpole_QP_solver_llbbyslb14, cartpole_QP_solver_dzcc14, cartpole_QP_solver_lbIdx14, cartpole_QP_solver_dllbcc14);
-cartpole_QP_solver_LA_VEC_DIVSUB_MULTADD_INDEXED_5(cartpole_QP_solver_ccrhsub14, cartpole_QP_solver_sub14, cartpole_QP_solver_lubbysub14, cartpole_QP_solver_dzcc14, cartpole_QP_solver_ubIdx14, cartpole_QP_solver_dlubcc14);
-cartpole_QP_solver_LA_VSUB7_290(cartpole_QP_solver_l, cartpole_QP_solver_ccrhs, cartpole_QP_solver_s, cartpole_QP_solver_dl_cc, cartpole_QP_solver_ds_cc);
-cartpole_QP_solver_LA_VADD_201(cartpole_QP_solver_dz_cc, cartpole_QP_solver_dz_aff);
-cartpole_QP_solver_LA_VADD_74(cartpole_QP_solver_dv_cc, cartpole_QP_solver_dv_aff);
-cartpole_QP_solver_LA_VADD_290(cartpole_QP_solver_dl_cc, cartpole_QP_solver_dl_aff);
-cartpole_QP_solver_LA_VADD_290(cartpole_QP_solver_ds_cc, cartpole_QP_solver_ds_aff);
+cartpole_QP_solver_LA_VEC_DIVSUB_MULTSUB_INDEXED_5(cartpole_QP_solver_ccrhsl11, cartpole_QP_solver_slb11, cartpole_QP_solver_llbbyslb11, cartpole_QP_solver_dzcc11, cartpole_QP_solver_lbIdx11, cartpole_QP_solver_dllbcc11);
+cartpole_QP_solver_LA_VEC_DIVSUB_MULTADD_INDEXED_5(cartpole_QP_solver_ccrhsub11, cartpole_QP_solver_sub11, cartpole_QP_solver_lubbysub11, cartpole_QP_solver_dzcc11, cartpole_QP_solver_ubIdx11, cartpole_QP_solver_dlubcc11);
+cartpole_QP_solver_LA_VSUB7_230(cartpole_QP_solver_l, cartpole_QP_solver_ccrhs, cartpole_QP_solver_s, cartpole_QP_solver_dl_cc, cartpole_QP_solver_ds_cc);
+cartpole_QP_solver_LA_VADD_159(cartpole_QP_solver_dz_cc, cartpole_QP_solver_dz_aff);
+cartpole_QP_solver_LA_VADD_59(cartpole_QP_solver_dv_cc, cartpole_QP_solver_dv_aff);
+cartpole_QP_solver_LA_VADD_230(cartpole_QP_solver_dl_cc, cartpole_QP_solver_dl_aff);
+cartpole_QP_solver_LA_VADD_230(cartpole_QP_solver_ds_cc, cartpole_QP_solver_ds_aff);
 info->lsit_cc = cartpole_QP_solver_LINESEARCH_BACKTRACKING_COMBINED(cartpole_QP_solver_z, cartpole_QP_solver_v, cartpole_QP_solver_l, cartpole_QP_solver_s, cartpole_QP_solver_dz_cc, cartpole_QP_solver_dv_cc, cartpole_QP_solver_dl_cc, cartpole_QP_solver_ds_cc, &info->step_cc, &info->mu);
 if( info->lsit_cc == cartpole_QP_solver_NOPROGRESS ){
 exitcode = cartpole_QP_solver_NOPROGRESS; break;
@@ -3406,24 +3163,6 @@ output->z12[1] = cartpole_QP_solver_z11[1];
 output->z12[2] = cartpole_QP_solver_z11[2];
 output->z12[3] = cartpole_QP_solver_z11[3];
 output->z12[4] = cartpole_QP_solver_z11[4];
-output->z12[5] = cartpole_QP_solver_z11[5];
-output->z13[0] = cartpole_QP_solver_z12[0];
-output->z13[1] = cartpole_QP_solver_z12[1];
-output->z13[2] = cartpole_QP_solver_z12[2];
-output->z13[3] = cartpole_QP_solver_z12[3];
-output->z13[4] = cartpole_QP_solver_z12[4];
-output->z13[5] = cartpole_QP_solver_z12[5];
-output->z14[0] = cartpole_QP_solver_z13[0];
-output->z14[1] = cartpole_QP_solver_z13[1];
-output->z14[2] = cartpole_QP_solver_z13[2];
-output->z14[3] = cartpole_QP_solver_z13[3];
-output->z14[4] = cartpole_QP_solver_z13[4];
-output->z14[5] = cartpole_QP_solver_z13[5];
-output->z15[0] = cartpole_QP_solver_z14[0];
-output->z15[1] = cartpole_QP_solver_z14[1];
-output->z15[2] = cartpole_QP_solver_z14[2];
-output->z15[3] = cartpole_QP_solver_z14[3];
-output->z15[4] = cartpole_QP_solver_z14[4];
 
 #if cartpole_QP_solver_SET_TIMING == 1
 info->solvetime = cartpole_QP_solver_toc(&solvertimer);

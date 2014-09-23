@@ -8,6 +8,8 @@ from math import pi, atan, cos, sin
 
 def cartplot(states, cart_width, cart_height, pole_length):
     
+    # State is [x, xdot, theta, thetadot]
+
     plt.clf()
     plt.cla()
 
@@ -25,19 +27,23 @@ def cartplot(states, cart_width, cart_height, pole_length):
         y_min = - .5*cart_height; y_max = .5*cart_height;
         y = [y_min, y_max, y_max, y_min]
 
-        ax.fill(x, y, 'b')
+        verts = [[x_min, y_min],[x_min, y_max],[x_max, y_max],[x_max, y_min]]
+        rect = plt.Rectangle([x_min, y_min], cart_width, cart_height, fc='b', ec='black', zorder=2)
+        ax.add_patch(rect)
 
         # Plot the pole
         plt.plot([states[0,i]], [0], 'ro', markersize=5)
         end_pole = [pole_length*sin(states[2,i])+states[0,i], -1*pole_length*cos(states[2,i])]
         plt.plot([states[0,i], end_pole[0]], [0, end_pole[1]],color='black',linewidth=2.0)
 
+    plt.ylim(-1, 1)
+
     plt.show(block=False)
     plt.pause(.1)
 
     raw_input()
 
-def plot(states, parents, goal_path, obstacles, goal_region, iters, cost, delta_v, delta_s):
+def plot(states, obstacles, goal_region, iters, cost, delta_v, delta_s, cart_width, cart_height, pole_length):
 
     #print goal_path
     
@@ -92,27 +98,26 @@ def plot(states, parents, goal_path, obstacles, goal_region, iters, cost, delta_
     # way to manually set axes
     #ax.axis([x_min, x_max, y_min, y_max])
 
-    # Plot SST graph
-    for i in range(0, states.shape[1] - 1): # second dimension of shape, because plotting in 2D
-        plt.plot([states[0,i], parents[0,i]], [states[1,i], parents[1,i]],color='blue')
-    
-    # Plot goal state and markers
-    plt.plot(goal_path[0,:], goal_path[1,:], color='g', linewidth=3.0)
-    for i in range(goal_path.shape[1]):
-        # since the output is in radians, I convert it to degrees
-        # the -90 is because I want the tip of the triangle to start facing the right
-        # as in 0 degrees of the unit circle.
-        orientation = float(atan(goal_path[3,i]/goal_path[2,i]))
-        if goal_path[2,i] < 0 and goal_path[3,i] < 0: # dx and dy are negative
-            orientation = pi + orientation
-        elif goal_path[2,i] < 0: # If dx is negative, the is starting from pi, not 0
-            orientation = pi - abs(orientation)
-        elif goal_path[3,i] < 0: # If dy is negative, everything is okay
-            pass
-        if i == 0: # intitial state is [0,0,0,0], orientation is nan
-            continue
-        else:
-            plt.plot(goal_path[0,i], goal_path[1,i], marker=(3,0,orientation*180/pi-90), markersize=10, color='g')
+    for i in range(0, states.shape[1]):
+
+        # Plot the car
+        x_min = states[3,i] - .5*cart_width; x_max = states[3,i] + .5*cart_width;
+        x = [x_min, x_min, x_max, x_max]
+
+        y_min = - .5*cart_height; y_max = .5*cart_height;
+        y = [y_min, y_max, y_max, y_min]
+
+        verts = [[x_min, y_min],[x_min, y_max],[x_max, y_max],[x_max, y_min]]
+        rect = plt.Rectangle([x_min, y_min], cart_width, cart_height, fc='b', ec='black', zorder=2)
+        ax.add_patch(rect)
+
+        # Plot the pole
+        plt.plot([states[3,i]], [0], 'ro', markersize=5)
+        end_pole = [pole_length*sin(states[2,i])+states[0,i], -1*pole_length*cos(states[2,i])]
+        plt.plot([states[3,i], end_pole[0]], [0, end_pole[1]],color='black',linewidth=2.0)
+
+    plt.show(block=False)
+    plt.pause(.1)
     
     plt.title('Cost: ' + str(cost))
 

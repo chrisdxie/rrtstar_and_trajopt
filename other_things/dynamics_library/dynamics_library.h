@@ -16,6 +16,11 @@ struct cartpole_parameters {
 	double mc; // Cart mass
 	double mp; // Pole mass
 	double l;  // Pole length
+	double b;  // Friction coefficient
+
+	// Useless things (but useful for plotting)
+	double cw; // cart width
+	double ch; // cart height
 };
 
 namespace dynamics_library {
@@ -47,7 +52,7 @@ namespace dynamics_library {
  	/*
  	 *  Set fields of cartpole parameters
  	 */
- 	void set_cartpole_parameters(double mc, double mp, double l);
+ 	void set_cartpole_parameters(double mc, double mp, double l, double b, double cw, double ch);
 
 	/*
 	 *  This function is a function to calculate the derivative of given a state
