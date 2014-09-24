@@ -177,7 +177,7 @@ void setup(int max_iters, std::string& randomize, int batch_size) {
 	update_C_ellipse_Matrix();
 
 	// Gamma
-	setup_values.gamma = 10; // Looked up thing in paper
+	setup_values.gamma = 12; // Looked up thing in paper
 
 	// Randomize argument
 	if (randomize == "true") {
@@ -193,14 +193,14 @@ void setup(int max_iters, std::string& randomize, int batch_size) {
 	setup_values.obstacles = obstacles;
 
 	// Limits
-	setup_values.x_min = -5;
-	setup_values.x_max = 5;
+	setup_values.x_min = -6;
+	setup_values.x_max = 6;
 	setup_values.v_min = -10;
 	setup_values.v_max = 10;
 	setup_values.theta_min = 0;
 	setup_values.theta_max = 2*M_PI;
-	setup_values.w_min = -2;
-	setup_values.w_max = 2;
+	setup_values.w_min = -10;
+	setup_values.w_max = 10;
 	setup_values.u_min = -10;
 	setup_values.u_max = 10;
 
@@ -447,12 +447,24 @@ inline bool inSet(Node* x, std::set<Node*>& Set) {
 
 /* HEURISTICS GO HERE */
 
+// Calculating configuration difference
+// Assume vector is [theta, x]
+inline double config_dist(VectorXd& p1, VectorXd& p2) {
+	Vector2d t;
+	t << (p1 - p2);
+	double s_theta = min(p1(0), p2(0));
+	double b_theta = max(p1(0), p2(0));
+	t(0) = min(b_theta - s_theta, s_theta + 2*M_PI - b_theta);
+
+	return t.norm();
+}
+
 // Cost to come heuristic
 inline double g_hat(Node* x) {
 	VectorXd pos(2), init_pos(2);
 	pos << x->state(2), x->state(3);
 	init_pos << setup_values.initial_state(2), setup_values.initial_state(3);
-	return (pos - init_pos).norm()/max_speed;
+	return config_dist(pos, init_pos)/max_speed;
 	//return x->g_hat;
 }
 // Cost to go heuristic
@@ -460,7 +472,7 @@ inline double h_hat(Node* x) {
 	VectorXd pos(2), goal_pos(2);
 	pos << x->state(2), x->state(3);
 	goal_pos << best_goal_node->state(2), best_goal_node->state(3);
-	return (pos - goal_pos).norm()/max_speed;
+	return config_dist(pos, goal_pos)/max_speed;
 	//return x->h_hat;
 }
 // Cost of x_start to x_goal where path is constrained to go through x heuristic
@@ -500,23 +512,39 @@ double c(Edge* e) {
 	bounds.x_min << setup_values.w_min, setup_values.v_min, setup_values.theta_min-2*M_PI, setup_values.x_min;
 	bounds.x_max << setup_values.w_max, setup_values.v_max, setup_values.theta_max+2*M_PI, setup_values.x_max;
 	bounds.delta_min = 0;
-	bounds.delta_max = 10; // I guess we are putting a max on delta
+	bounds.delta_max = 1; // I guess we are putting a max on delta
 	bounds.x_start = v->state;
 	bounds.x_goal = x->state;
 
 	// Initialize pointer to time variable, delta
 	double delta = 1;
 
-	// Call SQP (Redundant call, whatever. fix later)
-	int success = solve_cartpole_BVP(X, U, delta, bounds);
+	// Call SQP
+	int success = solve_cartpole_BVP(X, U, delta, bounds, !x->inV && !inSet(x,G));
 
 	// If not success, say the cost is infinity
 	if (success == 0) {
-		std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start << "\nGoal state:\n" << bounds.x_goal << "\n";
+		// if (!x->inV) {
+		// 	std::cout << "ADDING STATE Unsuccessful...\n";
+		// } else {
+		// 	std::cout << "REWIRING Unsuccessful...\n";
+		// }		
+		// std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start << "\nGoal state:\n" << bounds.x_goal << "\n";
 		failedSQPCalls.insert(start_and_end_states);
 		return INFTY;
 	}
-	std::cout << "SUCCESS!!!\nStart state:\n" << bounds.x_start << "\nGoal state:\n" << bounds.x_goal << "\n";
+
+	// If x is considered to be added to the tree, fix new values of velocies
+	if (!x->inV) {
+		x->state(0) = X[T-1](0,0); // Angular velocity
+		x->state(1) = X[T-1](1,0); // Positional velocity
+	}
+	// if (!x->inV) {
+	// 	std::cout << "ADDING STATE Successful!!!\n";
+	// } else {
+	// 	std::cout << "REWIRING Successful!!!\n";
+	// }	
+	// std::cout << "Start state:\n" << bounds.x_start << "\nGoal state:\n" << bounds.x_goal << "\n";
 
 	StdVectorX allButLastState(X.begin(), X.begin()+T-1);
 	e->states = allButLastState;
@@ -532,7 +560,7 @@ inline double c_hat(Node* x, Node* y) { // This is specific to cart pole
 	VectorXd x_pos(2), y_pos(2);
 	x_pos << x->state(2), x->state(3);
 	y_pos << y->state(2), y->state(3);
-	return (x_pos - y_pos).norm()/max_speed;
+	return config_dist(x_pos, y_pos)/max_speed;
 }
 /* DONE WITH HEURISTICS */
 
@@ -847,22 +875,24 @@ void updateQueue() {
 	while (expand) {
 		if (Q_V.size() > 0) {
 
-			Edge* best_edge = bestPotentialEdge();
-			double best_edge_cost;
-			if (best_edge == NULL) {
-				best_edge_cost = INFTY;
-			} else {
-				best_edge_cost = g_T(best_edge->v) + best_edge->heuristic_cost + h_hat(best_edge->x);
-			}
+			// Edge* best_edge = bestPotentialEdge();
+			// double best_edge_cost;
+			// if (best_edge == NULL) {
+			// 	best_edge_cost = INFTY;
+			// } else {
+			// 	best_edge_cost = g_T(best_edge->v) + best_edge->heuristic_cost + h_hat(best_edge->x);
+			// }
 
 			Node* best_node = bestPotentialNode();
 			double best_node_cost = g_T(best_node) + h_hat(best_node);
 
-			if (best_node_cost <= best_edge_cost) {
-				updateEdgeQueue(best_node);
-			} else {
-				expand = false;
-			}
+			updateEdgeQueue(best_node);
+
+			// if (best_node_cost <= best_edge_cost) {
+			// 	updateEdgeQueue(best_node);
+			// } else {
+			// 	expand = false;
+			// }
 
 		} else {
 			expand = false;
