@@ -13,7 +13,7 @@ addpath(forcesDir);
 disp(strcat(currDir,'/FORCES'));
 
 % Problem setup
-timesteps = 15;
+timesteps = 12;
 N = timesteps-1;
 nX = 4;
 nU = 1;
