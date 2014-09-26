@@ -6,7 +6,7 @@ using namespace std;
 #include <boost/python/numeric.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/numpy.hpp>
-#include <boost/filesystem.hpp>
+//#include <boost/filesystem.hpp>
 
 namespace py = boost::python;
 namespace np = boost::numpy;
@@ -24,6 +24,10 @@ using namespace Eigen;
 #include <smp/planners/rrtstar.hpp>
 
 #include <smp/planner_utils/trajectory.hpp>
+
+#include <stack>
+#include <fstream>
+#include <iostream>
 
 
 // SMP TYPE DEFINITIONS -------
@@ -121,6 +125,47 @@ void plot(py::object plotter, np::ndarray all_states, np::ndarray all_parents, n
 }
 
 
+MatrixXd read_in_obstacle_file(std::string file_name, collision_checker_t& collision_checker) {
+
+  ifstream fin(file_name.c_str());
+  std::vector<double> data;
+
+  std::copy(std::istream_iterator<double>(fin), // this denotes "start of stream"
+            std::istream_iterator<double>(),   // this denodes "end of stream"
+            std::back_inserter<std::vector<double> >(data));
+
+  MatrixXd obstacles(4, data.size()/4); obstacles.setZero();
+
+  int index = 0;
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < data.size()/4; j++) {
+      obstacles(i, j) = data[index++];
+    }
+  }
+
+  for (int i = 0; i < obstacles.cols(); i++) {
+    region<4> obs;
+    obs.center[0] = obstacles(0,i);
+    obs.size[0] = obstacles(1,i);
+    obs.center[1] = obstacles(2,i);
+    obs.size[1] = obstacles(3,i);
+
+    for (int j = 2; j < 4; j++) {
+      obs.center[j] = 0.0;
+      obs.size[j] = 20.0;
+    }  
+
+    collision_checker.add_obstacle (obs);
+
+  }
+
+  return obstacles;
+
+}
+
+/*
+ *  Arguments are: <NUM_ITERS> <RANDOMIZE in {true, false, <seed>}> <SCENE_FILE_NAME>
+ */ 
 int
 main (int argc, char* argv[]) {
 
@@ -135,9 +180,11 @@ main (int argc, char* argv[]) {
   // Expecting something in the form of: executable <NUM_ITERS> <{"random" or some random seed}>
   if (argc >= 3) {
     std::string arg2 = argv[2];
-    if (arg2.compare("random") == 0) {
+    if (arg2.compare("true") == 0) {
       srand(time(NULL));
       seed = time(NULL);
+    } else if (arg2.compare("false") == 0) {
+      srand(seed);
     } else {
       srand(atoi(argv[2])); // seed was passed in
       seed = atoi(argv[2]);
@@ -181,8 +228,8 @@ main (int argc, char* argv[]) {
   // 2.a Initialize the sampler
   region<4> sampler_support;
   for (int i = 0; i < 2; i++) {
-    sampler_support.center[i] = 5.0;
-    sampler_support.size[i] = 12.0;
+    sampler_support.center[i] = 0.0;
+    sampler_support.size[i] = 20.0;
   }
   for (int i = 2; i < 4; i++) {
     sampler_support.center[i] = 0.0;
@@ -199,37 +246,40 @@ main (int argc, char* argv[]) {
 
  
   // 2.d Initialize the collision checker
-  region<4> obstacle_1;
-  region<4> obstacle_2;
-  region<4> obstacle_3;
+  std::string scene_file_name = argv[3];
+  MatrixXd obstacles = read_in_obstacle_file(scene_file_name, collision_checker);
 
-  obstacle_1.center[0] = 2;
-  obstacle_1.center[1] = 8;
-  obstacle_1.size[0] = 1;
-  obstacle_1.size[1] = 3;
-  obstacle_2.center[0] = 3;
-  obstacle_2.center[1] = 3;
-  obstacle_2.size[0] = 4;
-  obstacle_2.size[1] = 2;
-  obstacle_3.center[0] = 7;
-  obstacle_3.center[1] = 7;
-  obstacle_3.size[0] = 2;
-  obstacle_3.size[1] = 2;
-  for (int i = 2; i < 4; i++) {
-    obstacle_1.center[i] = 0.0;
-    obstacle_1.size[i] = 20.0;
-  }
-    for (int i = 2; i < 4; i++) {
-    obstacle_2.center[i] = 0.0;
-    obstacle_2.size[i] = 20.0;
-  }
-    for (int i = 2; i < 4; i++) {
-    obstacle_3.center[i] = 0.0;
-    obstacle_3.size[i] = 20.0;
-  }
-  collision_checker.add_obstacle (obstacle_1);
-  collision_checker.add_obstacle (obstacle_2);
-  collision_checker.add_obstacle (obstacle_3);
+  // region<4> obstacle_1;
+  // region<4> obstacle_2;
+  // region<4> obstacle_3;
+
+  // obstacle_1.center[0] = 2;
+  // obstacle_1.center[1] = 8;
+  // obstacle_1.size[0] = 1;
+  // obstacle_1.size[1] = 3;
+  // obstacle_2.center[0] = 3;
+  // obstacle_2.center[1] = 3;
+  // obstacle_2.size[0] = 4;
+  // obstacle_2.size[1] = 2;
+  // obstacle_3.center[0] = 7;
+  // obstacle_3.center[1] = 7;
+  // obstacle_3.size[0] = 2;
+  // obstacle_3.size[1] = 2;
+  // for (int i = 2; i < 4; i++) {
+  //   obstacle_1.center[i] = 0.0;
+  //   obstacle_1.size[i] = 20.0;
+  // }
+  //   for (int i = 2; i < 4; i++) {
+  //   obstacle_2.center[i] = 0.0;
+  //   obstacle_2.size[i] = 20.0;
+  // }
+  //   for (int i = 2; i < 4; i++) {
+  //   obstacle_3.center[i] = 0.0;
+  //   obstacle_3.size[i] = 20.0;
+  // }
+  // collision_checker.add_obstacle (obstacle_1);
+  // collision_checker.add_obstacle (obstacle_2);
+  // collision_checker.add_obstacle (obstacle_3);
   
 
   // 2.e Initialize the model checker
@@ -240,7 +290,7 @@ main (int argc, char* argv[]) {
   }
   for (int i = 2; i < 4; i++) {
     region_goal.center[i] = 0.0;
-    region_goal.size[i] = 20.0;
+    region_goal.size[i] = 2.0;
   }
   min_time_reachability.set_goal_region (region_goal);
 
@@ -258,14 +308,6 @@ main (int argc, char* argv[]) {
 
   std::cout << "Initializing display...\n";
   py::object plotter = init_display(); // Initialize python interpreter and pyplot plot
-
-  // Get obstacles.
-  // Each column of this matrix will be an obstacle that the python plotting function will know what to do with.
-  // Each column consists of first dimension center, first dimension size, second dimension center, second dimension size, etc.
-  MatrixXd obstacles(4, 3);
-  obstacles.col(0) << obstacle_1.center[0], obstacle_1.size[0], obstacle_1.center[1], obstacle_1.size[1];
-  obstacles.col(1) << obstacle_2.center[0], obstacle_2.size[0], obstacle_2.center[1], obstacle_2.size[1];
-  obstacles.col(2) << obstacle_3.center[0], obstacle_3.size[0], obstacle_3.center[1], obstacle_3.size[1];
 
   // Get goal region
   // Same format as obstacles. Only one column, since one goal region
@@ -288,7 +330,7 @@ main (int argc, char* argv[]) {
     if (i%100 == 0){
       cout << "Iteration : " << i << endl;
     }
-    if ((i+1) % 1000 == 0) { // Plot every 1k iterations, and save automatically in a folder called "pics"
+    if (false) { // Plot every 1k iterations, and save automatically in a folder called "pics"
 
       trajectory_t trajectory_final;
       min_time_reachability.get_solution (trajectory_final);
@@ -357,8 +399,86 @@ main (int argc, char* argv[]) {
       plot(plotter, all_states_np, all_parents_np, states_np, obstacles_np, goal_region_np, i+1, best_cost);
     }
   }
+
+
+
   
-  
+  trajectory_t trajectory_final;
+  min_time_reachability.get_solution (trajectory_final);
+
+  // Get states from best trajectory
+  int num_states = trajectory_final.list_states.size();
+  MatrixXd states(4, num_states);
+
+  int index = 0;
+  for (typename list<state_t*>::iterator iter_state = trajectory_final.list_states.begin(); 
+       iter_state != trajectory_final.list_states.end(); iter_state++) {
+    state_t *traj_state = *iter_state;
+    for (int i = 0; i < 4; i++) {
+      states(i, index) = traj_state->state_vars[i];
+    }
+    index++;
+  }
+
+  np::ndarray states_np = eigen_to_ndarray(states);
+
+  double best_cost = min_time_reachability.get_best_cost();
+
+  // DFS on tree to get states and parents:
+  MatrixXd all_states(4, planner.get_num_vertices() * 20); all_states.setZero();
+  MatrixXd all_parents(4, planner.get_num_vertices() * 20); all_parents.setZero();
+  int k = 0;
+  std::stack<vertex<typeparams>*> fringe;
+  fringe.push(planner.root_vertex);
+  while(fringe.size() > 0) {
+    vertex<typeparams>* candidate = fringe.top();
+    fringe.pop();
+    if (k == 0) {
+      for(int j = 0; j < 4; ++j) {
+        all_states(j,k) = candidate->state->state_vars[j];
+        all_parents(j,k) = candidate->state->state_vars[j];
+      }
+      k++;
+    } else {
+      vertex<typeparams>* parent = (*(candidate->incoming_edges.begin()))->vertex_src;
+      trajectory_t* traj = (*(candidate->incoming_edges.begin()))->trajectory_edge;
+
+      for (typename list<state_t*>::iterator it = traj->list_states.begin(); it != traj->list_states.end(); it++) {
+        state_t* st = *it;
+        for (int j = 0; j < 4; j++) {
+          all_states(j,k) = st->state_vars[j];
+        }
+        if (it == traj->list_states.begin()) {
+          for (int j = 0; j < 4; j++) {
+            all_parents(j,k) = parent->state->state_vars[j];
+          }
+        } else {
+          for (int j = 0; j < 4; j++) {
+            all_parents(j,k) = all_states(j,k-1);
+          }
+        }
+        k++;
+      }
+
+      for(int j = 0; j < 4; ++j) {
+        all_states(j,k) = candidate->state->state_vars[j];
+        all_parents(j,k) = all_states(j,k-1);
+      }
+      k++;
+    }
+    for(std::list<edge<typeparams>*>::iterator it = candidate->outgoing_edges.begin();
+        it != candidate->outgoing_edges.end(); it++) {
+      fringe.push((*it)->vertex_dst);
+    }
+  }
+
+  MatrixXd final_states = all_states.leftCols(k);
+  MatrixXd final_parents = all_parents.leftCols(k);
+
+  np::ndarray all_states_np = eigen_to_ndarray(final_states);
+  np::ndarray all_parents_np = eigen_to_ndarray(final_parents);
+
+  plot(plotter, all_states_np, all_parents_np, states_np, obstacles_np, goal_region_np, NUM_ITERS, best_cost);
 
   // Successful execution, return 1
   return 1;

@@ -1,5 +1,5 @@
-#ifndef PLOT_BITSTAR_H_
-#define PLOT_BITSTAR_H_
+#ifndef CARTPOLE_PLOT_BITSTAR_H_
+#define CARTPOLE_PLOT_BITSTAR_H_
 
 #include <eigen3/Eigen/Eigen>
 using namespace Eigen;
@@ -13,7 +13,7 @@ using namespace Eigen;
 namespace py = boost::python;
 namespace np = boost::numpy;
 
-np::ndarray eigen_to_ndarray(const MatrixXd& m) {
+np::ndarray cp_eigen_to_ndarray(const MatrixXd& m) {
 	if (m.cols() == 1) {
 		py::tuple shape = py::make_tuple(m.rows());
 		np::dtype dtype = np::dtype::get_builtin<float>();
@@ -36,7 +36,7 @@ np::ndarray eigen_to_ndarray(const MatrixXd& m) {
 	}
 }
 
-py::object init_display() {
+py::object cp_init_display() {
 	// necessary initializations
 	Py_Initialize();
 	np::initialize();
@@ -60,7 +60,7 @@ py::object init_display() {
 	return plotter;
 }
 
-void plot(py::object& plotter, np::ndarray& goal_path, np::ndarray& obstacles, int iters, double cost,
+void cp_plot(py::object& plotter, np::ndarray& goal_path, np::ndarray& obstacles, int iters, double cost,
 		  double cart_width, double cart_height, double pole_length) {
 
 	try {

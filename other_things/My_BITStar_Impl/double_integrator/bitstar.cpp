@@ -367,7 +367,7 @@ MatrixXd get_path(Node* x) {
 	while (x->state != setup_values.initial_state) {
 
 		P.col(index) = x->state; index++;
-		for (int i = T-2; i >= 0; --i) { // Hacked, hard coded
+		for (int i = T-2; i >= 1; --i) { // Hacked, hard coded
 			P.col(index) = x->states[i];
 			index ++;
 		}
@@ -1040,17 +1040,16 @@ double BITStar() {
 		// Plot in Python
 		std::cout << "Solution found!\n";
 		std::cout << "Initializing display...\n";
-		py::object plotter = init_display(); // Initialize python interpreter and pyplot plot
+		py::object plotter = di_init_display(); // Initialize python interpreter and pyplot plot
 
 		// Convert Eigen matrices and vectors to Numpy ND arrays
-		np::ndarray states_np = eigen_to_ndarray(tree_to_matrix_states(root_node));
-		np::ndarray parents_np = eigen_to_ndarray(tree_to_matrix_parents(root_node));
-		np::ndarray goal_path_np = eigen_to_ndarray(goal_path);
-		// np::ndarray goal_region_np = eigen_to_ndarray(setup_values.goal_region);
-		np::ndarray obstacles_np = eigen_to_ndarray(setup_values.obstacles);
+		np::ndarray states_np = di_eigen_to_ndarray(tree_to_matrix_states(root_node));
+		np::ndarray parents_np = di_eigen_to_ndarray(tree_to_matrix_parents(root_node));
+		np::ndarray goal_path_np = di_eigen_to_ndarray(goal_path);
+		np::ndarray obstacles_np = di_eigen_to_ndarray(setup_values.obstacles);
 
 		std::cout << "Plotting...\n";
-		plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, setup_values.max_iters, g_T(best_goal_node));
+		di_plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, setup_values.max_iters, g_T(best_goal_node));
 
 	}
 	return g_T(best_goal_node);

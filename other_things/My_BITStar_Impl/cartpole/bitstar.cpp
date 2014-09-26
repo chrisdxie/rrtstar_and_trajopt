@@ -37,7 +37,7 @@ double r; // Radius from RRT*, updated every iteration
 int n; // Number of vertices in V, updated every iteration
 double f_max;
 Node* root_node;
-Node* best_goal_node;
+Node* goal_node;
 
 // For sampling in ball
 typedef boost::mt19937 RANDOM_ENGINE;
@@ -87,7 +87,7 @@ inline double g_T(Node* x) {
 // This needs to update every time we find a new goal
 void update_C_ellipse_Matrix() {
 	int d = setup_values.dimension;
-	VectorXd goal_state = best_goal_node->state;
+	VectorXd goal_state = goal_node->state;
 
 	// SVD stuff for ball
 	VectorXd a1 = goal_state - setup_values.initial_state;
@@ -135,11 +135,12 @@ void setup(int max_iters, std::string& randomize, int batch_size) {
 	VectorXd goal_state(d);
 	goal_state << 0, 0, M_PI, 4;
 
-	int num_obstacles = 1;
+	int num_obstacles = 3;
 	MatrixXd obstacles(4, num_obstacles);
-	obstacles.col(0) << -2.5, 1, -.5, .8;
-	//obstacles.col(1) << 2, 1, 8, 3;
-	//obstacles.col(2) << 7, 2, 7, 2;
+    obstacles.col(0) << -2, 2, -.5, .8;
+    obstacles.col(1) << 2, 2, -.5, .8;
+    obstacles.col(2) << 0, .6, .6, .6;
+
 
 	// Max Iterations
 	setup_values.max_iters = max_iters;
@@ -166,12 +167,12 @@ void setup(int max_iters, std::string& randomize, int batch_size) {
 	root_node->old = false;
 	V.insert(root_node);
 
-	best_goal_node = new Node;
-	best_goal_node->state = setup_values.goal_state;
-	best_goal_node->inV = false;
-	best_goal_node->old = false;
-	G.insert(best_goal_node); // Add goal state
-	X_sample.insert(best_goal_node);
+	goal_node = new Node;
+	goal_node->state = setup_values.goal_state;
+	goal_node->inV = false;
+	goal_node->old = false;
+	G.insert(goal_node); // Add goal state
+	X_sample.insert(goal_node);
 
 	// Update for the first time
 	update_C_ellipse_Matrix();
@@ -260,9 +261,9 @@ inline bool inBounds(VectorXd& state) {
 	return false;
 }
 
-bool inGoal(Node* x) {
-	return inside_sphere_obs(x->state, setup_values.goal_state, setup_values.goal_radius);
-}
+// bool inGoal(Node* x) {
+// 	return inside_sphere_obs(x->state, setup_values.goal_state, setup_values.goal_radius);
+// }
 
 bool isLeaf(Node* x) {
 	return x->children.size() == 0;
@@ -287,6 +288,8 @@ bool exists_collision(VectorXd& x_near, VectorXd& x_new) {
 	 *
 	 * x0 < x1, and p1x > p2x
 	 */
+	bool obstacle_collision_swv = false;
+
 	Matrix<double, 4, 2> traj_line;
 	traj_line.setZero();
 	if (x_near(3) < x_new(3)) {
@@ -310,7 +313,7 @@ bool exists_collision(VectorXd& x_near, VectorXd& x_new) {
 		traj_line.row(3) << p_near_x, p_near_y;
 	}
 
-	for (int n = 0; n < num_obstacles; n++) {
+	for (int n = 0; n < num_obstacles && !obstacle_collision_swv; n++) {
 
 		double x_min = obstacles(0,n) - .5*obstacles(1,n);
 		double x_max = obstacles(0,n) + .5*obstacles(1,n);
@@ -326,12 +329,40 @@ bool exists_collision(VectorXd& x_near, VectorXd& x_new) {
 		Matrix<double, 3, 2> temp = signed_distance_2d::signedDistancePolygons(traj_line, obs);
 		num_collision_check_calls++;
 
-		if (temp(0,0) < 0) {
-			return true;
+		if (std::isfinite(temp(0,0)) && temp(0,0) < 0) {
+			obstacle_collision_swv = true;
 		}
 
 	}
-	return false;
+
+    Matrix<double, 2, 2> pole_line;
+    pole_line.setZero();
+    pole_line.row(0) << x_new(3), 0;
+    pole_line.row(1) << p_new_x, p_new_y;
+
+    // Actual obstacle detection is here
+    bool obstacle_collision_individ = false;
+	for (int n = 0; n < num_obstacles && !obstacle_collision_individ; n++) {
+
+		double x_min = obstacles(0,n) - .5*obstacles(1,n);
+		double x_max = obstacles(0,n) + .5*obstacles(1,n);
+		double y_min = obstacles(2,n) - .5*obstacles(3,n);
+		double y_max = obstacles(2,n) + .5*obstacles(3,n);
+
+		Matrix<double, 4, 2> obs;
+		obs.setZero(4,2);
+		obs.row(0) << x_min, y_min; obs.row(1) << x_min, y_max;
+		obs.row(2) << x_max, y_max; obs.row(3) << x_max, y_min;
+
+        // Call signed distance function, retrieve value.
+        Matrix<double, 3, 2> temp = signed_distance_2d::signedDistancePolygons(pole_line, obs);
+
+        if (temp(0,0) < 0) {
+            obstacle_collision_individ = true;
+        }
+    }
+
+    return obstacle_collision_swv || obstacle_collision_individ;    
 }
 // Returns a matrix of states for Python plotting
 MatrixXd tree_to_matrix_states(Node* node) {
@@ -471,7 +502,7 @@ inline double g_hat(Node* x) {
 inline double h_hat(Node* x) {
 	VectorXd pos(2), goal_pos(2);
 	pos << x->state(2), x->state(3);
-	goal_pos << best_goal_node->state(2), best_goal_node->state(3);
+	goal_pos << goal_node->state(2), goal_node->state(3);
 	return config_dist(pos, goal_pos)/max_speed;
 	//return x->h_hat;
 }
@@ -611,30 +642,30 @@ Node* bestPotentialNode() {
 }
 
 // Sample uniformly from goal region. Specific to cartpole example. It is sampling from a ball with the goal state as the center
-void sample_from_goal_region() {
+// void sample_from_goal_region() {
 
-	int num_samples = 0;
-	int goal_region_batch_size = setup_values.batch_size/10;
+// 	int num_samples = 0;
+// 	int goal_region_batch_size = setup_values.batch_size/10;
 
-	while (num_samples < goal_region_batch_size) {
+// 	while (num_samples < goal_region_batch_size) {
 
-		// Sample the new state
-		VectorXd x_sample = sample_from_unit_ball();
+// 		// Sample the new state
+// 		VectorXd x_sample = sample_from_unit_ball();
 
-		x_sample *= setup_values.goal_radius;
-		x_sample += setup_values.goal_state;
+// 		x_sample *= setup_values.goal_radius;
+// 		x_sample += setup_values.goal_state;
 
-		// Create the node and insert it into X_sample
-		if (inBounds(x_sample)) {
-			Node* n = new Node();
-			n->state = x_sample;
-			n->inV = false;
-			n->old = false;
-			X_sample.insert(n);
-			num_samples++;
-		}
-	}	
-}
+// 		// Create the node and insert it into X_sample
+// 		if (inBounds(x_sample)) {
+// 			Node* n = new Node();
+// 			n->state = x_sample;
+// 			n->inV = false;
+// 			n->old = false;
+// 			X_sample.insert(n);
+// 			num_samples++;
+// 		}
+// 	}	
+// }
 
 // Sample uniformly from sample space. Specific to cartpole environment
 void sample_uniform_batch() {
@@ -670,10 +701,10 @@ void sample_batch() {
 
 	num_sample_batches++;
 
-	double best_cost = g_T(best_goal_node);
-	double c_min = g_hat(best_goal_node);
+	double best_cost = g_T(goal_node);
+	double c_min = g_hat(goal_node);
 
-	sample_from_goal_region();
+	//sample_from_goal_region();
 
 	if (best_cost == INFTY) { // Just sample uniformly from state space
 		sample_uniform_batch();
@@ -681,7 +712,7 @@ void sample_batch() {
 	}
 
 	int num_samples = 0;
-	VectorXd x_center = (setup_values.initial_state + best_goal_node->state)/2.0;
+	VectorXd x_center = (setup_values.initial_state + goal_node->state)/2.0;
 
 	// Create L matrix from bigger radius
 	MatrixXd L(setup_values.dimension, setup_values.dimension);
@@ -743,7 +774,7 @@ void pruneSampleSet() {
 	std::set<Node*>::iterator n_it;
 	for(n_it = X_sample.begin(); n_it != X_sample.end(); ) {
 		Node* n = *n_it;
-		if (f_hat(n) > g_T(best_goal_node)) {
+		if (f_hat(n) > g_T(goal_node)) {
 			num_samples_pruned++;
 			if (inSet(n,G)) {
 				G.erase(n);
@@ -792,7 +823,7 @@ void pruneVertexSet() {
 	n_it = V.begin();
 	while (n_it != V.end()) {
 		Node* n = *n_it;
-		if (f_hat(n) > g_T(best_goal_node)) {
+		if (f_hat(n) > g_T(goal_node)) {
 			num_vertices_pruned++;
 			pruneVertex(n);
 
@@ -840,7 +871,7 @@ void updateEdgeQueue(Node* v) {
 	for(n_it = X_near.begin(); n_it != X_near.end(); ++n_it) {
 		Node* x = *n_it;
 		double heuristic_edge_cost = c_hat(v, x);
-		if (g_hat(v) + heuristic_edge_cost + h_hat(x) < g_T(best_goal_node)) {
+		if (g_hat(v) + heuristic_edge_cost + h_hat(x) < g_T(goal_node)) {
 			Edge* e = new Edge(v, x);
 			e->heuristic_cost = heuristic_edge_cost;
 			Q_edge.insert(e);
@@ -863,7 +894,7 @@ void updateEdgeQueue(Node* v) {
 		for(n_it = V_near.begin(); n_it != V_near.end(); ++n_it) {
 			Node* w = *n_it;
 			double heuristic_edge_cost = c_hat(v, w);
-			if (g_hat(v) + heuristic_edge_cost + h_hat(w) < g_T(best_goal_node)) { // Same condition as above
+			if (g_hat(v) + heuristic_edge_cost + h_hat(w) < g_T(goal_node)) { // Same condition as above
 				if (g_T(v) + heuristic_edge_cost < g_T(w)) { // could improve cost-to-come to the target child
 					if (v != w->parent && w != v->parent) { // Make sure this edge isn't already in the tree
 						Edge* e = new Edge(v, w);
@@ -916,13 +947,13 @@ void updateQueue() {
 double costOfBestGoalNode() {
 
 	bool changed = false;
-	double best_cost = g_T(best_goal_node);
+	double best_cost = g_T(goal_node);
 	std::set<Node*>::iterator n_it;
 
 	for(n_it = G.begin(); n_it != G.end(); n_it++) {
 		Node* candidate = *n_it;
 		if (g_T(candidate) < best_cost) {
-			best_goal_node = candidate;
+			goal_node = candidate;
 			best_cost = g_T(candidate);
 			changed = true;
 		}
@@ -950,7 +981,7 @@ double BITStar() {
 
 	while (k <= setup_values.max_iters) { // Max_iters will be much more now. Maybe put some other termination condition here
 
-		if (k % 10 == 0) {
+		if (k % 100 == 0) {
 			std::cout << "Iteration: " << k << "\n";
 			std::cout << "Size of sample set: " << X_sample.size() << "\n";
 			std::cout << "Size of vertex set: " << V.size() << "\n";
@@ -982,16 +1013,16 @@ double BITStar() {
 		// Update Q_edge for vertices in the expansion queue Q_V
 		updateQueue();
 
-			// Grab best potential edge
+		// Grab best potential edge
 		Edge* e = bestPotentialEdge();
 		Q_edge.erase(e);
 		Node* v = e->v; Node* x = e->x;
 
-		if (g_T(v) + e->heuristic_cost + h_hat(x) < g_T(best_goal_node)) {
+		if (g_T(v) + e->heuristic_cost + h_hat(x) < g_T(goal_node)) {
 
 			double cvx = c(e); // Calculate true cost of edge
 			
-			if (g_hat(v) + cvx + h_hat(x) < g_T(best_goal_node)) {
+			if (g_hat(v) + cvx + h_hat(x) < g_T(goal_node)) {
 
 				if (g_T(v) + cvx < g_T(x)) {
 
@@ -1017,10 +1048,10 @@ double BITStar() {
 					v->children.insert(x);
 
 					// Check if node is in goal
-					if (inGoal(x) && !x->inV) {
-						G.insert(x);
-						std::cout << "New goal state found:\n" << x->state << "\n";
-					}
+					// if (inGoal(x) && !x->inV) {
+					// 	G.insert(x);
+					// 	std::cout << "New goal state found:\n" << x->state << "\n";
+					// }
 					x->inV = true;
 
 					// Update best cost stuff
@@ -1028,7 +1059,7 @@ double BITStar() {
 					f_max = costOfBestGoalNode(); // Best goal node is update here too
 					if (f_max < old_cost) {
 						std::cout << "New goal cost: " << f_max << "\n";
-						//std::cout << "State of goal:\n" << best_goal_node->state << "\n";
+						//std::cout << "State of goal:\n" << goal_node->state << "\n";
 					}
 
 					pruneEdgeQueue(x);
@@ -1060,30 +1091,31 @@ double BITStar() {
 	duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 	std::cout << "Duration of algorithm for " << setup_values.max_iters << " iterations: " << duration << "\n";
 
-	if (g_T(best_goal_node) < INFTY) {
+	if (g_T(goal_node) < INFTY) {
 
 		std::cout << "Size of V: " << V.size() << "\n";
 		std::cout << "Number of samples pruned: " << num_samples_pruned << "\n";
 		std::cout << "Number of vertices pruned: " << num_vertices_pruned << "\n";
 		std::cout << "Number of batches: " << num_sample_batches << "\n";
+		std::cout << "Number of failed SQP calls: " << failedSQPCalls.size() << "\n";
 
-		MatrixXd goal_path = get_path(best_goal_node);
+		MatrixXd goal_path = get_path(goal_node);
 
 		// Plot in Python
 		std::cout << "Solution found!\n";
 		std::cout << "Initializing display...\n";
-		py::object plotter = init_display(); // Initialize python interpreter and pyplot plot
+		py::object plotter = cp_init_display(); // Initialize python interpreter and pyplot plot
 
 		// Convert Eigen matrices and vectors to Numpy ND arrays
-		np::ndarray goal_path_np = eigen_to_ndarray(goal_path);
-		np::ndarray obstacles_np = eigen_to_ndarray(setup_values.obstacles);
+		np::ndarray goal_path_np = cp_eigen_to_ndarray(goal_path);
+		np::ndarray obstacles_np = cp_eigen_to_ndarray(setup_values.obstacles);
 
 		std::cout << "Plotting...\n";
-		plot(plotter, goal_path_np, obstacles_np, setup_values.max_iters, g_T(best_goal_node),
+		cp_plot(plotter, goal_path_np, obstacles_np, setup_values.max_iters, g_T(goal_node),
 			 cp_params.cw, cp_params.ch, cp_params.l);
 
 	}
-	return g_T(best_goal_node);
+	return g_T(goal_node);
 
 }
 

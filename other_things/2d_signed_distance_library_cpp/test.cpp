@@ -136,15 +136,6 @@ int main() {
     std::cout << "Initializing display...\n";
 	py::object plotter = init_display(); // Initialize python interpreter and pyplot plot
 
-	np::ndarray p1_np = eigen_to_ndarray(p1);
-	np::ndarray p2_np = eigen_to_ndarray(p2);
-	np::ndarray p3_np = eigen_to_ndarray(p3);
-	np::ndarray p4_np = eigen_to_ndarray(p4);
-	np::ndarray p5_np = eigen_to_ndarray(p5);
-	np::ndarray p6_np = eigen_to_ndarray(p6);
-	np::ndarray p7_np = eigen_to_ndarray(p7);
-	np::ndarray point_robot_np = eigen_to_ndarray(point_robot);
-
 	// Plot random triangles between [0, 1] x [0, 1]
 	srand(time(NULL));
 	Matrix<double, 3, 2> t1;
@@ -166,20 +157,31 @@ int main() {
 		}
 	}
 
-	t1 << .5, .48,
-		  .5, .52,
-		  .5, .48;
-	t2 << .1, .1,
-		   1, .5,
-		   0, 1;
+	p1 << 2.2051, 0,
+    	  2.6514, 0,
+    	  3.0718, -0.2706,
+    	  2.7041, 0.0319;
+	p2 << 3, -.9,
+		    3, -.1,
+		    1, -.1,
+		    1, -.9;
 
-	MatrixXd ans = signedDistancePolygons(t1, t2);
+	MatrixXd ans = signedDistancePolygons(p1, p2);
 	np::ndarray ans_np = eigen_to_ndarray(ans);
 	np::ndarray t1_np = eigen_to_ndarray(t1);
 	np::ndarray t2_np = eigen_to_ndarray(t2);
 
+	np::ndarray p1_np = eigen_to_ndarray(p1);
+	np::ndarray p2_np = eigen_to_ndarray(p2);
+	np::ndarray p3_np = eigen_to_ndarray(p3);
+	np::ndarray p4_np = eigen_to_ndarray(p4);
+	np::ndarray p5_np = eigen_to_ndarray(p5);
+	np::ndarray p6_np = eigen_to_ndarray(p6);
+	np::ndarray p7_np = eigen_to_ndarray(p7);
+	np::ndarray point_robot_np = eigen_to_ndarray(point_robot);
+
 	std::cout << "Plotting...\n";
-	plot(plotter, t1_np, t2_np, ans_np);
+	plot(plotter, p1_np, p2_np, ans_np);
 
 }
 

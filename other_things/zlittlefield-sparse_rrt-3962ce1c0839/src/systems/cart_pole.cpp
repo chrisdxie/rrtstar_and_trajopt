@@ -19,6 +19,7 @@
 #include <eigen3/Eigen/Eigen>
 using namespace Eigen;
 
+#include "../../../2d_signed_distance_library_cpp/signedDistancePolygons.hpp"
 #include "../../../dynamics_library/dynamics_library.hpp"
 using namespace dynamics_library;
 
@@ -36,12 +37,14 @@ using namespace dynamics_library;
 #define STATE_W 3
 #define CONTROL_A 0
 
-#define MIN_X -5
-#define MAX_X 5
+#define MIN_X -6
+#define MAX_X 6
 #define MIN_V -10
 #define MAX_V 10
-#define MIN_W -2
-#define MAX_W 2
+#define MIN_W -10
+#define MAX_W 10
+#define MIN_U -10
+#define MAX_U 10
 
 double cart_pole_t::distance(double* point1,double* point2)
 {
@@ -61,7 +64,7 @@ void cart_pole_t::random_state(double* state)
 
 void cart_pole_t::random_control(double* control)
 {
-        control[0] = uniform_random(-10,10);
+        control[0] = uniform_random(MIN_U,MAX_U);
 }
 
 bool cart_pole_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration )
@@ -70,12 +73,17 @@ bool cart_pole_t::propagate( double* start_state, double* control, int min_step,
         // The state for this is [x, xdot, theta, thetadot]
         // But I use             [thetadot, xdot, theta, x]
 
-        double mc = M;
-        double mp = m;
-        double l = 2*L;
+        temp_state[0] = start_state[0];
+        temp_state[1] = start_state[1];
+        temp_state[2] = start_state[2];
+        temp_state[3] = start_state[3];
+
+        double mc = .5;
+        double mp = .5;
+        double l = .5;
         double b = .1;
-        double cw = .25;
-        double ch = .05;
+        double cw = .5;
+        double ch = .2;
         set_cartpole_parameters(mc, mp, l, b, cw, ch);
 
         VectorXd z(4);
@@ -94,7 +102,9 @@ bool cart_pole_t::propagate( double* start_state, double* control, int min_step,
 
         duration = delta;
 
-        return true;
+        bool validity = valid_state(result_state);
+
+        return validity;
 
         /*
         temp_state[0] = start_state[0]; 
@@ -146,8 +156,120 @@ void cart_pole_t::enforce_bounds()
 }
 
 
-bool cart_pole_t::valid_state()
+bool cart_pole_t::valid_state(double* state)
 {
+    
+    // The state for this is [x, xdot, theta, thetadot] = [x, v, theta, w]
+
+    /* Compute line (2D polygon) spanned by x and x_next.
+     * The polygon created is represent by 4 points: the cart positions (beginning of pole)
+     * and the end of the pole. traj_line will look like:
+     *
+     * [x0, 0;
+     *  x1, 0;
+     *  p1x, p1y;
+     *  p2x, p2y]
+     *
+     * x0 < x1, and p1x > p2x
+     */
+    Matrix<double, 2, 2> traj_line;
+    traj_line.setZero();
+    traj_line.row(0) << state[0], 0;
+
+    double length = .5;
+    double p_new_x = length * sin(state[2]) + state[0];
+    double p_new_y = -1*length * cos(state[2]);
+
+    traj_line.row(1) << p_new_x, p_new_y;
+
+    // Actual obstacle detection is here
+    bool obstacle_collision_individ = false;
+    for(unsigned i=0; i<obstacles.size() && !obstacle_collision_individ;i++) {
+
+        Matrix<double, 4, 2> obs;
+        obs.setZero(4,2);
+
+        obs.row(0) << obstacles[i].low_x, obstacles[i].low_y; 
+        obs.row(1) << obstacles[i].low_x, obstacles[i].high_y;
+        obs.row(2) << obstacles[i].high_x, obstacles[i].high_y; 
+        obs.row(3) << obstacles[i].high_x, obstacles[i].low_y;
+
+        // Call signed distance function, retrieve value.
+        Matrix<double, 3, 2> temp = signed_distance_2d::signedDistancePolygons(traj_line, obs);
+
+        if (temp(0,0) < 0) {
+            obstacle_collision_individ = true;
+        }
+    }
+
+    bool obstacle_collision_swv = false;
+    Matrix<double, 4, 2> swv_poly;
+    swv_poly.setZero();
+    if (temp_state[0] < state[0]) {
+        swv_poly.row(0) << temp_state[0], 0;
+        swv_poly.row(1) << state[0], 0;
+    } else {
+        swv_poly.row(0) << state[0], 0;
+        swv_poly.row(1) << temp_state[0], 0;
+    }
+
+    double p_near_x = length * sin(temp_state[2]) + temp_state[0];
+    double p_near_y = -1*length * cos(temp_state[2]);
+    p_new_x = length * sin(state[2]) + state[0];
+    p_new_y = -1*length * cos(state[2]);    
+
+    if (p_near_x > p_new_x) {
+        swv_poly.row(2) << p_near_x, p_near_y;
+        swv_poly.row(3) << p_new_x, p_new_y;
+    } else {
+        swv_poly.row(2) << p_new_x, p_new_y;
+        swv_poly.row(3) << p_near_x, p_near_y;
+    }
+
+    for(unsigned i=0; i<obstacles.size() && !obstacle_collision_swv;i++) {
+
+        Matrix<double, 4, 2> obs;
+        obs.setZero(4,2);
+
+        obs.row(0) << obstacles[i].low_x, obstacles[i].low_y; 
+        obs.row(1) << obstacles[i].low_x, obstacles[i].high_y;
+        obs.row(2) << obstacles[i].high_x, obstacles[i].high_y; 
+        obs.row(3) << obstacles[i].high_x, obstacles[i].low_y;
+
+        // Call signed distance function, retrieve value.
+        Matrix<double, 3, 2> temp = signed_distance_2d::signedDistancePolygons(swv_poly, obs);
+
+        if (std::isfinite(temp(0,0)) && temp(0,0) < 0) {
+            obstacle_collision_swv = true;
+        }
+
+    }
+
+    bool inBounds = false;
+    // Check bounds
+    if( state[0] > MIN_X && 
+        state[0] < MAX_X && 
+        state[1] > MIN_V && 
+        state[1] < MAX_V &&
+        state[3] > MIN_W && 
+        state[3] < MAX_W)
+    {
+        inBounds = true;
+    }
+
+    // Put state[2] into [-pi, pi] range
+    if(state[2] < -M_PI) {
+        state[2] += 2*M_PI;
+    }
+    else if (state[2] > M_PI) {
+        state[2] -= 2*M_PI;
+    }
+
+    return !obstacle_collision_swv && !obstacle_collision_individ && inBounds;    
+
+}
+
+bool cart_pole_t::valid_state() {
     return true;
 }
 

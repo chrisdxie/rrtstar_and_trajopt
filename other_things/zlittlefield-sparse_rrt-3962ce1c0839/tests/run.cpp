@@ -27,6 +27,7 @@
 
 #include <iostream>
 
+#include "../../My_BITStar_Impl/cartpole/plot_bitstar.h"
 #include "../../My_BITStar_Impl/double_integrator/plot_bitstar.h"
 
 int main(int ac, char* av[])
@@ -155,15 +156,38 @@ int main(int ac, char* av[])
 				 * My visualization of tree
 				 */
 
-				py::object plotter = init_display(); // Initialize python interpreter and pyplot plot 
+				if (params::system=="double_integrator") {
 
-				// Convert Eigen matrices and vectors to Numpy ND arrays
-				np::ndarray states_np = eigen_to_ndarray(planner->tree_to_matrix_states());
-				np::ndarray parents_np = eigen_to_ndarray(planner->tree_to_matrix_parents());
-				np::ndarray goal_path_np = eigen_to_ndarray(planner->get_solution_path());
-				np::ndarray obstacles_np = eigen_to_ndarray(planner->get_obstacles());
+					py::object plotter = di_init_display(); // Initialize python interpreter and pyplot plot 
 
-				plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, checker.iterations(), solution_cost);
+					// Convert Eigen matrices and vectors to Numpy ND arrays
+					np::ndarray states_np = di_eigen_to_ndarray(planner->tree_to_matrix_states());
+					np::ndarray parents_np = di_eigen_to_ndarray(planner->tree_to_matrix_parents());
+					np::ndarray goal_path_np = di_eigen_to_ndarray(planner->get_solution_path());
+					np::ndarray obstacles_np = di_eigen_to_ndarray(planner->get_obstacles());
+
+					di_plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, checker.iterations(), solution_cost);
+				} else if (params::system=="cart_pole") {
+
+					py::object plotter = cp_init_display(); // Initialize python interpreter and pyplot plot 					
+
+					// Have to flip 0th and 3rd rows of goal_path to fit the format of my plotting
+					MatrixXd goal_path = planner->get_solution_path();
+					MatrixXd row0 = goal_path.row(0);
+					goal_path.row(0) = goal_path.row(3);
+					goal_path.row(3) = row0;
+					np::ndarray goal_path_np = cp_eigen_to_ndarray(goal_path);
+
+					// Hard code obstacles
+					MatrixXd obstacles(4,3);
+					obstacles.col(0) << -2, 2, -.5, .8;
+					obstacles.col(1) <<  2, 2, -.5, .8;
+					obstacles.col(2) <<  0, .6, .6, .6;
+					np::ndarray obstacles_np = cp_eigen_to_ndarray(obstacles);
+
+					// Hard code some of the parameters, whatevs
+					cp_plot(plotter, goal_path_np, obstacles_np, checker.iterations(), solution_cost, .5, .2, .5);
+				}
 
 				/*
 				 * Done with my visualization of tree
