@@ -12,6 +12,103 @@
 
 #include "motion_planners/planner.hpp"
 
+#include <stack>
+
+// Returns a matrix of states for Python plotting
+MatrixXd planner_t::tree_to_matrix_states() {
+
+	// Populate this matrix by an iterative DFS. MUST follow the same protocol
+	// as sister function for creating matrix of parents.
+	MatrixXd states(4, number_of_nodes); // Hard code this shiet
+	int index = 0;
+
+	std::stack<tree_node_t*> fringe;
+	fringe.push(root);
+	while (fringe.size() > 0) {
+		tree_node_t* candidate = fringe.top();
+		fringe.pop();
+
+		states.col(index++) << candidate->point[0], candidate->point[1], candidate->point[2], candidate->point[3];
+
+		for (std::list<tree_node_t*>::iterator child = candidate->children.begin(); child != candidate->children.end(); ++child) {
+			fringe.push(*child);
+		}
+	}
+
+	return states.leftCols(index);
+
+}
+
+// Returns a matrix of states for Python plotting
+MatrixXd planner_t::tree_to_matrix_parents() {
+
+	// Populate this matrix by an iterative DFS. MUST follow the same protocol
+	// as sister function for creating matrix of parents.
+	MatrixXd states(4, number_of_nodes); // Hard code this shiet
+	int index = 0;
+
+	std::stack<tree_node_t*> fringe;
+	fringe.push(root);
+	while (fringe.size() > 0) {
+		tree_node_t* candidate = fringe.top();
+		fringe.pop();
+
+		if (candidate != root) {
+			tree_node_t* cand_parent = candidate->parent;
+			states.col(index++) << cand_parent->point[0], cand_parent->point[1], cand_parent->point[2], cand_parent->point[3];
+		} else {
+			states.col(index++) << candidate->point[0], candidate->point[1], candidate->point[2], candidate->point[3];
+		}
+
+		for (std::list<tree_node_t*>::iterator child = candidate->children.begin(); child != candidate->children.end(); ++child) {
+			fringe.push(*child);
+		}
+	}
+
+	return states.leftCols(index);
+
+}
+
+MatrixXd planner_t::get_solution_path() {
+	MatrixXd goal_states(4, number_of_nodes);
+
+	// Fetch goal states
+	std::vector<std::vector<double> > states;
+	get_solution_states(states);
+
+	int index = 0;
+	for(std::vector<std::vector<double> >::iterator it = states.begin(); it != states.end(); it++) {
+		std::vector<double> st = *it;
+		goal_states.col(index++) << st[0], st[1], st[2], st[3]; 
+	}
+
+	return goal_states.leftCols(index);
+}
+
+MatrixXd planner_t::get_obstacles() {
+
+	std::string file_name = "../../random_scene_generation/double_integrator/scene_" + std::to_string(params::scene_number);
+
+	std::ifstream fin(file_name);
+	std::vector<double> data;
+
+	std::copy(std::istream_iterator<double>(fin), // this denotes "start of stream"
+        	  std::istream_iterator<double>(),   // this denodes "end of stream"
+        	  std::back_inserter<std::vector<double> >(data));
+
+	MatrixXd obstacles(4, data.size()/4); obstacles.setZero();
+
+	int index = 0;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < data.size()/4; j++) {
+			obstacles(i, j) = data[index++];
+		}
+	}
+
+	return obstacles;
+}
+
+
 void planner_t::set_start_state(double* in_start)
 {
 	if(start_state==NULL)

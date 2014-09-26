@@ -17,6 +17,7 @@
 
 #include "systems/pendulum.hpp"
 #include "systems/point.hpp"
+#include "systems/double_integrator.hpp"
 #include "systems/car.hpp"
 #include "systems/rally_car.hpp"
 #include "systems/cart_pole.hpp"
@@ -25,6 +26,8 @@
 #include "motion_planners/rrt.hpp"
 
 #include <iostream>
+
+#include "../../My_BITStar_Impl/double_integrator/plot_bitstar.h"
 
 int main(int ac, char* av[])
 {
@@ -35,6 +38,10 @@ int main(int ac, char* av[])
 	if(params::system=="point")
 	{
 		system = new point_t();
+	}
+	else if(params::system=="double_integrator")
+	{
+		system = new double_integrator_t();
 	}
 	else if(params::system=="pendulum")
 	{
@@ -122,18 +129,6 @@ int main(int ac, char* av[])
 				}
 				std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
 
-				// My visualization
-				std::vector<std::vector<double> > states;
-				planner->get_solution_states(states);
-				for(std::vector<std::vector<double> >::iterator it = states.begin(); it != states.end(); it++) {
-					std::vector<double> st = *it;
-					for(int j = 0; j < 4; j++) {
-						std::cout << st[j] << " ";
-					}
-					std::cout << "\n";
-				}
-				// Done...
-
 				stats_print = false;
 				if(params::intermediate_visualization)
 				{
@@ -155,6 +150,25 @@ int main(int ac, char* av[])
 				std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
 				planner->visualize_tree(count);
 				planner->visualize_nodes(count);
+
+				/*
+				 * My visualization of tree
+				 */
+
+				py::object plotter = init_display(); // Initialize python interpreter and pyplot plot 
+
+				// Convert Eigen matrices and vectors to Numpy ND arrays
+				np::ndarray states_np = eigen_to_ndarray(planner->tree_to_matrix_states());
+				np::ndarray parents_np = eigen_to_ndarray(planner->tree_to_matrix_parents());
+				np::ndarray goal_path_np = eigen_to_ndarray(planner->get_solution_path());
+				np::ndarray obstacles_np = eigen_to_ndarray(planner->get_obstacles());
+
+				plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, checker.iterations(), solution_cost);
+
+				/*
+				 * Done with my visualization of tree
+				 */
+
 				break;
 			}
 		}

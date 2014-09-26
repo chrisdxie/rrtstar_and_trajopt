@@ -43,6 +43,9 @@ namespace params
 	double node_diameter;
 	int bacon;
 	double solution_node_diameter;
+
+	//Parameters for environment scene
+	int scene_number;
 }
 
 #include <boost/program_options.hpp>
@@ -82,6 +85,7 @@ void read_parameters(int ac, char* av[])
 	("image_height",po::value<int>(&params::image_height),"Height of output images.") 
 	("node_diameter",po::value<double>(&params::node_diameter),"Diameter of visualized nodes in output images.") 
 	("solution_node_diameter",po::value<double>(&params::solution_node_diameter),"Diameter of nodes along solution path in output images.") 
+	("scene_number",po::value<int>(&params::scene_number),"For some systems, specifically double integrator implemented by Chris Xie, chooses the scene number") 
 	;
 
     po::variables_map varmap;

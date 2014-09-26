@@ -13,7 +13,6 @@
 #ifndef SPARSE_CART_POLE_HPP
 #define SPARSE_CART_POLE_HPP
 
-
 #include "systems/system.hpp"
 
 class cart_pole_t : public system_t

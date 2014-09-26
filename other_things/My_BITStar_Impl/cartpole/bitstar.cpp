@@ -135,9 +135,9 @@ void setup(int max_iters, std::string& randomize, int batch_size) {
 	VectorXd goal_state(d);
 	goal_state << 0, 0, M_PI, 4;
 
-	int num_obstacles = 0;
+	int num_obstacles = 1;
 	MatrixXd obstacles(4, num_obstacles);
-	//obstacles.col(0) << 3, 4, 3, 2;
+	obstacles.col(0) << -2.5, 1, -.5, .8;
 	//obstacles.col(1) << 2, 1, 8, 3;
 	//obstacles.col(2) << 7, 2, 7, 2;
 
@@ -386,7 +386,7 @@ MatrixXd get_path(Node* x) {
 	while (x->state != setup_values.initial_state) {
 
 		P.col(index) = x->state; index++;
-		for (int i = T-2; i >= 0; --i) { // Hacked, hard coded
+		for (int i = T-2; i >= 1; --i) { // Hacked, hard coded
 			P.col(index) = x->states[i];
 			index ++;
 		}
@@ -532,6 +532,17 @@ double c(Edge* e) {
 		// std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start << "\nGoal state:\n" << bounds.x_goal << "\n";
 		failedSQPCalls.insert(start_and_end_states);
 		return INFTY;
+	}
+
+	// Collision check of intermediate states
+	for (int i = 0; i < T-1; i++) {
+		VectorXd x1(setup_values.dimension), x2(setup_values.dimension);
+		x1 << X[i];
+		x2 << X[i+1];
+		if (exists_collision(x1, x2)) {
+			failedSQPCalls.insert(start_and_end_states);
+			return INFTY;
+		}
 	}
 
 	// If x is considered to be added to the tree, fix new values of velocies

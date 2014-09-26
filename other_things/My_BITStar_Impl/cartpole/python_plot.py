@@ -33,7 +33,7 @@ def cartplot(states, cart_width, cart_height, pole_length):
 
         # Plot the pole
         plt.plot([states[3,i]], [0], 'ro', markersize=5)
-        end_pole = [pole_length*sin(states[2,i])+states[0,i], -1*pole_length*cos(states[2,i])]
+        end_pole = [pole_length*sin(states[2,i])+states[3,i], -1*pole_length*cos(states[2,i])]
         plt.plot([states[3,i], end_pole[0]], [0, end_pole[1]],color='black',linewidth=2.0)
 
     plt.show(block=False)
@@ -93,7 +93,7 @@ def plot(states, obstacles, iters, cost, cart_width, cart_height, pole_length):
 
         # Plot the pole
         plt.plot([states[3,i]], [0], 'ro', markersize=5)
-        end_pole = [pole_length*sin(states[2,i])+states[0,i], -1*pole_length*cos(states[2,i])]
+        end_pole = [pole_length*sin(states[2,i])+states[3,i], -1*pole_length*cos(states[2,i])]
         plt.plot([states[3,i], end_pole[0]], [0, end_pole[1]],color='black',linewidth=2.0)
 
     plt.title('Cost: ' + str(cost))

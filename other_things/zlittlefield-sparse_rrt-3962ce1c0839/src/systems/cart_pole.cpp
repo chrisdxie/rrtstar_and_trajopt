@@ -14,17 +14,15 @@
 #include "systems/cart_pole.hpp"
 #include "utilities/random.hpp"
 
-
 #define _USE_MATH_DEFINES
-
-
-#include <cmath>
 
 #include <eigen3/Eigen/Eigen>
 using namespace Eigen;
 
 #include "../../../dynamics_library/dynamics_library.hpp"
 using namespace dynamics_library;
+
+#include <cmath>
 
 #define I 10 // Doesn't matter since I use my dynamics
 #define L .25
