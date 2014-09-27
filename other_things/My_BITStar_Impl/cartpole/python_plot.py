@@ -43,7 +43,7 @@ def cartplot(states, cart_width, cart_height, pole_length):
 
     raw_input()
 
-def plot(states, obstacles, iters, cost, cart_width, cart_height, pole_length):
+def plot(states, obstacles, seconds, cost, cart_width, cart_height, pole_length):
 
     #print states
     
@@ -115,7 +115,7 @@ def plot(states, obstacles, iters, cost, cart_width, cart_height, pole_length):
         print("Otherwise, press Enter to continue.")
         user_says = raw_input()
         if user_says.strip() == 'save':
-            save('pics/{0}_iters'.format(iters), 'pdf')
+            save('pics/{0}_seconds'.format(seconds), 'pdf')
 
        
 def save(path, ext='png', close=True, verbose=True):

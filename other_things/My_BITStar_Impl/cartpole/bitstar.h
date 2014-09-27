@@ -48,7 +48,7 @@ public:
 
 class SetupObject {
 public:
-	int max_iters;
+	int max_time;
 	int dimension;
 	VectorXd initial_state;
 	VectorXd goal_state;

@@ -60,7 +60,7 @@ LLVMLDXX := llvm-g++
 
 
 # Standard flags
-CXXFLAGS_STD := -g \
+CXXFLAGS_STD := -g -std=c++0x \
 	-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE \
 	-Wall -Wno-unused-parameter -Wno-sign-compare -D__STDC_FORMAT_MACROS 
 

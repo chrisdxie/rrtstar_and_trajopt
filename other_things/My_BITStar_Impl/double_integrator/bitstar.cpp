@@ -37,7 +37,7 @@ double r; // Radius from RRT*, updated every iteration
 int n; // Number of vertices in V, updated every iteration
 double f_max;
 Node* root_node;
-Node* best_goal_node;
+Node* goal_node;
 
 // For sampling in ball
 typedef boost::mt19937 RANDOM_ENGINE;
@@ -87,7 +87,7 @@ inline double g_T(Node* x) {
 // This needs to update every time we find a new goal
 void update_C_ellipse_Matrix() {
 	int d = setup_values.dimension;
-	VectorXd goal_state = best_goal_node->state;
+	VectorXd goal_state = goal_node->state;
 
 	// SVD stuff for ball
 	VectorXd a1 = goal_state - setup_values.initial_state;
@@ -115,7 +115,7 @@ void update_C_ellipse_Matrix() {
 
 }
 
-void setup(int max_iters, std::string& randomize, int batch_size, MatrixXd obstacles) {
+void setup(int max_time, std::string& randomize, int batch_size, MatrixXd obstacles) {
 
 	// This function populates a matrix of values for setting up the problem.
 	// Setup variables:
@@ -136,7 +136,7 @@ void setup(int max_iters, std::string& randomize, int batch_size, MatrixXd obsta
 	int num_obstacles = 3;
 
 	// Max Iterations
-	setup_values.max_iters = max_iters;
+	setup_values.max_time = max_time;
 
 	// Dimension of problem
 	setup_values.dimension = d;
@@ -157,12 +157,12 @@ void setup(int max_iters, std::string& randomize, int batch_size, MatrixXd obsta
 	root_node->old = false;
 	V.insert(root_node);
 
-	best_goal_node = new Node;
-	best_goal_node->state = goal_state;
-	best_goal_node->inV = false;
-	best_goal_node->old = false;
-	G.insert(best_goal_node);
-	X_sample.insert(best_goal_node);
+	goal_node = new Node;
+	goal_node->state = goal_state;
+	goal_node->inV = false;
+	goal_node->old = false;
+	G.insert(goal_node);
+	X_sample.insert(goal_node);
 
 	// Update for the first time
 	update_C_ellipse_Matrix();
@@ -434,7 +434,7 @@ inline double g_hat(Node* x) {
 inline double h_hat(Node* x) {
 	VectorXd pos(2), goal_pos(2);
 	pos << x->state(0), x->state(1);
-	goal_pos << best_goal_node->state(0), best_goal_node->state(1);
+	goal_pos << goal_node->state(0), goal_node->state(1);
 	return (pos - goal_pos).norm()/max_speed;
 	//return x->h_hat;
 }
@@ -648,8 +648,8 @@ void sample_batch() {
 
 	num_sample_batches++;
 
-	double best_cost = g_T(best_goal_node);
-	double c_min = g_hat(best_goal_node);
+	double best_cost = g_T(goal_node);
+	double c_min = g_hat(goal_node);
 
 	//sample_from_goal_region();
 
@@ -659,7 +659,7 @@ void sample_batch() {
 	}
 
 	int num_samples = 0;
-	VectorXd x_center = (setup_values.initial_state + best_goal_node->state)/2.0;
+	VectorXd x_center = (setup_values.initial_state + goal_node->state)/2.0;
 
 	// Create L matrix from bigger radius
 	MatrixXd L(setup_values.dimension, setup_values.dimension);
@@ -713,7 +713,7 @@ void pruneSampleSet() {
 	std::set<Node*>::iterator n_it;
 	for(n_it = X_sample.begin(); n_it != X_sample.end(); ) {
 		Node* n = *n_it;
-		if (f_hat(n) > g_T(best_goal_node)) {
+		if (f_hat(n) > g_T(goal_node)) {
 			num_samples_pruned++;
 			if (inSet(n,G)) {
 				G.erase(n);
@@ -762,7 +762,7 @@ void pruneVertexSet() {
 	n_it = V.begin();
 	while (n_it != V.end()) {
 		Node* n = *n_it;
-		if (f_hat(n) > g_T(best_goal_node)) {
+		if (f_hat(n) > g_T(goal_node)) {
 			num_vertices_pruned++;
 			pruneVertex(n);
 
@@ -810,7 +810,7 @@ void updateEdgeQueue(Node* v) {
 	for(n_it = X_near.begin(); n_it != X_near.end(); ++n_it) {
 		Node* x = *n_it;
 		double heuristic_edge_cost = c_hat(v, x);
-		if (g_hat(v) + heuristic_edge_cost + h_hat(x) < g_T(best_goal_node)) {
+		if (g_hat(v) + heuristic_edge_cost + h_hat(x) < g_T(goal_node)) {
 			Edge* e = new Edge(v, x);
 			e->heuristic_cost = heuristic_edge_cost;
 			Q_edge.insert(e);
@@ -833,7 +833,7 @@ void updateEdgeQueue(Node* v) {
 		for(n_it = V_near.begin(); n_it != V_near.end(); ++n_it) {
 			Node* w = *n_it;
 			double heuristic_edge_cost = c_hat(v, w);
-			if (g_hat(v) + heuristic_edge_cost + h_hat(w) < g_T(best_goal_node)) { // Same condition as above
+			if (g_hat(v) + heuristic_edge_cost + h_hat(w) < g_T(goal_node)) { // Same condition as above
 				if (g_T(v) + heuristic_edge_cost < g_T(w)) { // could improve cost-to-come to the target child
 					if (v != w->parent && w != v->parent) { // Make sure this edge isn't already in the tree
 						Edge* e = new Edge(v, w);
@@ -884,13 +884,13 @@ void updateQueue() {
 double costOfBestGoalNode() {
 
 	bool changed = false;
-	double best_cost = g_T(best_goal_node);
+	double best_cost = g_T(goal_node);
 	std::set<Node*>::iterator n_it;
 
 	for(n_it = G.begin(); n_it != G.end(); n_it++) {
 		Node* candidate = *n_it;
 		if (g_T(candidate) < best_cost) {
-			best_goal_node = candidate;
+			goal_node = candidate;
 			best_cost = g_T(candidate);
 			changed = true;
 		}
@@ -916,7 +916,7 @@ double BITStar() {
 	// Begin iterations here
 	int k = 1;
 
-	while (k <= setup_values.max_iters) { // Max_iters will be much more now. Maybe put some other termination condition here
+	while (true) {
 
 		if (k % 100 == 0) {
 			std::cout << "Iteration: " << k << "\n";
@@ -955,11 +955,11 @@ double BITStar() {
 		Q_edge.erase(e);
 		Node* v = e->v; Node* x = e->x;
 
-		if (g_T(v) + e->heuristic_cost + h_hat(x) < g_T(best_goal_node)) {
+		if (g_T(v) + e->heuristic_cost + h_hat(x) < g_T(goal_node)) {
 
 			double cvx = c(e); // Calculate true cost of edge
 			
-			if (g_hat(v) + cvx + h_hat(x) < g_T(best_goal_node)) {
+			if (g_hat(v) + cvx + h_hat(x) < g_T(goal_node)) {
 
 				if (g_T(v) + cvx < g_T(x)) {
 
@@ -996,18 +996,24 @@ double BITStar() {
 					f_max = costOfBestGoalNode(); // Best goal node is update here too
 					if (f_max < old_cost) {
 						std::cout << "New goal cost: " << f_max << "\n";
-						//std::cout << "State of goal:\n" << best_goal_node->state << "\n";
+						//std::cout << "State of goal:\n" << goal_node->state << "\n";
 					}
 
 					pruneEdgeQueue(x);
 
 					// Write time, # of nodes, cost to file
-					ofstream outfile("statistics_" + std::to_string(setup_values.max_iters) + "_iters.txt", ios::app);
+					ofstream outfile("BITSTAR_double_integrator_statistics_" + std::to_string(setup_values.max_time) + "_seconds.txt", ios::app);
 					if (outfile.is_open()) {
 						outfile << std::setprecision(10) << ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 						outfile << ", " << V.size();
 						outfile << ", " << f_max << std::endl;
 						outfile.close();
+					}
+
+					double curr_time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+					if (curr_time > setup_values.max_time) {
+						std::cout << "Done\n";
+						break;
 					}
 
 				} else {
@@ -1024,18 +1030,14 @@ double BITStar() {
 		k++;
 	}
 
-	// More timing stuff
-	duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-	std::cout << "Duration of algorithm for " << setup_values.max_iters << " iterations: " << duration << "\n";
-
-	if (g_T(best_goal_node) < INFTY) {
+	if (g_T(goal_node) < INFTY) {
 
 		std::cout << "Size of V: " << V.size() << "\n";
 		std::cout << "Number of samples pruned: " << num_samples_pruned << "\n";
 		std::cout << "Number of vertices pruned: " << num_vertices_pruned << "\n";
 		std::cout << "Number of batches: " << num_sample_batches << "\n";
 
-		MatrixXd goal_path = get_path(best_goal_node);
+		MatrixXd goal_path = get_path(goal_node);
 
 		// Plot in Python
 		std::cout << "Solution found!\n";
@@ -1049,10 +1051,10 @@ double BITStar() {
 		np::ndarray obstacles_np = di_eigen_to_ndarray(setup_values.obstacles);
 
 		std::cout << "Plotting...\n";
-		di_plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, setup_values.max_iters, g_T(best_goal_node));
+		di_plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, setup_values.max_time, g_T(goal_node));
 
 	}
-	return g_T(best_goal_node);
+	return g_T(goal_node);
 
 }
 
@@ -1082,19 +1084,19 @@ MatrixXd read_in_obstacle_file(std::string file_name) {
  * Just a note: This function MUST be called from directory that
  * plot_sst.cpp lives in.
  *
- * USAGE: build/bin/plot_sst <MAX_ITERS> <RANDOMIZE> <BATCH_SIZE> <OBSTACLE_FILE>
+ * USAGE: build/bin/bitstar <TIME IN SECONDS> <RANDOMIZE> <BATCH_SIZE> <OBSTACLE_FILE>
  */
 
 int main(int argc, char* argv[]) {
 
-	// Assumes an optional command line argument of MAX_ITERS RANDOMIZE {true, false} BATCH_SIZE
-	int max_iters = 1000;
+	// Assumes an optional command line argument of TIME IN SECONDS RANDOMIZE {true, false} BATCH_SIZE
+	int max_time = 60; // 1 minute
 	std::string randomize = "false";
 	int batch_size = 100;
 	MatrixXd obstacles(0,0); obstacles.setZero();
 
 	if (argc >= 2) {
-		max_iters = atoi(argv[1]);
+		max_time = atoi(argv[1]);
 	}
 	if (argc >= 3) {
 		randomize = argv[2];
@@ -1107,7 +1109,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Setup function
-	setup(max_iters, randomize, batch_size, obstacles);
+	setup(max_time, randomize, batch_size, obstacles);
 
 	// Running of BIT*
 	std::cout << "Running BIT*...\n";

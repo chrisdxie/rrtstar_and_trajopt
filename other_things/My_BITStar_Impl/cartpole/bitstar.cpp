@@ -115,7 +115,7 @@ void update_C_ellipse_Matrix() {
 
 }
 
-void setup(int max_iters, std::string& randomize, int batch_size) {
+void setup(int max_time, std::string& randomize, int batch_size) {
 
 	// This function populates a matrix of values for setting up the problem.
 	// Setup variables:
@@ -142,8 +142,8 @@ void setup(int max_iters, std::string& randomize, int batch_size) {
     obstacles.col(2) << 0, .6, .6, .6;
 
 
-	// Max Iterations
-	setup_values.max_iters = max_iters;
+	// Max time in seconds
+	setup_values.max_time = max_time;
 
 	// Dimension of problem
 	setup_values.dimension = d;
@@ -979,7 +979,7 @@ double BITStar() {
 	// Begin iterations here
 	int k = 1;
 
-	while (k <= setup_values.max_iters) { // Max_iters will be much more now. Maybe put some other termination condition here
+	while (true) {
 
 		if (k % 100 == 0) {
 			std::cout << "Iteration: " << k << "\n";
@@ -1065,12 +1065,18 @@ double BITStar() {
 					pruneEdgeQueue(x);
 
 					// Write time, # of nodes, cost to file
-					ofstream outfile("statistics_" + std::to_string(setup_values.max_iters) + "_iters.txt", ios::app);
+					ofstream outfile("BITSTAR_cartpole_statistics_" + std::to_string(setup_values.max_time) + "_seconds.txt", ios::app);
 					if (outfile.is_open()) {
 						outfile << std::setprecision(10) << ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 						outfile << ", " << V.size();
 						outfile << ", " << f_max << std::endl;
 						outfile.close();
+					}
+
+					double curr_time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+					if (curr_time > setup_values.max_time) {
+						std::cout << "Done\n";
+						break;
 					}
 
 				} else {
@@ -1086,10 +1092,6 @@ double BITStar() {
 		}
 		k++;
 	}
-
-	// More timing stuff
-	duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-	std::cout << "Duration of algorithm for " << setup_values.max_iters << " iterations: " << duration << "\n";
 
 	if (g_T(goal_node) < INFTY) {
 
@@ -1111,7 +1113,7 @@ double BITStar() {
 		np::ndarray obstacles_np = cp_eigen_to_ndarray(setup_values.obstacles);
 
 		std::cout << "Plotting...\n";
-		cp_plot(plotter, goal_path_np, obstacles_np, setup_values.max_iters, g_T(goal_node),
+		cp_plot(plotter, goal_path_np, obstacles_np, setup_values.max_time, g_T(goal_node),
 			 cp_params.cw, cp_params.ch, cp_params.l);
 
 	}
@@ -1123,18 +1125,18 @@ double BITStar() {
  * Just a note: This function MUST be called from directory that
  * plot_sst.cpp lives in.
  *
- * USAGE: build/bin/plot_sst <MAX_ITERS> <RANDOMIZE> <BATCH_SIZE>
+ * USAGE: build/bin/bitstar <TIME IN SECONDS> <RANDOMIZE> <BATCH_SIZE>
  */
 
 int main(int argc, char* argv[]) {
 
-	// Assumes an optional command line argument of MAX_ITERS RANDOMIZE {true, false} BATCH_SIZE
-	int max_iters = 1000;
+	// Assumes an optional command line argument of TIME IN SECONDS RANDOMIZE {true, false} BATCH_SIZE
+	int max_time = 60; // 1 minute
 	std::string randomize = "false";
 	int batch_size = 100;
 
 	if (argc >= 2) {
-		max_iters = atoi(argv[1]);
+		max_time = atoi(argv[1]);
 	}
 	if (argc >= 3) {
 		randomize = argv[2];
@@ -1144,7 +1146,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Setup function
-	setup(max_iters, randomize, batch_size);
+	setup(max_time, randomize, batch_size);
 
 	// Running of BIT*
 	std::cout << "Running BIT*...\n";

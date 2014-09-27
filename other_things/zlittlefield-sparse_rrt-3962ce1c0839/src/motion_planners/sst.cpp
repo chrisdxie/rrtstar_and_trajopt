@@ -16,7 +16,7 @@
 #include <iostream>
 #include <deque>
 #include <boost/tuple/tuple.hpp>
-
+#include <iomanip>
 
 void sst_t::setup_planning()
 {
@@ -48,6 +48,9 @@ void sst_t::setup_planning()
 	add_point_to_samples(witness_sample);
 
 	witness_sample->rep = (sst_node_t*)root;
+
+	start = std::clock();
+	last_time = start / double (CLOCKS_PER_SEC);
 
 }
 void sst_t::get_solution(std::vector<std::pair<double*,double> >& controls)
@@ -95,10 +98,9 @@ void sst_t::get_solution_states(std::vector<std::vector<double> >& states) {
 		last_solution_path.push_back(path[i]);
 		std::vector<double> st;
 
-		st.push_back(path[i]->point[0]);
-		st.push_back(path[i]->point[1]);
-		st.push_back(path[i]->point[2]);
-		st.push_back(path[i]->point[3]);
+		for (int j = 0; j < 4; j++) {
+			st.push_back(path[i]->point[j]);
+		}
 
 		states.push_back(st);
 	}
@@ -112,6 +114,30 @@ void sst_t::step()
 	if(propagate())
 	{
 		add_to_tree();
+	}
+
+	double report_interval = 0.05; // Report stats every x secs
+	double curr_time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+	if (curr_time - last_time > report_interval) {
+
+		std::vector<std::pair<double*,double> > controls;
+		get_solution(controls);
+		double solution_cost = 0;
+		for(unsigned i=0;i<controls.size();i++)
+		{
+			solution_cost+=controls[i].second;
+		}
+
+		// Write time, # of nodes, cost to file
+		std::ofstream outfile("SST_" + params::system + "_statistics_scene_" + std::to_string(params::scene_number) + "_" +std::to_string(params::stopping_check) + "_seconds.txt", std::ios::app);
+		if (outfile.is_open()) {
+			outfile << std::setprecision(10) << curr_time;
+			outfile << ", " << number_of_nodes;
+			outfile << ", " << solution_cost << std::endl;
+			outfile.close();
+		}
+
+		last_time = curr_time;
 	}
 }
 

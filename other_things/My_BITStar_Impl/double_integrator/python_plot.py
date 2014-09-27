@@ -6,9 +6,9 @@ from math import pi, atan
 
 #import IPython
 
-def plot(states, parents, goal_path, obstacles, iters, cost):
+def plot(states, parents, goal_path, obstacles, seconds, cost):
 
-    print goal_path
+    #print goal_path
     
     plt.clf()
     plt.cla()
@@ -41,6 +41,9 @@ def plot(states, parents, goal_path, obstacles, iters, cost):
         obstacles = np.transpose([obstacles])
 
     num_obstacles = obstacles.shape[1]
+
+    # import pdb
+    # pdb.set_trace()
 
     for i in range(num_obstacles):
         x_center = obstacles[0,i]
@@ -94,12 +97,11 @@ def plot(states, parents, goal_path, obstacles, iters, cost):
     # do pause in python so plot can be resized etc.
     pause = True
     if (pause):
-        print("Type 'save' to save this figure into a pdf file as 'pics/<number of iterations>_iters.pdf'")
+        print("Type 'save' to save this figure into a pdf file as 'pics/<number of seconds>_seconds.pdf'")
         print("Otherwise, press Enter to continue.")
         user_says = raw_input()
         if user_says.strip() == 'save':
-            save('pics/{0}_iters'.format(iters), 'pdf')
-            np.savetxt('pics/states_{0}_iters'.format(iters), goal_path)
+            save('pics/{0}_iters'.format(seconds), 'pdf')
 
        
 def save(path, ext='png', close=True, verbose=True):

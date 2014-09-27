@@ -214,8 +214,8 @@ void rally_car_t::update_derivative(double* control)
         double _wr = temp_state[7];
 
         double _sta = control[0];
-        double _tf = control[0];
-        double _tr = control[0];
+        double _tf = control[1];
+        double _tr = control[2];
 
         deriv[STATE_X] = _vx;
         deriv[STATE_Y] = _vy;
@@ -273,6 +273,7 @@ void rally_car_t::update_derivative(double* control)
         deriv[STATE_THETADOT] = ((fFy*cos(_sta)+fFx*sin(_sta))*LF - fRy*LR)/IZ;
         deriv[STATE_WF] = (_tf-fFx*R)/IF;
         deriv[STATE_WR] = (_tr-fRx*R)/IR;
+
 }
 void rally_car_t::visualize_obstacles(svg::Document& doc ,svg::Dimensions dims)
 {

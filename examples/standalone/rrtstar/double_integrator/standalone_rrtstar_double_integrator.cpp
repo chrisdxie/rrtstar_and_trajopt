@@ -28,6 +28,7 @@ using namespace Eigen;
 #include <stack>
 #include <fstream>
 #include <iostream>
+#include <ctime>
 
 
 // SMP TYPE DEFINITIONS -------
@@ -320,7 +321,10 @@ main (int argc, char* argv[]) {
 
 
 
-
+  // Time it
+  std::clock_t start;
+  double duration;
+  start = std::clock();
 
   // 4. RUN THE PLANNER 
   for (int i = 0; i < NUM_ITERS; i++){
@@ -329,6 +333,16 @@ main (int argc, char* argv[]) {
     
     if (i%100 == 0){
       cout << "Iteration : " << i << endl;
+
+      // Write time, # of nodes, cost to file
+      ofstream outfile("RRTSTAR_statistics_" + std::to_string(NUM_ITERS) + "_iters.txt", ios::app);
+      if (outfile.is_open()) {
+        outfile << std::setprecision(10) << ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+        outfile << ", " << planner.get_num_vertices();
+        outfile << ", " << min_time_reachability.get_best_cost() << std::endl;
+        outfile.close();
+      }
+
     }
     if (false) { // Plot every 1k iterations, and save automatically in a folder called "pics"
 

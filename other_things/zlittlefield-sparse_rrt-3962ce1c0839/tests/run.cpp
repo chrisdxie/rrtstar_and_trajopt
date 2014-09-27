@@ -166,7 +166,7 @@ int main(int ac, char* av[])
 					np::ndarray goal_path_np = di_eigen_to_ndarray(planner->get_solution_path());
 					np::ndarray obstacles_np = di_eigen_to_ndarray(planner->get_obstacles());
 
-					di_plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, checker.iterations(), solution_cost);
+					di_plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, params::stopping_check, solution_cost);
 				} else if (params::system=="cart_pole") {
 
 					py::object plotter = cp_init_display(); // Initialize python interpreter and pyplot plot 					
@@ -187,6 +187,26 @@ int main(int ac, char* av[])
 
 					// Hard code some of the parameters, whatevs
 					cp_plot(plotter, goal_path_np, obstacles_np, checker.iterations(), solution_cost, .5, .2, .5);
+				} else if (params::system=="rally_car") {
+
+					py::object plotter = di_init_display(); // Initialize python interpreter and pyplot plot 					
+
+					// Convert Eigen matrices and vectors to Numpy ND arrays
+					np::ndarray states_np = di_eigen_to_ndarray(planner->tree_to_matrix_states());
+					np::ndarray parents_np = di_eigen_to_ndarray(planner->tree_to_matrix_parents());
+					np::ndarray goal_path_np = di_eigen_to_ndarray(planner->get_solution_path());
+					//std::cout << "Solution:\n" << (planner->get_solution_path()).transpose() << "\n";
+
+					// Hard code obstacles
+					MatrixXd obstacles(4,6);
+					obstacles.col(0) << 0, 42, 20.5, 1;
+					obstacles.col(1) << 20.5, 1, -5.5, 53;
+					obstacles.col(2) << 9.5, 1, -16, 32;
+					obstacles.col(3) << 15, 12, -32.5, 1;
+					obstacles.col(4) << -9.5, 1, -16, 32;
+					obstacles.col(5) << -20.5, 1, -5.5, 53;
+					np::ndarray obstacles_np = di_eigen_to_ndarray(obstacles);
+					di_plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, params::stopping_check, solution_cost);					
 				}
 
 				/*

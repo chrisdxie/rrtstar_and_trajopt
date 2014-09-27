@@ -60,12 +60,12 @@ py::object cp_init_display() {
 	return plotter;
 }
 
-void cp_plot(py::object& plotter, np::ndarray& goal_path, np::ndarray& obstacles, int iters, double cost,
+void cp_plot(py::object& plotter, np::ndarray& goal_path, np::ndarray& obstacles, int seconds, double cost,
 		  double cart_width, double cart_height, double pole_length) {
 
 	try {
 		// pass control to python now
-		plotter(goal_path, obstacles, iters, cost, cart_width, cart_height, pole_length);
+		plotter(goal_path, obstacles, seconds, cost, cart_width, cart_height, pole_length);
 	}
 	catch(py::error_already_set const &) {
 		// will pass python errors to cpp for printing

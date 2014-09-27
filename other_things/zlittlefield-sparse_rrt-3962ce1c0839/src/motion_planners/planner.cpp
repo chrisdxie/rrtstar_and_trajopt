@@ -79,7 +79,8 @@ MatrixXd planner_t::get_solution_path() {
 	int index = 0;
 	for(std::vector<std::vector<double> >::iterator it = states.begin(); it != states.end(); it++) {
 		std::vector<double> st = *it;
-		goal_states.col(index++) << st[0], st[1], st[2], st[3]; 
+		goal_states.col(index++) << st[0], st[1], st[2], st[3]; 		
+		//goal_states.col(index++) << st[0], st[1], st[2], st[3], st[4], st[5], st[6], st[7]; 
 	}
 
 	return goal_states.leftCols(index);
