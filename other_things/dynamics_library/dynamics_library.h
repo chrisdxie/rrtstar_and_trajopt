@@ -64,6 +64,16 @@ namespace dynamics_library {
 	VectorXd continuous_cartpole_dynamics(VectorXd z, VectorXd u);
 
 	/*
+	 *  This function is a function to calculate the derivative of given a state
+	 *  and input. The input is the current state z = [x, x_dot, theta, theta_dot]
+	 *  and the parameters cart_mass, pole_mass, pole_length.
+	 *
+	 *  The return value is z_dot.
+	 */
+	 
+	VectorXd continuous_rally_car_dynamics(VectorXd z, VectorXd u);
+
+	/*
 	 *  This function returns the jacobian of the function f w.r.t. the state,
 	 *  the input, and delta.
 	 *

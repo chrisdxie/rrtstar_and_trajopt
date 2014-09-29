@@ -1,5 +1,5 @@
-#ifndef PLOT_BITSTAR_H_
-#define PLOT_BITSTAR_H_
+#ifndef DOUBLE_INTEGRATOR_PLOT_BITSTAR_H_
+#define DOUBLE_INTEGRATOR_PLOT_BITSTAR_H_
 
 #include <eigen3/Eigen/Eigen>
 using namespace Eigen;
@@ -13,7 +13,7 @@ using namespace Eigen;
 namespace py = boost::python;
 namespace np = boost::numpy;
 
-np::ndarray eigen_to_ndarray(const MatrixXd& m) {
+np::ndarray di_eigen_to_ndarray(const MatrixXd& m) {
 	if (m.cols() == 1) {
 		py::tuple shape = py::make_tuple(m.rows());
 		np::dtype dtype = np::dtype::get_builtin<float>();
@@ -36,14 +36,14 @@ np::ndarray eigen_to_ndarray(const MatrixXd& m) {
 	}
 }
 
-py::object init_display() {
+py::object di_init_display() {
 	// necessary initializations
 	Py_Initialize();
 	np::initialize();
 	py::numeric::array::set_module_and_type("numpy", "ndarray");
 
 	// use boost to find directory of python_plot.py
-	std::string working_dir = "/Users/ChrisXie/school/research/RRTSTAR_TrajOpt_Project/RRTSTAR_and_TrajOpt/other_things/My_BITStar_Impl/double_integrator";
+	std::string working_dir = "/home/chris/rrtstar_and_trajopt/other_things/My_BITStar_Impl/double_integrator";
 	std::string plot_cpp_dir = working_dir + "/";
 
 	// necessary imports
@@ -60,11 +60,11 @@ py::object init_display() {
 	return plotter;
 }
 
-void plot(py::object& plotter, np::ndarray& states, np::ndarray& parents, np::ndarray& goal_path, np::ndarray& goal_region, np::ndarray& obstacles, int iters, double cost) {
+void di_plot(py::object& plotter, np::ndarray& states, np::ndarray& parents, np::ndarray& goal_path, np::ndarray& obstacles, int seconds, double cost) {
 
 	try {
 		// pass control to python now
-		plotter(states, parents, goal_path, goal_region, obstacles, iters, cost);
+		plotter(states, parents, goal_path, obstacles, seconds, cost);
 	}
 	catch(py::error_already_set const &) {
 		// will pass python errors to cpp for printing

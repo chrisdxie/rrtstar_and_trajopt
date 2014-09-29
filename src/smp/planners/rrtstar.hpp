@@ -47,6 +47,8 @@ int smp::rrtstar<typeparams>
   planner_incremental_t::initialize(initial_state_in);
   
   this->root_vertex->data.total_cost = 0;
+
+  goal_in_tree = false;
   
   return 1;
 }
@@ -101,7 +103,18 @@ int smp::rrtstar<typeparams>
     return 0; 
   }
   
+  bool is_goal_vertex = false;
+  if (!goal_in_tree && rand()/double(RAND_MAX) < 0.001) {
+    state_sample->state_vars[0] = 9;
+    state_sample->state_vars[1] = 9;
+    state_sample->state_vars[2] = 0;
+    state_sample->state_vars[3] = 0;
+
+	std::cout << "Sampling goal state!\n";
+    is_goal_vertex = true; 
   
+  }
+
   // 2. Find the nearest vertex
   vertex_t *vertex_nearest;
   this->distance_evaluator.find_nearest_vertex (state_sample, (void **)&vertex_nearest);
@@ -212,6 +225,9 @@ int smp::rrtstar<typeparams>
       edge_t *edge_last = vertex_parent->outgoing_edges.back();
       edge_last->data.edge_cost = cost_trajectory_from_parent;
 
+      if (is_goal_vertex) {
+        goal_in_tree = true;
+      }      
 
       if (parameters.get_phase() >= 2) {  // Check whether phase 2 should occur
       

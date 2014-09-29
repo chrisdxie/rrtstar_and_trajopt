@@ -13,8 +13,47 @@
 #ifndef SPARSE_CART_POLE_HPP
 #define SPARSE_CART_POLE_HPP
 
-
 #include "systems/system.hpp"
+
+class cartpole_Rectangle_t
+{
+public:
+	/**
+	 * @brief Create a rectangle using two corners
+	 * 
+	 * @param lx Bottom Left X coordinate
+	 * @param ly Bottom Left Y coordinate
+	 * @param hx Top Right X coordinate
+	 * @param hy Top Right Y coordinate
+	 */
+	cartpole_Rectangle_t(double lx,double ly,double hx,double hy)
+	{
+		low_x = lx;
+		low_y = ly;
+		high_x = hx;
+		high_y = hy;
+	}
+	/**
+	 * @brief Create a rectangle with center position and dimensions.
+	 * 
+	 * @param pos_x Center X coordinate.
+	 * @param pos_y Center Y coordinate.
+	 * @param dim_x X Dimension
+	 * @param dim_y Y Dimension
+	 * @param value Just a flag to denote which constructor is used.
+	 */
+	cartpole_Rectangle_t(double pos_x,double dim_x,double pos_y,double dim_y,bool value)
+	{
+		low_x = pos_x-dim_x/2;
+		low_y = pos_y-dim_y/2;
+		high_x = pos_x+dim_x/2;
+		high_y = pos_y+dim_y/2;
+	}
+	double low_x;
+	double low_y;
+	double high_x;
+	double high_y;
+};
 
 class cart_pole_t : public system_t
 {
@@ -25,6 +64,11 @@ public:
 		control_dimension = 1;
 		temp_state = new double[state_dimension];
 		deriv = new double[state_dimension];
+
+		// Hard code obstacle scenario here
+		obstacles.push_back(cartpole_Rectangle_t(-2, 2, -.5, .8, true));
+		obstacles.push_back(cartpole_Rectangle_t( 2, 2, -.5, .8, true));
+		obstacles.push_back(cartpole_Rectangle_t( 0, .6, .6, .6, true));
 	}
 	virtual ~cart_pole_t(){}
 
@@ -56,6 +100,7 @@ public:
 	/**
 	 * @copydoc system_t::valid_state()
 	 */
+	virtual bool valid_state(double* state);
 	virtual bool valid_state();
 
 	/**
@@ -66,6 +111,7 @@ public:
 protected:
 	double* deriv;
 	void update_derivative(double* control);
+	std::vector<cartpole_Rectangle_t> obstacles;	
 };
 
 

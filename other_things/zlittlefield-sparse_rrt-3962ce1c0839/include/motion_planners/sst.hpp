@@ -16,6 +16,7 @@
 #include "systems/system.hpp"
 #include "motion_planners/planner.hpp"
 #include <boost/tuple/tuple.hpp>
+#include <ctime>
 
 
 /**
@@ -88,6 +89,9 @@ public:
 	 * @copydoc planner_t::step()
 	 */
 	 virtual void step();
+
+	std::clock_t start;
+	double last_time;
 
 protected:
 	

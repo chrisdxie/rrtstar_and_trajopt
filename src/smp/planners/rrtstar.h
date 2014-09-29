@@ -83,6 +83,9 @@ namespace smp {
         typedef collision_checker_base<typeparams> collision_checker_t;
         typedef model_checker_base<typeparams> model_checker_t;
 
+        Vector4d goal_vertex;
+        bool goal_in_tree;
+
 
     private:
 

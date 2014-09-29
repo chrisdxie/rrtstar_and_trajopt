@@ -84,6 +84,96 @@ VectorXd dynamics_library::continuous_cartpole_dynamics(VectorXd z, VectorXd u) 
 
 }
 
+VectorXd dynamics_library::continuous_rally_car_dynamics(VectorXd z, VectorXd u) {
+
+	VectorXd zdot(8); zdot.setZero();
+
+	// Parameters
+	double M  = 1450;
+	double IZ = 2740;
+	double LF = 1.3;
+	double LR = 1.4;
+	double R = .3;
+	double IF = 1.8; 
+	double IR = 1.8;
+	double H = .4; 
+	double B = 7;
+	double C = 1.6;
+	double D = .52;		
+
+    double _x = z(0);
+    double _y = z(1);
+    double _vx = z(2);
+    double _vy = z(3);
+    double _theta = z(4);
+    double _thetadot = z(5);
+    double _wf = z(6);
+    double _wr = z(7);
+
+    double _sta = u(0);
+    double _tf = u(1);
+    double _tr = u(2);
+
+    zdot(0) = _vx;
+    zdot(1) = _vy;
+    zdot(4) = _thetadot;
+
+    double V = sqrt(_vx*_vx+_vy*_vy);
+    double beta = atan2(_vy,_vx) - _theta;
+    double V_Fx = V*cos(beta-_sta) + _thetadot*LF*sin(_sta);
+    double V_Fy = V*sin(beta-_sta) + _thetadot*LF*cos(_sta);
+    double V_Rx = V*cos(beta);
+    double V_Ry = V*sin(beta) - _thetadot*LR;
+
+    double s_Fx = (V_Fx - _wf*R)/(_wf*R);
+    double s_Fy = V_Fy/(_wf*R);
+    double s_Rx = (V_Rx - _wr*R)/(_wr*R);
+    double s_Ry = V_Ry/(_wr*R);
+
+    double s_F = sqrt(s_Fx*s_Fx+s_Fy*s_Fy);
+    double s_R = sqrt(s_Rx*s_Rx+s_Ry*s_Ry);
+
+    double mu_F = D*sin(C*atan(B*s_F));
+    double mu_R = D*sin(C*atan(B*s_R));
+    double mu_Fx;
+    double mu_Fy;
+    if(std::isfinite(s_Fx))
+            mu_Fx = -1*(s_Fx/s_F)*mu_F;
+    else
+            mu_Fx = -mu_F;
+    if(std::isfinite(s_Fy))
+            mu_Fy = -1*(s_Fy/s_F)*mu_F;
+    else
+            mu_Fy = -mu_F;
+    double mu_Rx;
+    double mu_Ry;
+    if(std::isfinite(s_Rx))
+            mu_Rx = -1*(s_Rx/s_R)*mu_R;
+    else
+            mu_Rx = -mu_R;
+    if(std::isfinite(s_Ry))
+            mu_Ry = -1*(s_Ry/s_R)*mu_R;
+    else
+            mu_Ry = -mu_R;
+
+    double fFz = (LR*M*(9.8) - H*M*9.8*mu_Rx) / (LF+LR+H*(mu_Fx*cos(_sta)-mu_Fy*sin(_sta)-mu_Rx));
+    double fRz = M*9.8 - fFz;
+
+    double fFx = mu_Fx * fFz;
+    double fFy = mu_Fy * fFz;
+    double fRx = mu_Rx * fRz;
+    double fRy = mu_Ry * fRz;;
+
+
+    zdot(2) = (fFx*cos(_theta+_sta)-fFy*sin(_theta+_sta)+fRx*cos(_theta)-fRy*sin(_theta) )/M;
+    zdot(3) = (fFx*sin(_theta+_sta)+fFy*cos(_theta+_sta)+fRx*sin(_theta)+fRy*cos(_theta) )/M;
+    zdot(5) = ((fFy*cos(_sta)+fFx*sin(_sta))*LF - fRy*LR)/IZ;
+    zdot(6) = (_tf-fFx*R)/IF;
+    zdot(7) = (_tr-fRx*R)/IR;
+
+    return zdot;
+}
+
 MatrixXd dynamics_library::numerical_jacobian(VectorXd (*f)(VectorXd, VectorXd), VectorXd x,
 								VectorXd u, double delta) {
 

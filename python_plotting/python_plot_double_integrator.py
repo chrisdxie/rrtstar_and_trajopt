@@ -87,8 +87,6 @@ def plot(all_states, all_parents, states, inputs, obstacles, goal_region, iter, 
     plt.pause(.1)
     #raw_input("Press Enter to continue")
 
-    save('pics/{0}_iters_{1}'.format(iter,extra_string), 'pdf')
-
     if os.path.exists('paths_of_{0}'.format(extra_string)):
         f = open('paths_of_{0}'.format(extra_string), 'a')
     else:
@@ -112,6 +110,15 @@ def plot(all_states, all_parents, states, inputs, obstacles, goal_region, iter, 
         f.write(input_string + '\n')
     f.write('Cost: {0}\n\n'.format(cost))
     f.close()
+
+    pause = True
+    if (pause):
+        print("Type 'save' to save this figure into a pdf file as 'pics/<number of iterations>_iters.pdf'")
+        print("Otherwise, press Enter to continue.")
+        user_says = raw_input()
+        if user_says.strip() == 'save':
+            save('pics/{0}_iters'.format(iters), 'pdf')
+            np.savetxt('pics/states_{0}_iters'.format(iter), states)
 
 
 def save(path, ext='png', close=True, verbose=True):

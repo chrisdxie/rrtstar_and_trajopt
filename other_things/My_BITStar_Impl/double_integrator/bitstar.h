@@ -48,10 +48,10 @@ public:
 
 class SetupObject {
 public:
-	int max_iters;
+	int max_time;
 	int dimension;
 	VectorXd initial_state;
-	VectorXd goal_region;
+	VectorXd goal_state;
 	double gamma; // Set to be at least side length of state space
 	bool randomize;
 	// API: Each column is a rectangular obstacle represented by a 4d vector.
@@ -66,6 +66,8 @@ public:
 	double u_max;
 
 	int batch_size;
+
+	int stats_id;
 };
 
 #endif /* BITSTAR_H_ */

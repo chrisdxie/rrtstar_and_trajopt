@@ -60,7 +60,7 @@ LLVMLDXX := llvm-g++
 
 
 # Standard flags
-CXXFLAGS_STD := -g \
+CXXFLAGS_STD := -g -std=c++0x \
 	-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE \
 	-Wall -Wno-unused-parameter -Wno-sign-compare -D__STDC_FORMAT_MACROS 
 
@@ -93,7 +93,7 @@ LDFALGS_SMP :=
 #-----------------------------------------------------------------------------
 
 # Stuff for rll3 machine
-RLL3FLAGS := -I/usr/include/python2.7 -rdynamic -L/usr/local/lib -L/usr/lib/libpython2.7.so -lboost_iostreams-mt -lboost_python -lboost_thread-mt -lpthread -lboost_filesystem-mt -lboost_system-mt /usr/local/lib/libboost_numpy.so -lpython2.7 -Wl,-rpath,/usr/local/lib:/usr/lib/libpython2.7.so
+RLL3FLAGS := -std=c++0x -I/usr/include/python2.7 -rdynamic -L/usr/local/lib -L/usr/lib/libpython2.7.so -lboost_iostreams-mt -lboost_python -lboost_thread-mt -lpthread -lboost_filesystem-mt -lboost_system-mt /usr/local/lib/libboost_numpy.so -lpython2.7 -Wl,-rpath,/usr/local/lib:/usr/lib/libpython2.7.so
 
 #CXXFLAGS = $(CXXFLAGS_STD) $(CXXFLAGS_SMP) $(RLL3FLAGS)
 CXXFLAGS = $(CXXFLAGS_OPT) $(CXXFLAGS_SMP) $(RLL3FLAGS)

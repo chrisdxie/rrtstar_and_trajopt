@@ -48,7 +48,7 @@ public:
 
 class SetupObject {
 public:
-	int max_iters;
+	int max_time;
 	int dimension;
 	VectorXd initial_state;
 	VectorXd goal_state;
@@ -71,6 +71,8 @@ public:
 	double u_max;
 
 	int batch_size;
+
+	int stats_id;
 };
 
 #endif /* BITSTAR_H_ */

@@ -20,6 +20,9 @@
 #include "nearest_neighbors/graph_nearest_neighbors.hpp"
 #include "motion_planners/tree_node.hpp"
 
+#include <eigen3/Eigen/Eigen>
+using namespace Eigen;
+
 /**
  * @brief The base class for motion planners.
  * @details The base class for motion planners. This class provides 
@@ -111,6 +114,15 @@ public:
 
 	/** @brief The number of nodes in the tree. */
 	unsigned number_of_nodes;
+
+	/**
+	 * Stuff I need for my initialization 
+	 *	Author: Chris Xie
+	 */
+	MatrixXd tree_to_matrix_states();
+	MatrixXd tree_to_matrix_parents();
+	MatrixXd get_solution_path();
+	MatrixXd get_obstacles();
 
 protected:
 

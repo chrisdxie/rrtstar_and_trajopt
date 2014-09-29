@@ -17,6 +17,7 @@
 
 #include "systems/pendulum.hpp"
 #include "systems/point.hpp"
+#include "systems/double_integrator.hpp"
 #include "systems/car.hpp"
 #include "systems/rally_car.hpp"
 #include "systems/cart_pole.hpp"
@@ -25,6 +26,9 @@
 #include "motion_planners/rrt.hpp"
 
 #include <iostream>
+
+#include "../../My_BITStar_Impl/cartpole/plot_bitstar.h"
+#include "../../My_BITStar_Impl/double_integrator/plot_bitstar.h"
 
 int main(int ac, char* av[])
 {
@@ -35,6 +39,10 @@ int main(int ac, char* av[])
 	if(params::system=="point")
 	{
 		system = new point_t();
+	}
+	else if(params::system=="double_integrator")
+	{
+		system = new double_integrator_t();
 	}
 	else if(params::system=="pendulum")
 	{
@@ -122,18 +130,6 @@ int main(int ac, char* av[])
 				}
 				std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
 
-				// My visualization
-				std::vector<std::vector<double> > states;
-				planner->get_solution_states(states);
-				for(std::vector<std::vector<double> >::iterator it = states.begin(); it != states.end(); it++) {
-					std::vector<double> st = *it;
-					for(int j = 0; j < 4; j++) {
-						std::cout << st[j] << " ";
-					}
-					std::cout << "\n";
-				}
-				// Done...
-
 				stats_print = false;
 				if(params::intermediate_visualization)
 				{
@@ -155,6 +151,68 @@ int main(int ac, char* av[])
 				std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
 				planner->visualize_tree(count);
 				planner->visualize_nodes(count);
+
+				/*
+				 * My visualization of tree
+				 */
+
+				if (params::system=="double_integrator") {
+
+					py::object plotter = di_init_display(); // Initialize python interpreter and pyplot plot 
+
+					// Convert Eigen matrices and vectors to Numpy ND arrays
+					np::ndarray states_np = di_eigen_to_ndarray(planner->tree_to_matrix_states());
+					np::ndarray parents_np = di_eigen_to_ndarray(planner->tree_to_matrix_parents());
+					np::ndarray goal_path_np = di_eigen_to_ndarray(planner->get_solution_path());
+					np::ndarray obstacles_np = di_eigen_to_ndarray(planner->get_obstacles());
+
+					di_plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, params::stopping_check, solution_cost);
+				} else if (params::system=="cart_pole") {
+
+					py::object plotter = cp_init_display(); // Initialize python interpreter and pyplot plot 					
+
+					// Have to flip 0th and 3rd rows of goal_path to fit the format of my plotting
+					MatrixXd goal_path = planner->get_solution_path();
+					MatrixXd row0 = goal_path.row(0);
+					goal_path.row(0) = goal_path.row(3);
+					goal_path.row(3) = row0;
+					np::ndarray goal_path_np = cp_eigen_to_ndarray(goal_path);
+
+					// Hard code obstacles
+					MatrixXd obstacles(4,3);
+					obstacles.col(0) << -2, 2, -.5, .8;
+					obstacles.col(1) <<  2, 2, -.5, .8;
+					obstacles.col(2) <<  0, .6, .6, .6;
+					np::ndarray obstacles_np = cp_eigen_to_ndarray(obstacles);
+
+					// Hard code some of the parameters, whatevs
+					cp_plot(plotter, goal_path_np, obstacles_np, checker.iterations(), solution_cost, .5, .2, .5);
+				} else if (params::system=="rally_car") {
+
+					py::object plotter = di_init_display(); // Initialize python interpreter and pyplot plot 					
+
+					// Convert Eigen matrices and vectors to Numpy ND arrays
+					np::ndarray states_np = di_eigen_to_ndarray(planner->tree_to_matrix_states());
+					np::ndarray parents_np = di_eigen_to_ndarray(planner->tree_to_matrix_parents());
+					np::ndarray goal_path_np = di_eigen_to_ndarray(planner->get_solution_path());
+					//std::cout << "Solution:\n" << (planner->get_solution_path()).transpose() << "\n";
+
+					// Hard code obstacles
+					MatrixXd obstacles(4,6);
+					obstacles.col(0) << 0, 42, 20.5, 1;
+					obstacles.col(1) << 20.5, 1, -5.5, 53;
+					obstacles.col(2) << 9.5, 1, -16, 32;
+					obstacles.col(3) << 15, 12, -32.5, 1;
+					obstacles.col(4) << -9.5, 1, -16, 32;
+					obstacles.col(5) << -20.5, 1, -5.5, 53;
+					np::ndarray obstacles_np = di_eigen_to_ndarray(obstacles);
+					di_plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, params::stopping_check, solution_cost);					
+				}
+
+				/*
+				 * Done with my visualization of tree
+				 */
+
 				break;
 			}
 		}

@@ -35,12 +35,10 @@ void mod_cartpole_state(Vector4d& z) {
 
 int main() {
 
-	Vector4d z;
-	z << 4.9368, -2.1114, 4.0367, -5.7592;
-	Vector4d x_next;
-	x_next << 4, 8, 30, -3;
-	VectorXd u(1);
-	u << -0.7847;
+	VectorXd z(8);
+	z << 18.0002, -29.3624, 0.00550246, 15.8682, 1.57, -8.15236e-05, 1.77549, 40;
+	VectorXd u(3);
+	u << -0.178751, -652.562, 1186.94;
 	double delta = .33;
 
 	double mc = .5;
@@ -51,15 +49,13 @@ int main() {
 	double ch = 0;
 	set_cartpole_parameters(mc, mp, l, b, cw, ch);
 
-	VectorXd zdot = continuous_cartpole_dynamics(z, u);
+	VectorXd zdot = continuous_rally_car_dynamics(z, u);
 	std::cout << "zdot:\n" << zdot << "\n";
 
-	mod_cartpole_state(z);
-	zdot = continuous_cartpole_dynamics(z, u);
-	std::cout << "zdot after modding cartpole state:\n" << zdot << "\n";	
+	VectorXd z_next = rk4(continuous_rally_car_dynamics, z, u, delta);
+	std::cout << "Propagated by " << delta << " seconds:\n" << z_next << "\n";
 
-	VectorXd z_next = rk4(continuous_cartpole_dynamics, z, u, delta);
-	std::cout << "propogated by " << delta << " seconds:\n" << z_next << "\n";
+
 
 }
 

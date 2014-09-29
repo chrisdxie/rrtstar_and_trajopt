@@ -42,6 +42,9 @@ namespace params
 	extern int image_height;
 	extern double node_diameter;
 	extern double solution_node_diameter;
+
+	//Parameters for environment scene
+	extern int scene_number;
 }
 
 void read_parameters(int ac, char* av[]);
