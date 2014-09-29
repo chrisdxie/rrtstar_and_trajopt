@@ -115,7 +115,7 @@ void update_C_ellipse_Matrix() {
 
 }
 
-void setup(int max_time, std::string& randomize, int batch_size, MatrixXd obstacles) {
+void setup(int max_time, std::string& randomize, int batch_size, MatrixXd obstacles, int stats_id) {
 
 	// This function populates a matrix of values for setting up the problem.
 	// Setup variables:
@@ -213,6 +213,8 @@ void setup(int max_time, std::string& randomize, int batch_size, MatrixXd obstac
 	// uniform dist
 	u_dist = new U_DIST(0, 1);
 	u_sampler = new U_GENERATOR(*r_eng, *u_dist);
+
+	setup_values.stats_id = stats_id;
 
 }
 
@@ -909,6 +911,7 @@ double BITStar() {
 	std::clock_t start;
 	double duration;
 	start = std::clock();
+	double last_time = start / (double) CLOCKS_PER_SEC;
 
 	// f_max from paper
 	f_max = INFTY;
@@ -1001,16 +1004,21 @@ double BITStar() {
 
 					pruneEdgeQueue(x);
 
-					// Write time, # of nodes, cost to file
-					ofstream outfile("BITSTAR_double_integrator_statistics_" + std::to_string(setup_values.max_time) + "_seconds.txt", ios::app);
-					if (outfile.is_open()) {
-						outfile << std::setprecision(10) << ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-						outfile << ", " << V.size();
-						outfile << ", " << f_max << std::endl;
-						outfile.close();
+					double report_interval = 1; // Report stats every x secs
+					double curr_time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+
+					if (curr_time - last_time > report_interval) {
+						// Write time, # of nodes, cost to file
+						ofstream outfile("BITSTAR_double_integrator_statistics_" + std::to_string(setup_values.max_time) + "_seconds_run_" + std::to_string(setup_values.stats_id) + ".txt", ios::app);
+						if (outfile.is_open()) {
+							outfile << std::setprecision(10) << ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+							outfile << ", " << V.size();
+							outfile << ", " << f_max << std::endl;
+							outfile.close();
+						}
+						last_time = curr_time;
 					}
 
-					double curr_time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 					if (curr_time > setup_values.max_time) {
 						std::cout << "Done\n";
 						break;
@@ -1084,7 +1092,7 @@ MatrixXd read_in_obstacle_file(std::string file_name) {
  * Just a note: This function MUST be called from directory that
  * plot_sst.cpp lives in.
  *
- * USAGE: build/bin/bitstar <TIME IN SECONDS> <RANDOMIZE> <BATCH_SIZE> <OBSTACLE_FILE>
+ * USAGE: build/bin/bitstar <TIME IN SECONDS> <RANDOMIZE> <BATCH_SIZE> <OBSTACLE_FILE> <ID_NUMBER_FOR_STATS>
  */
 
 int main(int argc, char* argv[]) {
@@ -1094,6 +1102,7 @@ int main(int argc, char* argv[]) {
 	std::string randomize = "false";
 	int batch_size = 100;
 	MatrixXd obstacles(0,0); obstacles.setZero();
+	int stats_id = 1;
 
 	if (argc >= 2) {
 		max_time = atoi(argv[1]);
@@ -1107,9 +1116,12 @@ int main(int argc, char* argv[]) {
 	if (argc >= 5) {
 		obstacles = read_in_obstacle_file(argv[4]);
 	}
+	if(argc >= 6) {
+		stats_id = atoi(argv[5]);
+	}
 
 	// Setup function
-	setup(max_time, randomize, batch_size, obstacles);
+	setup(max_time, randomize, batch_size, obstacles, stats_id);
 
 	// Running of BIT*
 	std::cout << "Running BIT*...\n";

@@ -115,7 +115,7 @@ void update_C_ellipse_Matrix() {
 
 }
 
-void setup(int max_time, std::string& randomize, int batch_size) {
+void setup(int max_time, std::string& randomize, int batch_size, int stats_id) {
 
 	// This function populates a matrix of values for setting up the problem.
 	// Setup variables:
@@ -227,6 +227,8 @@ void setup(int max_time, std::string& randomize, int batch_size) {
 	// uniform dist
 	u_dist = new U_DIST(0, 1);
 	u_sampler = new U_GENERATOR(*r_eng, *u_dist);
+
+	setup_values.stats_id = stats_id;
 
 	// Parameters of the system. Taken from PILCO manual
 	double mc = .5;
@@ -972,6 +974,7 @@ double BITStar() {
 	std::clock_t start;
 	double duration;
 	start = std::clock();
+	double last_time = start / (double) CLOCKS_PER_SEC;
 
 	// f_max from paper
 	f_max = INFTY;
@@ -1064,16 +1067,21 @@ double BITStar() {
 
 					pruneEdgeQueue(x);
 
-					// Write time, # of nodes, cost to file
-					ofstream outfile("BITSTAR_cartpole_statistics_" + std::to_string(setup_values.max_time) + "_seconds.txt", ios::app);
-					if (outfile.is_open()) {
-						outfile << std::setprecision(10) << ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-						outfile << ", " << V.size();
-						outfile << ", " << f_max << std::endl;
-						outfile.close();
+					double report_interval = 1; // Report stats every x secs
+					double curr_time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+
+					if (curr_time - last_time > report_interval) {
+						// Write time, # of nodes, cost to file
+						ofstream outfile("BITSTAR_cartpole_statistics_" + std::to_string(setup_values.max_time) + "_seconds_run_" + std::to_string(setup_values.stats_id) + ".txt", ios::app);
+						if (outfile.is_open()) {
+							outfile << std::setprecision(10) << ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+							outfile << ", " << V.size();
+							outfile << ", " << f_max << std::endl;
+							outfile.close();
+						}
+						last_time = curr_time;
 					}
 
-					double curr_time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 					if (curr_time > setup_values.max_time) {
 						std::cout << "Done\n";
 						break;
@@ -1125,7 +1133,7 @@ double BITStar() {
  * Just a note: This function MUST be called from directory that
  * plot_sst.cpp lives in.
  *
- * USAGE: build/bin/bitstar <TIME IN SECONDS> <RANDOMIZE> <BATCH_SIZE>
+ * USAGE: build/bin/bitstar <TIME IN SECONDS> <RANDOMIZE> <BATCH_SIZE> <ID_NUMBER_FOR_STATS>
  */
 
 int main(int argc, char* argv[]) {
@@ -1134,6 +1142,7 @@ int main(int argc, char* argv[]) {
 	int max_time = 60; // 1 minute
 	std::string randomize = "false";
 	int batch_size = 100;
+	int stats_id = 1;
 
 	if (argc >= 2) {
 		max_time = atoi(argv[1]);
@@ -1144,9 +1153,12 @@ int main(int argc, char* argv[]) {
 	if (argc >= 4) {
 		batch_size = atoi(argv[3]);
 	}
+	if (argc >= 5) {
+		stats_id = atoi(argv[4]);
+	}
 
 	// Setup function
-	setup(max_time, randomize, batch_size);
+	setup(max_time, randomize, batch_size, stats_id);
 
 	// Running of BIT*
 	std::cout << "Running BIT*...\n";

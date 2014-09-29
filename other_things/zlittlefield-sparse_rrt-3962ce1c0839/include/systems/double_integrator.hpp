@@ -15,6 +15,9 @@
 
 #include "systems/system.hpp"
 
+#include <iostream>
+#include <string>
+#include <iterator>
 #include <fstream>
 #include <eigen3/Eigen/Eigen>
 using namespace Eigen;
@@ -22,7 +25,7 @@ using namespace Eigen;
 
 MatrixXd read_in_obstacle_file(std::string file_name) {
 
-	std::ifstream fin(file_name);
+	std::ifstream fin(file_name.c_str());
 	std::vector<double> data;
 
 	std::copy(std::istream_iterator<double>(fin), // this denotes "start of stream"

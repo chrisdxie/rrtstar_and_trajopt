@@ -71,6 +71,8 @@ public:
 	double u_max;
 
 	int batch_size;
+
+	int stats_id;
 };
 
 #endif /* BITSTAR_H_ */

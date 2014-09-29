@@ -165,14 +165,14 @@ MatrixXd read_in_obstacle_file(std::string file_name, collision_checker_t& colli
 }
 
 /*
- *  Arguments are: <NUM_ITERS> <RANDOMIZE in {true, false, <seed>}> <SCENE_FILE_NAME>
+ *  Arguments are: <NUM_SECONDS> <RANDOMIZE in {true, false, <seed>}> <SCENE_FILE_NAME> <ID_NUMBER_FOR_STATS>
  */ 
 int
 main (int argc, char* argv[]) {
 
 
   // Grab number of iterations from command line input
-  int NUM_ITERS = 2000; // Default
+  int MAX_SECONDS = 60; // Default
   if (argc >= 2) {
     NUM_ITERS = atoi(argv[1]);
   }
@@ -190,6 +190,10 @@ main (int argc, char* argv[]) {
       srand(atoi(argv[2])); // seed was passed in
       seed = atoi(argv[2]);
     }
+  }
+  int stats_id = 1;
+  if (argc>=4) {
+    stats_id = atoi(argv[3]);
   }
 
 
@@ -287,11 +291,11 @@ main (int argc, char* argv[]) {
   region<4> region_goal;
   for (int i = 0; i < 2; i++) {
     region_goal.center[i] = 9.0;
-    region_goal.size[i] = 1.0;
+    region_goal.size[i] = 1e-2;
   }
   for (int i = 2; i < 4; i++) {
     region_goal.center[i] = 0.0;
-    region_goal.size[i] = 2.0;
+    region_goal.size[i] = 1e-2;
   }
   min_time_reachability.set_goal_region (region_goal);
 
@@ -325,22 +329,36 @@ main (int argc, char* argv[]) {
   std::clock_t start;
   double duration;
   start = std::clock();
+  double last_time = start / (double) CLOCKS_PER_SEC;
 
   // 4. RUN THE PLANNER 
-  for (int i = 0; i < NUM_ITERS; i++){
+  for (int i = 0; true; i++){
 
     planner.iteration ();
     
     if (i%100 == 0){
       cout << "Iteration : " << i << endl;
 
-      // Write time, # of nodes, cost to file
-      ofstream outfile("RRTSTAR_statistics_" + std::to_string(NUM_ITERS) + "_iters.txt", ios::app);
-      if (outfile.is_open()) {
-        outfile << std::setprecision(10) << ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-        outfile << ", " << planner.get_num_vertices();
-        outfile << ", " << min_time_reachability.get_best_cost() << std::endl;
-        outfile.close();
+      double report_interval = 1; // Report stats every x secs
+      double curr_time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+
+      if (curr_time - last_time > report_interval) {
+        // Write time, # of nodes, cost to file
+        ofstream outfile("RRTSTAR_double_integrator_statistics_" + std::to_string(MAX_SECONDS) + "_seconds_run_" + std::to_string(stats_id) + "_iters.txt", ios::app);
+        if (outfile.is_open()) {
+          outfile << std::setprecision(10) << ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+          outfile << ", " << planner.get_num_vertices();
+          outfile << ", " << min_time_reachability.get_best_cost() << std::endl;
+          outfile.close();
+        }
+
+        last_time = curr_time;
+
+      }
+
+      if (curr_time > MAX_SECONDS) {
+        std::cout << "Done\n";
+        break;
       }
 
     }

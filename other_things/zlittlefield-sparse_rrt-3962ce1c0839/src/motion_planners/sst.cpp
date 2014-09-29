@@ -116,7 +116,7 @@ void sst_t::step()
 		add_to_tree();
 	}
 
-	double report_interval = 0.05; // Report stats every x secs
+	double report_interval = 0.2; // Report stats every x secs
 	double curr_time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 	if (curr_time - last_time > report_interval) {
 
