@@ -66,18 +66,28 @@ int num_sample_batches = 0;
 double max_speed = sqrt(2); // Hard coded for this example
 
 inline double uniform(double low, double high) {
-	return (high - low)*(rand() / double(RAND_MAX)) + low;
+	return (high - low)*(*u_sampler)() + low;
 }
 
 // Cost of node from root of tree
 inline double g_T(Node* x) {
 	if (x->inV) {
+		
+		Node* curr = x;
+		double cost = 0;
+		while (curr->state != setup_values.initial_state) {
+			cost += curr->cost;
+			curr = curr->parent;
+		}
+		return cost;
 
+		/*
 		if (x->state == setup_values.initial_state) {
 			return x->cost; // Should be 0 for root node!
 		} else {
 			return x->cost + g_T(x->parent);
 		}
+		*/
 
 	} else {
 		return INFTY;
@@ -87,12 +97,12 @@ inline double g_T(Node* x) {
 // This needs to update every time we find a new goal
 void update_C_ellipse_Matrix() {
 	int d = setup_values.dimension;
-	VectorXd goal_state = goal_node->state;
+	Vector4d goal_state = goal_node->state;
 
 	// SVD stuff for ball
-	VectorXd a1 = goal_state - setup_values.initial_state;
-	MatrixXd M(d, d);
-	M.setZero(d,d);
+	Vector4d a1 = goal_state - setup_values.initial_state;
+	Matrix<double, 4, 4> M;
+	M.setZero();
 	M.col(0) = a1;
 
 	// Perform SVD on M
@@ -128,9 +138,9 @@ void setup(int max_time, std::string& randomize, int batch_size, MatrixXd obstac
 	// 		Rectangular obstacle y range
 
 	int d = 4;
-	VectorXd initial_state(d);
+	Vector4d initial_state;
 	initial_state << 0, 0, 0, 0;
-	VectorXd goal_state(d);
+	Vector4d goal_state;
 	goal_state << 9, 9, 0, 0;
 
 	int num_obstacles = 3;
@@ -168,7 +178,7 @@ void setup(int max_time, std::string& randomize, int batch_size, MatrixXd obstac
 	update_C_ellipse_Matrix();
 
 	// Gamma
-	setup_values.gamma = 10; // Looked up thing in paper
+	setup_values.gamma = 15; // Looked up thing in paper
 
 	// Randomize argument
 	if (randomize == "true") {
@@ -219,7 +229,7 @@ void setup(int max_time, std::string& randomize, int batch_size, MatrixXd obstac
 }
 
 // Returns true if point is inside rectangular polygon
-inline bool inside_rectangular_obs(VectorXd& point, double x_min, double x_max,	double y_min, double y_max) {
+inline bool inside_rectangular_obs(Vector2d& point, double x_min, double x_max,	double y_min, double y_max) {
 	return (x_min <= point(0)) && (point(0) <= x_max) && (y_min <= point(1)) && (point(1) <= y_max);
 }
 
@@ -227,8 +237,8 @@ inline bool inside_sphere_obs(VectorXd& point, VectorXd& center, double radius) 
 	return (point - center).norm() < radius;
 }
 
-inline bool inBounds(VectorXd& state) {
-	VectorXd pos(2), vel(2);
+inline bool inBounds(Vector4d& state) {
+	Vector2d pos(2), vel(2);
 	pos << state(0), state(1);
 	vel << state(2), state(3);
 	if (inside_rectangular_obs(pos, setup_values.x_min, setup_values.x_max,
@@ -264,7 +274,7 @@ bool isLeaf(Node* x) {
 }
 
 // 2 dimensional collision check. Return true if point is contained inside rectangle
-bool exists_collision(VectorXd& x_near, VectorXd& x_new) {
+bool exists_collision(Vector4d& x_near, Vector4d& x_new) {
 
 	// Hard coded for point robot since states are in 2D
 
@@ -278,6 +288,19 @@ bool exists_collision(VectorXd& x_near, VectorXd& x_new) {
 		double y_min = obstacles(2,n) - .5*obstacles(3,n);
 		double y_max = obstacles(2,n) + .5*obstacles(3,n);
 
+		float dis_num = 10;
+		Vector2d pos_near, pos_new;
+		pos_near << x_near(0), x_near(1);
+		pos_new << x_new(0), x_new(1);
+		Vector2d direction = (pos_new - pos_near)/(pos_new - pos_near).norm();
+		double length = (pos_new - pos_near).norm();
+		for (int i = 1;i <= dis_num; i++) {
+			Vector2d point = pos_near + length * i/dis_num * direction;
+			if (inside_rectangular_obs(point, x_min, x_max, y_min, y_max)) {
+				return true;
+			}
+		}
+		/*
 		Matrix<double, 4, 2> obs;
 		obs.setZero(4,2);
 		obs.row(0) << x_min, y_min; obs.row(1) << x_min, y_max;
@@ -296,7 +319,7 @@ bool exists_collision(VectorXd& x_near, VectorXd& x_new) {
 		if (temp(0,0) < 0) {
 			return true;
 		}
-
+		*/
 	}
 	return false;
 }
@@ -389,7 +412,7 @@ inline double sq_dist(VectorXd& p1, VectorXd& p2) {
 	return (p1 - p2).transpose()*(p1 - p2);
 }
 
-inline double dist(VectorXd& p1, VectorXd& p2) {
+inline double dist(Vector4d& p1, Vector4d& p2) {
 	return (p1 - p2).norm();
 }
 
@@ -398,7 +421,7 @@ inline int factorial(int n) {
 }
 
 // Sample from unit ball: http://math.stackexchange.com/questions/87230/picking-random-points-in-the-volume-of-sphere-with-uniform-probability/87238#87238
-inline VectorXd sample_from_unit_ball() {
+inline Vector4d sample_from_unit_ball() {
 
 	double R = 1; // Unit ball has radius 1
 
@@ -406,7 +429,7 @@ inline VectorXd sample_from_unit_ball() {
 	double length = R * pow((*u_sampler)(), 1.0/setup_values.dimension);
 
 	// Sample direction
-	VectorXd dir(setup_values.dimension);
+	Vector4d dir;
 	for (int i = 0; i < setup_values.dimension; i++) {
 		dir(i) = (*g_sampler)();
 	}
@@ -426,18 +449,21 @@ inline bool inSet(Node* x, std::set<Node*>& Set) {
 
 // Cost to come heuristic
 inline double g_hat(Node* x) {
-	VectorXd pos(2), init_pos(2);
-	pos << x->state(0), x->state(1);
-	init_pos << setup_values.initial_state(0), setup_values.initial_state(1);
-	return (pos - init_pos).norm()/max_speed;
+	//VectorXd pos(2), init_pos(2);
+	//pos << x->state(0), x->state(1);
+	//init_pos << setup_values.initial_state(0), setup_values.initial_state(1);
+	//return sqrt(x->state(0)-setup_values.initial_state(0)))/max_speed;
+	return sqrt((x->state(0)-setup_values.initial_state(0))*(x->state(0)-setup_values.initial_state(0)) + (x->state(1)-setup_values.initial_state(1))*(x->state(1)-setup_values.initial_state(1)))/max_speed;	
 	//return x->g_hat;
 }
 // Cost to go heuristic
 inline double h_hat(Node* x) {
-	VectorXd pos(2), goal_pos(2);
-	pos << x->state(0), x->state(1);
-	goal_pos << goal_node->state(0), goal_node->state(1);
-	return (pos - goal_pos).norm()/max_speed;
+	//VectorXd pos(2), goal_pos(2);
+	//pos << x->state(0), x->state(1);
+	//goal_pos << goal_node->state(0), goal_node->state(1);
+	//return (pos - goal_pos).norm()/max_speed;
+	return sqrt((x->state(0)-goal_node->state(0))*(x->state(0)-goal_node->state(0)) + (x->state(1)-goal_node->state(1))*(x->state(1)-goal_node->state(1)))/max_speed;
+
 	//return x->h_hat;
 }
 // Cost of x_start to x_goal where path is constrained to go through x heuristic
@@ -481,7 +507,10 @@ double c(Edge* e) {
 	// Collision check of intermediate states
 	int i = 0;
 	for (std::vector<VectorX>::iterator it = X.begin(); it != X.end(); ++it) {
-		VectorXd x1(setup_values.dimension), x2(setup_values.dimension);
+		if (i == (X.size() - 1)) {
+			continue;
+		}
+		Vector4d x1, x2;
 		x1 << X[i];
 		x2 << X[i+1];
 		if (exists_collision(x1, x2)) {
@@ -498,11 +527,11 @@ double c(Edge* e) {
 }
 // Cost of connecting two nodes heuristic
 inline double c_hat(Node* x, Node* y) { // This is specific to double integrator
-	VectorXd x_state(2);
-	VectorXd y_state(2);
+	Vector2d x_state;
+	Vector2d y_state;
 	x_state << x->state(0), x->state(1);
 	y_state << y->state(0), y->state(1);
-	if (exists_collision(x_state, y_state)) {
+	if (exists_collision(x->state, y->state)) {
 		return INFTY;
 	}
 	return (x_state - y_state).norm()/max_speed;
@@ -591,7 +620,7 @@ void sample_uniform_batch() {
 	while (num_samples < setup_values.batch_size) {
 
 		// Sample the new state
-		VectorXd x_sample(setup_values.dimension);
+		Vector4d x_sample;
 
 		// This is specific to the square environment (and 4d state)
 		x_sample(0) = uniform(setup_values.x_min, setup_values.x_max);
@@ -628,7 +657,7 @@ void sample_batch() {
 	}
 
 	int num_samples = 0;
-	VectorXd x_center = (setup_values.initial_state + goal_node->state)/2.0;
+	Vector4d x_center = (setup_values.initial_state + goal_node->state)/2.0;
 
 	// Create L matrix from bigger radius
 	MatrixXd L(setup_values.dimension, setup_values.dimension);
@@ -645,8 +674,8 @@ void sample_batch() {
 
 	MatrixXd CL = C_ellipse*L;
 	while (num_samples < setup_values.batch_size) {
-		VectorXd x_ball = sample_from_unit_ball();
-		VectorXd x_sample = CL*x_ball + x_center;
+		Vector4d x_ball = sample_from_unit_ball();
+		Vector4d x_sample = CL*x_ball + x_center;
 
 		if (inBounds(x_sample)) {
 			Node* n = new Node();
@@ -888,10 +917,10 @@ double BITStar() {
 
 	while (true) {
 
-		if (k % 100 == 0) {
+		if (k % 1000 == 0) {
 			std::cout << "Iteration: " << k << "\n";
-			std::cout << "Size of sample set: " << X_sample.size() << "\n";
-			std::cout << "Size of vertex set: " << V.size() << "\n";
+			//std::cout << "Size of sample set: " << X_sample.size() << "\n";
+			//std::cout << "Size of vertex set: " << V.size() << "\n";
 		}
 
 		// New Batch of samples!!

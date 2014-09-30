@@ -11,7 +11,7 @@ using namespace Eigen;
 
 class Node {
 public:
-	VectorXd state;
+	Vector4d state;
 	double cost;
 //	double h_hat;
 //	double g_hat;
@@ -50,8 +50,8 @@ class SetupObject {
 public:
 	int max_time;
 	int dimension;
-	VectorXd initial_state;
-	VectorXd goal_state;
+	Vector4d initial_state;
+	Vector4d goal_state;
 	double gamma; // Set to be at least side length of state space
 	bool randomize;
 	// API: Each column is a rectangular obstacle represented by a 4d vector.

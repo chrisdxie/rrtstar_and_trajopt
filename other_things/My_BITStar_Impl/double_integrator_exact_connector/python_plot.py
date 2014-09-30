@@ -7,7 +7,6 @@ from math import pi, atan
 #import IPython
 
 def plot(states, parents, goal_path, obstacles, seconds, cost):
-
     #print goal_path
     
     plt.clf()
