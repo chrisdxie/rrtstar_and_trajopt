@@ -461,29 +461,38 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bounds,
 
 	bool success = true;
 
-	while(penalty_increases < cfg::max_penalty_coeff_increases) {
-		success = minimize_merit_function(X, U, delta, bounds, penalty_coeff, problem, output, info);
+        bool already_reinitialized = false;
+        double eps = 1e-3;
+        double prev_constraint_violation = (computeMerit(delta, X, U, penalty_coeff) - computeObjective(delta, X, U))/penalty_coeff;
+        LOG_INFO("Initial Constraint violation: %.5f\n", prev_constraint_violation);
 
-		if (!success) {
-			LOG_ERROR("Merit function not minimized successfully\n");
-			break;
-		}
+        while(penalty_increases < cfg::max_penalty_coeff_increases) {
+                success = minimize_merit_function(X, U, delta, bounds, penalty_coeff, problem, output, info);
 
-		double constraint_violation = (computeMerit(delta, X, U, penalty_coeff) - computeObjective(delta, X, U))/penalty_coeff;
-		LOG_INFO("Constraint violation: %.5f\n", constraint_violation);
+                if (!success) {
+                        LOG_ERROR("Merit function not minimized successfully\n");
+                        break;
+                }
 
-		if (constraint_violation <= cfg::cnt_tolerance) {
-			break;
-		} else if (constraint_violation > 1 && penalty_increases == 0) {
+                double constraint_violation = (computeMerit(delta, X, U, penalty_coeff) - computeObjective(delta, X, U))/penalty_coeff;
+                LOG_INFO("Constraint violation: %.5f\n", constraint_violation);
 
-			if (delta > 1) {
-				LOG_ERROR("Delta exceeds maximum allowed.\n");
-				success = false;
-				break;
+                if (constraint_violation <= cfg::cnt_tolerance) {
+                        break;
+                } else if (constraint_violation >= prev_constraint_violation - eps && !already_reinitialized) { //&& penalty_increases == 0) {
+
+                        already_reinitialized = true;
+                        penalty_increases = 0;
+                        penalty_coeff = cfg::initial_penalty_coeff;
+
+                        if (delta > 1) {
+                                LOG_ERROR("Delta exceeds maximum allowed.\n");
+                                success = false;
+                                break;
 			}
 
-			delta = prev_delta + 0.1;
-			prev_delta = delta;
+                        delta = prev_delta + bounds.delta_max/2; // Halfway
+                        delta = std::min(delta, bounds.delta_max);
 
 			Matrix<double, X_DIM, T> init;
 			for(int i = 0; i < X_DIM; ++i) {
@@ -511,6 +520,8 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bounds,
 				break;
 			}
 		}
+
+                prev_constraint_violation = constraint_violation;
 
 		// warm start?
 		for(int t = 0; t < T-2; ++t) {
@@ -571,7 +582,7 @@ int main(int argc, char* argv[]) {
 
 	StdVectorX X(T);
 	StdVectorU U(T-1);
-	double delta = atof(argv[9]);
+	double delta = 0.01;
 
 	// Start and goal state
 	VectorX x_start, x_goal;
@@ -587,12 +598,12 @@ int main(int argc, char* argv[]) {
 	// Init bounds
 	bounds_t bounds;
 
-	bounds.u_min << -10;
-	bounds.u_max << 10;
+	bounds.u_min << -20;
+	bounds.u_max << 20;
 	bounds.x_min << -10, -10, -4*M_PI, -10;
 	bounds.x_max << 10, 10, 4*M_PI, 10;
 	bounds.delta_min = 0;
-	bounds.delta_max = 2;
+	bounds.delta_max = .1;
 	bounds.x_goal = x_goal;
 	bounds.x_start = x_start;
 

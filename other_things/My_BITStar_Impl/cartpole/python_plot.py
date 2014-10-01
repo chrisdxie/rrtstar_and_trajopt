@@ -45,7 +45,7 @@ def cartplot(states, cart_width, cart_height, pole_length):
 
 def plot(states, obstacles, seconds, cost, cart_width, cart_height, pole_length):
 
-    #print states
+    print states
     
     plt.clf()
     plt.cla()
@@ -94,9 +94,9 @@ def plot(states, obstacles, seconds, cost, cart_width, cart_height, pole_length)
         ax.add_patch(rect)
 
         # Plot the pole
-        plt.plot([states[3,i]], [0], 'ro', markersize=5)
+        plt.plot([states[3,i]], [0], 'yo', markersize=5)
         end_pole = [pole_length*sin(states[2,i])+states[3,i], -1*pole_length*cos(states[2,i])]
-        plt.plot([states[3,i], end_pole[0]], [0, end_pole[1]],color='black',linewidth=2.0)
+        plt.plot([states[3,i], end_pole[0]], [0, end_pole[1]],color=[float(i)/float(states.shape[1]), 0,float(states.shape[1]-i)/float(states.shape[1])],linewidth=2.0)
 
     plt.ylim(-1,1)
 

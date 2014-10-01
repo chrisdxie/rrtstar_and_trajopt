@@ -63,10 +63,13 @@ int num_samples_pruned = 0;
 int num_vertices_pruned = 0;
 int num_sample_batches = 0;
 
-double max_speed = 10; // Hard coded for this example
+int num_failed_adds = 0;
+int num_failed_rewires = 0;
+
+double max_speed = sqrt(125); // Hard coded for this example
 
 inline double uniform(double low, double high) {
-	return (high - low)*(rand() / double(RAND_MAX)) + low;
+	return (high - low)*(*u_sampler)() + low;
 }
 
 // Cost of node from root of tree
@@ -137,9 +140,16 @@ void setup(int max_time, std::string& randomize, int batch_size, int stats_id) {
 
 	int num_obstacles = 3;
 	MatrixXd obstacles(4, num_obstacles);
-    obstacles.col(0) << -2, 2, -.5, .8;
-    obstacles.col(1) << 2, 2, -.5, .8;
-    obstacles.col(2) << 0, .6, .6, .6;
+	//obstacles.col(0) << 0, .03, .5, .22;
+	//obstacles.col(1) << 0, .03, -.5, .22;
+
+        obstacles.col(0) << -2, 2, -.5, .8;
+        obstacles.col(1) << 2, 2, -.5, .8;
+        obstacles.col(2) << 0, .6, .6, .6;
+
+        //obstacles.col(0) << -2.5, 2, -.5, .8;
+        //obstacles.col(1) << 2.5, 2, -.5, .8;
+        //obstacles.col(2) << 0, 2, .6, .6;
 
 
 	// Max time in seconds
@@ -194,16 +204,16 @@ void setup(int max_time, std::string& randomize, int batch_size, int stats_id) {
 	setup_values.obstacles = obstacles;
 
 	// Limits
-	setup_values.x_min = -6;
-	setup_values.x_max = 6;
+	setup_values.x_min = -10;
+	setup_values.x_max = 10;
 	setup_values.v_min = -10;
 	setup_values.v_max = 10;
 	setup_values.theta_min = 0;
 	setup_values.theta_max = 2*M_PI;
 	setup_values.w_min = -10;
 	setup_values.w_max = 10;
-	setup_values.u_min = -10;
-	setup_values.u_max = 10;
+	setup_values.u_min = -20;
+	setup_values.u_max = 20;
 
 	// Sampling stuff
 	if (setup_values.randomize) {
@@ -235,8 +245,8 @@ void setup(int max_time, std::string& randomize, int batch_size, int stats_id) {
 	double mp = .5;
 	double l = .5;
 	double b = .1;
-	double cw = .5;
-	double ch = .2;
+	double cw = .4;
+	double ch = .15;
 	set_cartpole_parameters(mc, mp, l, b, cw, ch);
 
 }
@@ -531,8 +541,6 @@ double c(Edge* e) {
 		return INFTY;
 	}
 
-	num_true_cost_calls++;
-
 	// Instantiate StdVectorsX and StdVectorU
 	StdVectorX X(T);
 	StdVectorU U(T-1);
@@ -545,24 +553,52 @@ double c(Edge* e) {
 	bounds.x_min << setup_values.w_min, setup_values.v_min, setup_values.theta_min-2*M_PI, setup_values.x_min;
 	bounds.x_max << setup_values.w_max, setup_values.v_max, setup_values.theta_max+2*M_PI, setup_values.x_max;
 	bounds.delta_min = 0;
-	bounds.delta_max = 1; // I guess we are putting a max on delta
+	bounds.delta_max = .5; // I guess we are putting a max on delta
 	bounds.x_start = v->state;
 	bounds.x_goal = x->state;
 
+        double thetas[3] = {x->state(2), x->state(2)-2*M_PI, x->state(2)+2*M_PI};
+	double closest = 50;
+	for (int i = 0; i < 3; i++) {
+		if (fabs(v->state(2)-thetas[i]) < fabs(v->state(2) - closest)) {
+			bounds.x_goal(2) = thetas[i];
+			closest = thetas[i];
+		}
+	}
+
+	if (x == goal_node) {
+		std::cout << "Attempting to connect to GOAL_NODE!!\n";
+	}
+
+	// Prune attempt
+	/*
+	if (((bounds.x_goal(2) - bounds.x_start(2) > 0) != (bounds.x_start(0) > 0)) && v != root_node && x != goal_node) {
+		return INFTY;
+	}
+        if (((bounds.x_goal(3) - bounds.x_start(3) > 0) != (bounds.x_start(1) > 0)) && v != root_node && x != goal_node) {
+                return INFTY;
+        }
+	*/
+
 	// Initialize pointer to time variable, delta
 	double delta = 1;
+
+	num_true_cost_calls++;
 
 	// Call SQP
 	int success = solve_cartpole_BVP(X, U, delta, bounds, !x->inV && !inSet(x,G));
 
 	// If not success, say the cost is infinity
 	if (success == 0) {
-		// if (!x->inV) {
-		// 	std::cout << "ADDING STATE Unsuccessful...\n";
-		// } else {
-		// 	std::cout << "REWIRING Unsuccessful...\n";
-		// }		
-		// std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start << "\nGoal state:\n" << bounds.x_goal << "\n";
+		if (!x->inV) {
+			std::cout << "ADDING STATE Unsuccessful...\n";
+			//std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start(0) << " " << bounds.x_start(1) << " " << bounds.x_start(2) << " " << bounds.x_start(3) << "\nGoal state:\n" << bounds.x_goal(0) << " " << bounds.x_goal(1) << " " << bounds.x_goal(2) << " " << bounds.x_goal(3) << "\n";
+			num_failed_adds++;
+		} else {
+			std::cout << "REWIRING Unsuccessful...\n";
+			num_failed_rewires++;
+		}		
+		std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start(0) << " " << bounds.x_start(1) << " " << bounds.x_start(2) << " " << bounds.x_start(3) << "\nGoal state:\n" << bounds.x_goal(0) << " " << bounds.x_goal(1) << " " << bounds.x_goal(2) << " " << bounds.x_goal(3) << "\n";
 		failedSQPCalls.insert(start_and_end_states);
 		return INFTY;
 	}
@@ -583,12 +619,13 @@ double c(Edge* e) {
 		x->state(0) = X[T-1](0,0); // Angular velocity
 		x->state(1) = X[T-1](1,0); // Positional velocity
 	}
-	// if (!x->inV) {
-	// 	std::cout << "ADDING STATE Successful!!!\n";
-	// } else {
-	// 	std::cout << "REWIRING Successful!!!\n";
-	// }	
-	// std::cout << "Start state:\n" << bounds.x_start << "\nGoal state:\n" << bounds.x_goal << "\n";
+	//if (!x->inV) {
+	//	std::cout << "ADDING STATE Successful!!!\n";
+	//	std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start(0) << " " << bounds.x_start(1) << " " << bounds.x_start(2) << " " << bounds.x_start(3) << "\nGoal state:\n" << bounds.x_goal(0) << " " << bounds.x_goal(1) << " " << bounds.x_goal(2) << " " << bounds.x_goal(3) << "\n";
+	//} else {
+	//	std::cout << "REWIRING Successful!!!\n";
+	//}	
+	//std::cout << "Start state:\n" << bounds.x_start << "\nGoal state:\n" << bounds.x_goal << "\n";
 
 	StdVectorX allButLastState(X.begin(), X.begin()+T-1);
 	e->states = allButLastState;
@@ -715,6 +752,8 @@ void sample_batch() {
 
 	int num_samples = 0;
 	VectorXd x_center = (setup_values.initial_state + goal_node->state)/2.0;
+
+	best_cost *= max_speed;
 
 	// Create L matrix from bigger radius
 	MatrixXd L(setup_values.dimension, setup_values.dimension);
@@ -1107,7 +1146,6 @@ double BITStar() {
 		std::cout << "Number of samples pruned: " << num_samples_pruned << "\n";
 		std::cout << "Number of vertices pruned: " << num_vertices_pruned << "\n";
 		std::cout << "Number of batches: " << num_sample_batches << "\n";
-		std::cout << "Number of failed SQP calls: " << failedSQPCalls.size() << "\n";
 
 		MatrixXd goal_path = get_path(goal_node);
 
@@ -1165,6 +1203,9 @@ int main(int argc, char* argv[]) {
 	double path_length = BITStar();
 
 	std::cout << "Number of calls to true cost calculator: " << num_true_cost_calls << "\n";
+	std::cout << "Number of unique failed SQP calls: " << failedSQPCalls.size() << "\n";
+	std::cout << "Number of failed adds: " << num_failed_adds << ", as a percentage: " << (double) num_failed_adds/failedSQPCalls.size() << "\n";
+	std::cout << "Number of failed rewires: " << num_failed_rewires << ", as a percentage: " << (double) num_failed_rewires/failedSQPCalls.size() << "\n";
 	std::cout << "Number of calls to signed distance checker: " << num_collision_check_calls << "\n";
 	std::cout << "Best path cost: " << path_length << "\n";
 	std::cout << "exiting\n";
