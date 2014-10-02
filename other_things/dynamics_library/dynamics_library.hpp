@@ -84,6 +84,69 @@ VectorXd dynamics_library::continuous_cartpole_dynamics(VectorXd z, VectorXd u) 
 
 }
 
+void dynamics_library::set_acrobot_parameters(double m, double l, double l2, double lc, double lc2, double I1, double I2) {
+
+	acrobot_params.g = 9.82;
+	acrobot_params.m = m;
+	acrobot_params.l = l;
+	acrobot_params.l2 = l2;
+	acrobot_params.lc = lc;
+	acrobot_params.lc2 = lc2;
+	acrobot_params.I1 = I1;
+	acrobot_params.I2 = I2;
+
+}
+
+VectorXd dynamics_library::continuous_acrobot_dynamics(VectorXd z, VectorXd u) {
+
+
+    // z = [theta_1, theta_2, theta_dot_1, theta_dot_2]
+
+    double g = acrobot_params.g;
+	double m = acrobot_params.m;
+	double l = acrobot_params.l;
+	double l2 = acrobot_params.l2;
+	double lc = acrobot_params.lc;
+	double lc2 = acrobot_params.lc2;
+	double I1 = acrobot_params.I1;
+	double I2 = acrobot_params.I2;
+
+    Vector4d zdot; zdot.setZero();
+
+    double theta2 = z(1);
+    double theta1 = z(0) - M_PI / 2;
+    double theta1dot = z(2);
+    double theta2dot = z(3);
+    double _tau = u(0);
+
+    //extra term m*lc2
+    double d11 = m * lc2 + m * (l2 + lc2 + 2 * l * lc * cos(theta2)) + I1 + I2;
+
+    double d22 = m * lc2 + I2;
+    double d12 = m * (lc2 + l * lc * cos(theta2)) + I2;
+    double d21 = d12;
+
+    //extra theta1dot
+    double c1 = -m * l * lc * theta2dot * theta2dot * sin(theta2) - (2 * m * l * lc * theta1dot * theta2dot * sin(theta2));
+    double c2 = m * l * lc * theta1dot * theta1dot * sin(theta2);
+    double g1 = (m * lc + m * l) * g * cos(theta1) + (m * lc * g * cos(theta1 + theta2));
+    double g2 = m * lc * g * cos(theta1 + theta2);
+
+    zdot(0) = theta1dot;
+    zdot(1) = theta2dot;
+
+    double u2 = _tau - 1 * .1 * theta2dot;
+    double u1 = -1 * .1 * theta1dot;
+    double theta1dot_dot = (d22 * (u1 - c1 - g1) - d12 * (u2 - c2 - g2)) / (d11 * d22 - d12 * d21);
+    double theta2dot_dot = (d11 * (u2 - c2 - g2) - d21 * (u1 - c1 - g1)) / (d11 * d22 - d12 * d21);
+
+    zdot(2) = theta1dot_dot;
+    zdot(3) = theta2dot_dot;
+
+    return zdot;
+
+}
+
 VectorXd dynamics_library::continuous_rally_car_dynamics(VectorXd z, VectorXd u) {
 
 	VectorXd zdot(8); zdot.setZero();
@@ -338,18 +401,14 @@ MatrixXd dynamics_library::calcJacobians(VectorXd point, VectorXd x, VectorXd x_
 
 	// Preprocess: Get dimension of position, and position vectors only.
 	int d = x.size()/2;
-//	x = x.head(d);
-//	x_next = x_next.head(d);
-
-	Vector2d x_, x_next_;
-	x_  << x(0), x(1);
- 	x_next_ << x_next(0), x_next(1);
+	x = x.head(d);
+	x_next = x_next.head(d);
 
 	// Jacobians
 	MatrixXd jacs(d, 4*d); // Remember, left half is dP/dx, right half is dP/dx_next
 	jacs.setZero();
 
-	double alpha = (point - x_).norm()/(x_next_ - x_).norm();
+	double alpha = (point - x).norm()/(x_next - x).norm();
 	jacs.leftCols(d) = (1-alpha)*MatrixXd::Identity(d, d);
 	jacs.middleCols(2*d, d) =  alpha * MatrixXd::Identity(d, d);
 

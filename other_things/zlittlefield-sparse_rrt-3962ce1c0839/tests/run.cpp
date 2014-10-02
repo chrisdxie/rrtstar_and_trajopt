@@ -179,14 +179,25 @@ int main(int ac, char* av[])
 					np::ndarray goal_path_np = cp_eigen_to_ndarray(goal_path);
 
 					// Hard code obstacles
-					MatrixXd obstacles(4,3);
-					obstacles.col(0) << -2, 2, -.5, .8;
-					obstacles.col(1) <<  2, 2, -.5, .8;
-					obstacles.col(2) <<  0, .6, .6, .6;
+					//MatrixXd obstacles(4,3);
+					//obstacles.col(0) << -2, 2, -.5, .8;
+					//obstacles.col(1) <<  2, 2, -.5, .8;
+					//obstacles.col(2) <<  0, .6, .6, .6;
+
+					MatrixXd obstacles(4,2);
+					obstacles.col(0) << 0, .03, .5, .22;
+                			obstacles.col(1) << 0, .03,-.5, .22;
+	
+					//MatrixXd obstacles(4,3);
+			                //obstacles.col(0) << -2.5, 3, -.5, .8;
+			                //obstacles.col(1) << 2.5, 3, -.5, .8;
+			                //obstacles.col(2) << 0, 2, .6, .6;
+
+
 					np::ndarray obstacles_np = cp_eigen_to_ndarray(obstacles);
 
 					// Hard code some of the parameters, whatevs
-					cp_plot(plotter, goal_path_np, obstacles_np, checker.iterations(), solution_cost, .5, .2, .5);
+					cp_plot(plotter, goal_path_np, obstacles_np, checker.iterations(), solution_cost, .4, .15, .5);
 				} else if (params::system=="rally_car") {
 
 					py::object plotter = di_init_display(); // Initialize python interpreter and pyplot plot 					

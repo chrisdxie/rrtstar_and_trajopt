@@ -114,12 +114,12 @@ py::object init_display() {
   return plotter;
 }
 
-void plot(py::object plotter, np::ndarray all_states, np::ndarray all_parents, np::ndarray goal_states, np::ndarray goal_inputs, np::ndarray obstacles,
-    np::ndarray goal_region, int iter, double cost) {
+void plot(py::object plotter, np::ndarray all_states, np::ndarray all_parents, np::ndarray goal_states, np::ndarray goal_inputs, np::ndarray obstacles, std::string obs_file,
+    np::ndarray goal_region, int iter, double cost, int scene_num) {
 
   try {
       // pass control to python now
-    plotter(all_states, all_parents, goal_states, goal_inputs, obstacles, goal_region, iter, "", cost);
+    plotter(all_states, all_parents, goal_states, goal_inputs, obstacles, goal_region, iter, obs_file, cost, scene_num);
   }
   catch(py::error_already_set const &) {
       // will pass python errors to cpp for printing
@@ -167,7 +167,7 @@ MatrixXd read_in_obstacle_file(std::string file_name, collision_checker_t& colli
 }
 
 /*
- *  Arguments are: <NUM_SECONDS> <RANDOMIZE in {true, false, <seed>}> <SCENE_FILE_NAME> <ID_NUMBER_FOR_STATS>
+ *  Arguments are: <NUM_SECONDS> <RANDOMIZE in {true, false, <seed>}> <SCENE_FILE_NAME> <ID_NUMBER_FOR_STATS> <SCENE_NUM>
  */ 
 int
 main (int argc, char* argv[]) {
@@ -197,6 +197,7 @@ main (int argc, char* argv[]) {
   if (argc >= 5) {
     stats_id = atoi(argv[4]);
   }
+  int scene_num = atoi(argv[5]);
 
   // 1. CREATE PLANNING OBJECTS
   
@@ -432,7 +433,7 @@ main (int argc, char* argv[]) {
       np::ndarray all_states_np = eigen_to_ndarray(all_states);
       np::ndarray all_parents_np = eigen_to_ndarray(all_parents);
 
-      plot(plotter, all_states_np, all_parents_np, states_np, inputs_np, obstacles_np, goal_region_np, i+1, best_cost);
+      plot(plotter, all_states_np, all_parents_np, states_np, inputs_np, obstacles_np, scene_file_name, goal_region_np, i+1, best_cost, scene_num);
     }
   }
 
@@ -529,7 +530,7 @@ main (int argc, char* argv[]) {
   np::ndarray all_states_np = eigen_to_ndarray(final_states);
   np::ndarray all_parents_np = eigen_to_ndarray(final_parents);
 
-  plot(plotter, all_states_np, all_parents_np, states_np, inputs_np, obstacles_np, goal_region_np, MAX_SECONDS, best_cost);
+  plot(plotter, all_states_np, all_parents_np, states_np, inputs_np, obstacles_np, scene_file_name, goal_region_np, MAX_SECONDS, best_cost, scene_num);
 
   // Successful execution, return 1
   return 1;

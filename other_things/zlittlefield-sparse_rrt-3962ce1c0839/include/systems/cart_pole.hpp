@@ -66,9 +66,16 @@ public:
 		deriv = new double[state_dimension];
 
 		// Hard code obstacle scenario here
-		obstacles.push_back(cartpole_Rectangle_t(-2, 2, -.5, .8, true));
-		obstacles.push_back(cartpole_Rectangle_t( 2, 2, -.5, .8, true));
-		obstacles.push_back(cartpole_Rectangle_t( 0, .6, .6, .6, true));
+		obstacles.push_back(cartpole_Rectangle_t( 0, .03, .5, .22, true));
+		obstacles.push_back(cartpole_Rectangle_t( 0, .03,-.5, .22, true));
+
+		//obstacles.push_back(cartpole_Rectangle_t(-2, 2, -.5, .8, true));
+		//obstacles.push_back(cartpole_Rectangle_t( 2, 2, -.5, .8, true));
+		//obstacles.push_back(cartpole_Rectangle_t( 0, .6, .6, .6, true));
+
+		//obstacles.push_back(cartpole_Rectangle_t(-2.5, 2, -.5, .8, true));
+                //obstacles.push_back(cartpole_Rectangle_t( 2.5, 2, -.5, .8, true));
+                //obstacles.push_back(cartpole_Rectangle_t( 0, 2, .6, .6, true));
 	}
 	virtual ~cart_pole_t(){}
 

@@ -6,9 +6,9 @@ import os
 from math import pi, atan
 
 
-def plot(all_states, all_parents, states, inputs, obstacles, goal_region, iter, extra_string, cost):
-
-    print states
+def plot(all_states, all_parents, states, inputs, obstacles, goal_region, iter, extra_string, cost, scene_num):
+    #return
+    #print states
 
     plt.clf()
     plt.cla()
@@ -82,11 +82,14 @@ def plot(all_states, all_parents, states, inputs, obstacles, goal_region, iter, 
 
     # Title
     plt.title('Cost: ' + str(cost))
+    plt.ylim(-10,10)
+    plt.xlim(-10,10)
 
     plt.show(block=False)
     plt.pause(.1)
     #raw_input("Press Enter to continue")
 
+    """
     if os.path.exists('paths_of_{0}'.format(extra_string)):
         f = open('paths_of_{0}'.format(extra_string), 'a')
     else:
@@ -110,7 +113,12 @@ def plot(all_states, all_parents, states, inputs, obstacles, goal_region, iter, 
         f.write(input_string + '\n')
     f.write('Cost: {0}\n\n'.format(cost))
     f.close()
+    """
 
+    save('pics/{0}_seconds_scene_{1}'.format(iter, scene_num), 'pdf')
+
+
+    """
     pause = True
     if (pause):
         print("Type 'save' to save this figure into a pdf file as 'pics/<number of iterations>_iters.pdf'")
@@ -119,7 +127,7 @@ def plot(all_states, all_parents, states, inputs, obstacles, goal_region, iter, 
         if user_says.strip() == 'save':
             save('pics/{0}_iters'.format(iters), 'pdf')
             np.savetxt('pics/states_{0}_iters'.format(iter), states)
-
+    """
 
 def save(path, ext='png', close=True, verbose=True):
     """Save a figure from pyplot.

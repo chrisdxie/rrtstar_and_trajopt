@@ -19,9 +19,9 @@
 #include <eigen3/Eigen/Eigen>
 using namespace Eigen;
 
-#include "../../../2d_signed_distance_library_cpp/signedDistancePolygons.hpp"
-#include "../../../dynamics_library/dynamics_library.hpp"
-using namespace dynamics_library;
+//#include "../../../2d_signed_distance_library_cpp/signedDistancePolygons.hpp"
+//#include "../../../dynamics_library/dynamics_library.hpp"
+//using namespace dynamics_library;
 
 #include <cmath>
 
@@ -73,6 +73,7 @@ bool cart_pole_t::propagate( double* start_state, double* control, int min_step,
         // The state for this is [x, xdot, theta, thetadot]
         // But I use             [thetadot, xdot, theta, x]
 
+        /*
         temp_state[0] = start_state[0];
         temp_state[1] = start_state[1];
         temp_state[2] = start_state[2];
@@ -105,6 +106,10 @@ bool cart_pole_t::propagate( double* start_state, double* control, int min_step,
         bool validity = valid_state(result_state);
 
         return validity;
+        */
+
+        // STUPID STUPID STUPID
+        return true;
 
         /*
         temp_state[0] = start_state[0]; 
@@ -158,7 +163,8 @@ void cart_pole_t::enforce_bounds()
 
 bool cart_pole_t::valid_state(double* state)
 {
-    
+    return true; // gotta use this stuff in other class... stupid object linking stuff
+
     // The state for this is [x, xdot, theta, thetadot] = [x, v, theta, w]
 
     /* Compute line (2D polygon) spanned by x and x_next.
@@ -172,6 +178,8 @@ bool cart_pole_t::valid_state(double* state)
      *
      * x0 < x1, and p1x > p2x
      */
+
+     /*
     Matrix<double, 2, 2> traj_line;
     traj_line.setZero();
     traj_line.row(0) << state[0], 0;
@@ -265,7 +273,8 @@ bool cart_pole_t::valid_state(double* state)
         state[2] -= 2*M_PI;
     }
 
-    return !obstacle_collision_swv && !obstacle_collision_individ && inBounds;    
+    return !obstacle_collision_swv && !obstacle_collision_individ && inBounds;
+    */    
 
 }
 

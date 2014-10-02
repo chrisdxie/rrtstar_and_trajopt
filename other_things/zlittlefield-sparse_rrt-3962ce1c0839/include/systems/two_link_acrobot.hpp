@@ -15,6 +15,7 @@
 
 
 #include "systems/system.hpp"
+#include "systems/point.hpp"
 
 class two_link_acrobot_t : public system_t
 {
@@ -25,6 +26,12 @@ public:
 		control_dimension = 1;
 		temp_state = new double[state_dimension];
 		deriv = new double[state_dimension];
+
+		// Just barely cover the edge of the circle
+		obstacles.push_back(Rectangle_t(  1.2,  1.2, .8, .8,true));
+		obstacles.push_back(Rectangle_t( -1.2,  1.2, .8, .8,true));		
+		obstacles.push_back(Rectangle_t(  1.2, -1.2, .8, .8,true));		
+		obstacles.push_back(Rectangle_t( -1.2, -1.2, .8, .8,true));		
 
 	}
 	virtual ~two_link_acrobot_t(){}
@@ -58,6 +65,7 @@ public:
 	 * @copydoc system_t::valid_state()
 	 */
 	virtual bool valid_state();
+	virtual bool valid_state(double* state);
 
 	/**
 	 * @copydoc system_t::visualize_point(double*, svg::Dimensions)
@@ -67,6 +75,7 @@ public:
 protected:
 	double* deriv;
 	void update_derivative(double* control);
+	std::vector<Rectangle_t> obstacles;
 };
 
 

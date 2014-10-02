@@ -7,6 +7,7 @@ from math import pi, atan
 #import IPython
 
 def plot(states, parents, goal_path, obstacles, seconds, cost):
+    return
     #print goal_path
     
     plt.clf()
@@ -86,14 +87,19 @@ def plot(states, parents, goal_path, obstacles, seconds, cost):
             plt.plot(goal_path[0,i], goal_path[1,i], marker=(3,0,orientation*180/pi-90), markersize=10, color='g')
     
     plt.title('Cost: ' + str(cost))
+    plt.ylim(-10,10)
+    plt.xlim(-10,10)
 
     plt.show(block=False)
     plt.pause(.1)
     
+    save('pics/{0}_seconds'.format(seconds), 'pdf')
+
     # way to save the plot
     #save('figure_name', ext="png", close=False, verbose=False)
     
     # do pause in python so plot can be resized etc.
+    """
     pause = True
     if (pause):
         print("Type 'save' to save this figure into a pdf file as 'pics/<number of seconds>_seconds.pdf'")
@@ -101,7 +107,7 @@ def plot(states, parents, goal_path, obstacles, seconds, cost):
         user_says = raw_input()
         if user_says.strip() == 'save':
             save('pics/{0}_iters'.format(seconds), 'pdf')
-
+    """
        
 def save(path, ext='png', close=True, verbose=True):
     """Save a figure from pyplot.

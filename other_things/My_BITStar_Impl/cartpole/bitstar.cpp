@@ -54,6 +54,8 @@ U_GENERATOR *u_sampler;
 
 MatrixXd C_ellipse;
 
+std::vector<std::pair<double,double> > stats;
+
 // Cache useless SQP calls
 std::set< std::vector<double> > failedSQPCalls;
 
@@ -65,6 +67,8 @@ int num_sample_batches = 0;
 
 int num_failed_adds = 0;
 int num_failed_rewires = 0;
+
+std::vector<double> SQP_times;
 
 double max_speed = sqrt(125); // Hard coded for this example
 
@@ -134,18 +138,18 @@ void setup(int max_time, std::string& randomize, int batch_size, int stats_id) {
 
 	int d = 4;
 	VectorXd initial_state(d);
-	initial_state << 0, 0, 0, -4;
+	initial_state << 0, 0, M_PI, -.25;
 	VectorXd goal_state(d);
-	goal_state << 0, 0, M_PI, 4;
+	goal_state << 0, 0, M_PI, .25;
 
 	int num_obstacles = 3;
 	MatrixXd obstacles(4, num_obstacles);
-	//obstacles.col(0) << 0, .03, .5, .22;
-	//obstacles.col(1) << 0, .03, -.5, .22;
+	obstacles.col(0) << 0, .03, .5, .22;
+	obstacles.col(1) << 0, .03, -.5, .22;
 
-        obstacles.col(0) << -2, 2, -.5, .8;
-        obstacles.col(1) << 2, 2, -.5, .8;
-        obstacles.col(2) << 0, .6, .6, .6;
+        //obstacles.col(0) << -2, 2, -.5, .8;
+        //obstacles.col(1) << 2, 2, -.5, .8;
+        //obstacles.col(2) << 0, .6, .6, .6;
 
         //obstacles.col(0) << -2.5, 2, -.5, .8;
         //obstacles.col(1) << 2.5, 2, -.5, .8;
@@ -188,7 +192,7 @@ void setup(int max_time, std::string& randomize, int batch_size, int stats_id) {
 	update_C_ellipse_Matrix();
 
 	// Gamma
-	setup_values.gamma = 12; // Looked up thing in paper
+	setup_values.gamma = 20; // Looked up thing in paper
 
 	// Randomize argument
 	if (randomize == "true") {
@@ -204,16 +208,16 @@ void setup(int max_time, std::string& randomize, int batch_size, int stats_id) {
 	setup_values.obstacles = obstacles;
 
 	// Limits
-	setup_values.x_min = -10;
-	setup_values.x_max = 10;
-	setup_values.v_min = -10;
-	setup_values.v_max = 10;
+	setup_values.x_min = -5;
+	setup_values.x_max = 5;
+	setup_values.v_min = -5;
+	setup_values.v_max = 5;
 	setup_values.theta_min = 0;
 	setup_values.theta_max = 2*M_PI;
 	setup_values.w_min = -10;
 	setup_values.w_max = 10;
-	setup_values.u_min = -20;
-	setup_values.u_max = 20;
+	setup_values.u_min = -10;
+	setup_values.u_max = 10;
 
 	// Sampling stuff
 	if (setup_values.randomize) {
@@ -553,7 +557,7 @@ double c(Edge* e) {
 	bounds.x_min << setup_values.w_min, setup_values.v_min, setup_values.theta_min-2*M_PI, setup_values.x_min;
 	bounds.x_max << setup_values.w_max, setup_values.v_max, setup_values.theta_max+2*M_PI, setup_values.x_max;
 	bounds.delta_min = 0;
-	bounds.delta_max = .5; // I guess we are putting a max on delta
+	bounds.delta_max = .52; // I guess we are putting a max on delta
 	bounds.x_start = v->state;
 	bounds.x_goal = x->state;
 
@@ -585,20 +589,22 @@ double c(Edge* e) {
 
 	num_true_cost_calls++;
 
+	std:clock_t start = std::clock();
 	// Call SQP
-	int success = solve_cartpole_BVP(X, U, delta, bounds, !x->inV && !inSet(x,G));
+	int success = solve_cartpole_BVP(X, U, delta, bounds, /*false*/ !x->inV && !inSet(x,G));
+        SQP_times.push_back((std::clock() - start) / (double) CLOCKS_PER_SEC);
 
 	// If not success, say the cost is infinity
 	if (success == 0) {
 		if (!x->inV) {
-			std::cout << "ADDING STATE Unsuccessful...\n";
+			//std::cout << "ADDING STATE Unsuccessful...\n";
 			//std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start(0) << " " << bounds.x_start(1) << " " << bounds.x_start(2) << " " << bounds.x_start(3) << "\nGoal state:\n" << bounds.x_goal(0) << " " << bounds.x_goal(1) << " " << bounds.x_goal(2) << " " << bounds.x_goal(3) << "\n";
 			num_failed_adds++;
 		} else {
-			std::cout << "REWIRING Unsuccessful...\n";
+			//std::cout << "REWIRING Unsuccessful...\n";
 			num_failed_rewires++;
 		}		
-		std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start(0) << " " << bounds.x_start(1) << " " << bounds.x_start(2) << " " << bounds.x_start(3) << "\nGoal state:\n" << bounds.x_goal(0) << " " << bounds.x_goal(1) << " " << bounds.x_goal(2) << " " << bounds.x_goal(3) << "\n";
+		//std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start(0) << " " << bounds.x_start(1) << " " << bounds.x_start(2) << " " << bounds.x_start(3) << "\nGoal state:\n" << bounds.x_goal(0) << " " << bounds.x_goal(1) << " " << bounds.x_goal(2) << " " << bounds.x_goal(3) << "\n";
 		failedSQPCalls.insert(start_and_end_states);
 		return INFTY;
 	}
@@ -1100,6 +1106,7 @@ double BITStar() {
 					double old_cost = f_max;
 					f_max = costOfBestGoalNode(); // Best goal node is update here too
 					if (f_max < old_cost) {
+						stats.push_back(std::make_pair(f_max, ( std::clock() - start ) / (double) CLOCKS_PER_SEC ));
 						std::cout << "New goal cost: " << f_max << "\n";
 						//std::cout << "State of goal:\n" << goal_node->state << "\n";
 					}
@@ -1204,9 +1211,28 @@ int main(int argc, char* argv[]) {
 
 	std::cout << "Number of calls to true cost calculator: " << num_true_cost_calls << "\n";
 	std::cout << "Number of unique failed SQP calls: " << failedSQPCalls.size() << "\n";
+	std::cout << "As a percentage: " << ((double) failedSQPCalls.size())/num_true_cost_calls << "\n";
 	std::cout << "Number of failed adds: " << num_failed_adds << ", as a percentage: " << (double) num_failed_adds/failedSQPCalls.size() << "\n";
 	std::cout << "Number of failed rewires: " << num_failed_rewires << ", as a percentage: " << (double) num_failed_rewires/failedSQPCalls.size() << "\n";
 	std::cout << "Number of calls to signed distance checker: " << num_collision_check_calls << "\n";
 	std::cout << "Best path cost: " << path_length << "\n";
+
+	double avg = 0;
+	double std_dev = 0;
+	for (std::vector<double>::iterator it = SQP_times.begin(); it != SQP_times.end(); ++it) {
+		double n = *it;
+		avg += n;
+		std_dev += pow(n,2);
+	}
+	avg /= SQP_times.size();
+	std_dev = sqrt(std_dev/SQP_times.size());
+	std::cout << "Average call time for SQP: " << avg << "\n";
+	std::cout << "Standard deviation for call time for SQP: " << std_dev << "\n";
+
+	std::cout << "Stats:\n";
+	for(std::vector<std::pair<double,double> >::iterator it = stats.begin(); it != stats.end(); ++it) {
+		std::cout << it->first << " " << it->second << std::endl;
+	}
+
 	std::cout << "exiting\n";
 }

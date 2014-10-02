@@ -129,7 +129,7 @@ void sst_t::step()
 		}
 
 		// Write time, # of nodes, cost to file
-		std::ofstream outfile("SST_" + params::system + "_statistics_scene_" + std::to_string(params::scene_number) + "_" +std::to_string(params::stopping_check) + "_seconds.txt", std::ios::app);
+		std::ofstream outfile("SST_" + params::system + "_statistics_scene_" + std::to_string(params::scene_number) + "_" +std::to_string(params::stopping_check) + "_seconds_run_" + std::to_string(params::random_seed) + ".txt", std::ios::app);
 		if (outfile.is_open()) {
 			outfile << std::setprecision(10) << curr_time;
 			outfile << ", " << number_of_nodes;

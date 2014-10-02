@@ -63,10 +63,12 @@ int num_samples_pruned = 0;
 int num_vertices_pruned = 0;
 int num_sample_batches = 0;
 
+std::vector<double> SQP_times;
+
 double max_speed = sqrt(2); // Hard coded for this example
 
 inline double uniform(double low, double high) {
-	return (high - low)*(rand() / double(RAND_MAX)) + low;
+	return (high - low)*(*u_sampler)() + low;
 }
 
 // Cost of node from root of tree
@@ -201,8 +203,6 @@ void setup(int max_time, std::string& randomize, int batch_size, MatrixXd obstac
 	// To specifically seed it
 	if (randomize != "true" && randomize != "false") {
 		delete r_eng;
-		//std::cout << randomize << "\n";
-		//std::cout << randomize.c_str() << "\n";
 		r_eng = new RANDOM_ENGINE(atoi(randomize.c_str())); // seed
 	};
 
@@ -503,8 +503,10 @@ double c(Edge* e) {
 	// Initialize pointer to time variable, delta
 	double delta = 1;
 
+	std::clock_t start = std::clock();
 	// Call SQP (Redundant call, whatever. fix later)
 	int success = solve_double_integrator_BVP(X, U, delta, bounds);
+	SQP_times.push_back((std::clock() - start) / (double) CLOCKS_PER_SEC);
 
 	// If not success, say the cost is infinity
 	if (success == 0) {
@@ -662,6 +664,8 @@ void sample_batch() {
 
 	int num_samples = 0;
 	VectorXd x_center = (setup_values.initial_state + goal_node->state)/2.0;
+
+	best_cost *= max_speed;
 
 	// Create L matrix from bigger radius
 	MatrixXd L(setup_values.dimension, setup_values.dimension);
@@ -1130,5 +1134,19 @@ int main(int argc, char* argv[]) {
 	std::cout << "Number of calls to true cost calculator: " << num_true_cost_calls << "\n";
 	std::cout << "Number of calls to signed distance checker: " << num_collision_check_calls << "\n";
 	std::cout << "Best path cost: " << path_length << "\n";
+
+	// Average and std for SQP calls
+	double avg = 0;
+	double std_dev = 0;
+	for (std::vector<double>::iterator it = SQP_times.begin(); it != SQP_times.end(); it++) {
+		double n = *it;
+		avg += n;
+		std_dev += pow(n,2);
+	}
+	avg /= SQP_times.size();
+	std_dev = sqrt(std_dev/SQP_times.size());
+	std::cout << "Average call time for SQP: " << avg << "\n";
+	std::cout << "Standard deviation call time for SQP: " << std_dev << "\n";
+	
 	std::cout << "exiting\n";
 }

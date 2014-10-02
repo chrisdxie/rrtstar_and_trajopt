@@ -23,6 +23,17 @@ struct cartpole_parameters {
 	double ch; // cart height
 };
 
+struct acrobot_parameters {
+	double g;  // Alway 9.81
+	double m;
+	double l;
+	double l2;
+	double lc;
+	double lc2; // lc^2
+	double I1;
+	double I2; 
+};
+
 namespace dynamics_library {
 
 	/*
@@ -62,6 +73,15 @@ namespace dynamics_library {
 	 *  The return value is z_dot.
 	 */
 	VectorXd continuous_cartpole_dynamics(VectorXd z, VectorXd u);
+
+
+	acrobot_parameters acrobot_params;
+
+	void set_acrobot_parameters(double m, double l, double l2, double lc, double lc2, double I1, double I2);
+
+	VectorXd continuous_acrobot_dynamics(VectorXd z, VectorXd u);
+
+
 
 	/*
 	 *  This function is a function to calculate the derivative of given a state

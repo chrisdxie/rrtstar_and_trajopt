@@ -14,7 +14,7 @@ using namespace dynamics_library;
 
 #define INFTY 1e10
 
-#define TIMESTEPS 12
+#define TIMESTEPS 8
 const int T = TIMESTEPS;
 
 #define X_DIM 4

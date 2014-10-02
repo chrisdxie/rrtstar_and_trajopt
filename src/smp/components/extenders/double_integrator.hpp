@@ -79,7 +79,8 @@ double extend_with_time_optimal_control_one_axis (double s_ini[2], double s_fin[
       // ===== Consistency check === TODO: Remove this later ====
       if ( (v_intersect_1 < VELOCITY_CONSTRAINT_MIN - 0.1) ) {
 	cout << "ERR: Velocity constraint is not met :" <<  v_intersect_1 << endl;
-	exit (1);
+  return -1;
+	//exit (1);
       }
       // =====
             
@@ -130,7 +131,8 @@ double extend_with_time_optimal_control_one_axis (double s_ini[2], double s_fin[
       // ===== Consistency check === TODO: Remove this later ====
       if ( (v_intersect_2 > VELOCITY_CONSTRAINT_MAX + 0.1) ) {
 	cout << "ERR: Velocity constraint is not met :n" <<  v_intersect_2 << endl;
-	exit (1);
+  return -1;
+	//exit (1);
       }
       // =====
             
@@ -226,6 +228,10 @@ int extend_with_effort_optimal_control_one_axis (double s_ini[2], double s_fin[2
 							dir, traj_saturated, 
 							x_intersect_beg, x_intersect_end, v_intersect);
 	
+    if (t_curr == -1) {
+      return 0;
+    }
+
     if ( t_curr < t_goal ) {   // decrease the control effort
       u_curr -= u_diff;
     }
@@ -288,6 +294,10 @@ int smp::extender_double_integrator<typeparams,NUM_DIMENSIONS>
 							      &direction_a1, &traj_saturated_a1,
 							      &x_intersect_beg_a1, &x_intersect_end_a1, &v_intersect_a1);
 
+  if (time_a1 == -1) {
+    return 0;
+  }
+
   double s_ini_a2[2] = {
     (*state_ini)[1],
     (*state_ini)[3]
@@ -304,6 +314,10 @@ int smp::extender_double_integrator<typeparams,NUM_DIMENSIONS>
   double time_a2 = extend_with_time_optimal_control_one_axis (s_ini_a2, s_fin_a2, INPUT_CONSTRAINT_MAX,
 							      &direction_a2, &traj_saturated_a2,
 							      &x_intersect_beg_a2, &x_intersect_end_a2, &v_intersect_a2);
+
+  if (time_a2 == -1) {
+    return 0;
+  }
 
   double max_control_a1 = INPUT_CONSTRAINT_MAX;
   double max_control_a2 = INPUT_CONSTRAINT_MAX;

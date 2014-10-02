@@ -44,7 +44,6 @@ def cartplot(states, cart_width, cart_height, pole_length):
     raw_input()
 
 def plot(states, obstacles, seconds, cost, cart_width, cart_height, pole_length):
-
     print states
     
     plt.clf()

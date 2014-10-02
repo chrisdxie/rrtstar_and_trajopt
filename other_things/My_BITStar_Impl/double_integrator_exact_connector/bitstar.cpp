@@ -63,6 +63,8 @@ int num_samples_pruned = 0;
 int num_vertices_pruned = 0;
 int num_sample_batches = 0;
 
+std::vector<double> exact_connect_times;
+
 double max_speed = sqrt(2); // Hard coded for this example
 
 inline double uniform(double low, double high) {
@@ -486,8 +488,10 @@ double c(Edge* e) {
 	// Initialize pointer to time variable, delta
 	int exact_connection = 1;
 
+	std::clock_t start = std::clock();
 	// Call SQP (Redundant call, whatever. fix later)
 	int success = extend(v->state, x->state, &exact_connection, X, U);
+	exact_connect_times.push_back((std::clock() - start)/ (double) CLOCKS_PER_SEC);
 
 	// If not success, say the cost is infinity
 	if (success == 0) {
@@ -1126,5 +1130,20 @@ int main(int argc, char* argv[]) {
 	std::cout << "Number of calls to true cost calculator: " << num_true_cost_calls << "\n";
 	std::cout << "Number of calls to signed distance checker: " << num_collision_check_calls << "\n";
 	std::cout << "Best path cost: " << path_length << "\n";
+
+	// Average and std for exact connector calls
+	double avg = 0;
+	double std_dev = 0;
+	for (std::vector<double>::iterator it = exact_connect_times.begin(); it != exact_connect_times.end(); it++) {
+		double n = *it;
+		avg += n;
+		std_dev += pow(n,2);
+	}
+	avg /= exact_connect_times.size();
+	std_dev = sqrt(std_dev/exact_connect_times.size());
+        std::cout << "Average call time for exact connector: " << std::setprecision(10) << avg << "\n";
+        std::cout << "Standard deviation call time for exact connector: " << std::setprecision(10) << std_dev << "\n";
+
+
 	std::cout << "exiting\n";
 }
