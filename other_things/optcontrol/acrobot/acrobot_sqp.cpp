@@ -613,7 +613,6 @@ int main(int argc, char* argv[]) {
 	bounds.x_goal = x_goal;
 	bounds.x_start = x_start;
 
-	// Taken from PILCO manual
 	double m = 1.0;
 	double l = 1.0;
 	double l2 = 1.0;

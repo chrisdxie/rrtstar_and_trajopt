@@ -29,6 +29,7 @@
 
 #include "../../My_BITStar_Impl/cartpole/plot_bitstar.h"
 #include "../../My_BITStar_Impl/double_integrator/plot_bitstar.h"
+#include "../../My_BITStar_Impl/acrobot/plot_bitstar.h"
 
 int main(int ac, char* av[])
 {
@@ -198,26 +199,22 @@ int main(int ac, char* av[])
 
 					// Hard code some of the parameters, whatevs
 					cp_plot(plotter, goal_path_np, obstacles_np, checker.iterations(), solution_cost, .4, .15, .5);
-				} else if (params::system=="rally_car") {
+				} else if (params::system=="two_link_acrobot") {
 
-					py::object plotter = di_init_display(); // Initialize python interpreter and pyplot plot 					
+					py::object plotter = ac_init_display(); // Initialize python interpreter and pyplot plot 					
 
 					// Convert Eigen matrices and vectors to Numpy ND arrays
-					np::ndarray states_np = di_eigen_to_ndarray(planner->tree_to_matrix_states());
-					np::ndarray parents_np = di_eigen_to_ndarray(planner->tree_to_matrix_parents());
-					np::ndarray goal_path_np = di_eigen_to_ndarray(planner->get_solution_path());
+					np::ndarray goal_path_np = ac_eigen_to_ndarray(planner->get_solution_path());
 					//std::cout << "Solution:\n" << (planner->get_solution_path()).transpose() << "\n";
 
 					// Hard code obstacles
-					MatrixXd obstacles(4,6);
-					obstacles.col(0) << 0, 42, 20.5, 1;
-					obstacles.col(1) << 20.5, 1, -5.5, 53;
-					obstacles.col(2) << 9.5, 1, -16, 32;
-					obstacles.col(3) << 15, 12, -32.5, 1;
-					obstacles.col(4) << -9.5, 1, -16, 32;
-					obstacles.col(5) << -20.5, 1, -5.5, 53;
-					np::ndarray obstacles_np = di_eigen_to_ndarray(obstacles);
-					di_plot(plotter, states_np, parents_np, goal_path_np, obstacles_np, params::stopping_check, solution_cost);					
+					MatrixXd obstacles(4,4);
+					obstacles.col(0) <<  1.2, .8,  1.2, .8;
+					obstacles.col(1) << -1.2, .8,  1.2, .8;
+					obstacles.col(2) <<  1.2, .8, -1.2, .8;
+					obstacles.col(3) << -1.2, .8, -1.2, .8;
+					np::ndarray obstacles_np = ac_eigen_to_ndarray(obstacles);
+					ac_plot(plotter, goal_path_np, obstacles_np, params::stopping_check, solution_cost, 1);
 				}
 
 				/*

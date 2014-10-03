@@ -1,9 +1,9 @@
-#ifndef CARTPOLE_SQP_HPP_
-#define CARTPOLE_SQP_HPP_
+#ifndef ACROBOT_SQP_HPP_
+#define ACROBOT_SQP_HPP_
 
 extern "C" {
-#include "cartpole_QP_solver.h"
-cartpole_QP_solver_FLOAT **f, **lb, **ub, **C, **e, **z;
+#include "acrobot_QP_solver.h"
+acrobot_QP_solver_FLOAT **f, **lb, **ub, **C, **e, **z;
 }
 
 #include <iostream>
@@ -17,7 +17,7 @@ using namespace dynamics_library;
 
 #define INFTY 1e10
 
-#define TIMESTEPS 8
+#define TIMESTEPS 10
 const int T = TIMESTEPS;
 
 #define X_DIM 4
@@ -40,7 +40,7 @@ const double improve_ratio_threshold = .1;
 const double min_approx_improve = 1e-4;
 const double min_trust_box_size = 1e-3;
 const double trust_shrink_ratio = .5;
-const double trust_expand_ratio = 1.5;
+const double trust_expand_ratio = 1.25;
 const double cnt_tolerance = 1e-5;
 const double penalty_coeff_increase_ratio = 10;
 const double initial_penalty_coeff = 1;
@@ -78,19 +78,19 @@ inline void fill_col_major(double *X, const MatrixXd& XMat) {
 	}
 }
 
-void setup_state_vars(cartpole_QP_solver_params& problem, cartpole_QP_solver_output& output)
+void setup_state_vars(acrobot_QP_solver_params& problem, acrobot_QP_solver_output& output)
 {
 
 	/* Initialize problem inputs and outputs as double arrays */
 	// problem inputs
-	f = new cartpole_QP_solver_FLOAT*[T-1];
-	lb = new cartpole_QP_solver_FLOAT*[T];
-	ub = new cartpole_QP_solver_FLOAT*[T];
-	C = new cartpole_QP_solver_FLOAT*[T-1];
-	e = new cartpole_QP_solver_FLOAT*[T-1];
+	f = new acrobot_QP_solver_FLOAT*[T-1];
+	lb = new acrobot_QP_solver_FLOAT*[T];
+	ub = new acrobot_QP_solver_FLOAT*[T];
+	C = new acrobot_QP_solver_FLOAT*[T-1];
+	e = new acrobot_QP_solver_FLOAT*[T-1];
 
 	// problem outputs
-	z = new cartpole_QP_solver_FLOAT*[T];
+	z = new acrobot_QP_solver_FLOAT*[T];
 
 	/* Link them via boost to something, IDK how this works */
 #define SET_VARS(n) \
@@ -239,21 +239,23 @@ void fill_lb_and_ub(StdVectorX& X, StdVectorU& U, double& delta, double trust_bo
 
 	VectorXd lbT_temp(X_DIM+1);
 	VectorXd ubT_temp(X_DIM+1);
-	if (free_velocity) { // Don't confine velocity end state
-		lbT_temp(0) = MAX(bounds.x_min(0), xT[0] - trust_box_size);
-		ubT_temp(0) = MIN(bounds.x_max(0), xT[0] + trust_box_size);
-		lbT_temp(1) = MAX(bounds.x_min(1), xT[1] - trust_box_size);
-		ubT_temp(1) = MIN(bounds.x_max(1), xT[1] + trust_box_size);
-		for(int i = 2; i < X_DIM; ++i) {
-			lbT_temp(i) = MAX(bounds.x_goal(i) - eps, xT[i] - trust_box_size);
-			ubT_temp(i) = MIN(bounds.x_goal(i) + eps, xT[i] + trust_box_size);
-		}
-	} else { // Confine velocity end state, for rewirings and connecting to goal states
-		for(int i = 0; i < X_DIM; ++i) {
-			lbT_temp(i) = MAX(bounds.x_goal(i) - eps, xT[i] - trust_box_size);
-			ubT_temp(i) = MIN(bounds.x_goal(i) + eps, xT[i] + trust_box_size);
-		}
-	}
+
+        if (free_velocity) { // Don't confine velocity end state
+                lbT_temp(2) = MAX(bounds.x_min(0), xT[0] - trust_box_size);
+                ubT_temp(2) = MIN(bounds.x_max(0), xT[0] + trust_box_size);
+                lbT_temp(3) = MAX(bounds.x_min(1), xT[1] - trust_box_size);
+                ubT_temp(3) = MIN(bounds.x_max(1), xT[1] + trust_box_size);
+                for(int i = 0; i < 2; ++i) {
+                        lbT_temp(i) = MAX(bounds.x_goal(i) - eps, xT[i] - trust_box_size);
+                        ubT_temp(i) = MIN(bounds.x_goal(i) + eps, xT[i] + trust_box_size);
+                }
+        } else { // Confine velocity end state, for rewirings and connecting to goal states
+                for(int i = 0; i < X_DIM; ++i) {
+                        lbT_temp(i) = MAX(bounds.x_goal(i) - eps, xT[i] - trust_box_size);
+                        ubT_temp(i) = MIN(bounds.x_goal(i) + eps, xT[i] + trust_box_size);
+                }
+        }
+
 	lbT_temp(X_DIM) = MAX(bounds.delta_min, delta - trust_box_size);
 	ubT_temp(X_DIM) = MIN(bounds.delta_max, delta + trust_box_size);
 
@@ -268,7 +270,7 @@ void fill_in_C_and_e(StdVectorX& X, StdVectorU& U, double& delta, double trust_b
 	VectorU& u0 = U[0];
 
 	VectorX xt1;
-	Matrix<double, X_DIM, X_DIM+U_DIM+1> jac = numerical_jacobian(continuous_cartpole_dynamics, x0, u0, delta);
+	Matrix<double, X_DIM, X_DIM+U_DIM+1> jac = numerical_jacobian(continuous_acrobot_dynamics, x0, u0, delta);
 	Matrix<double, X_DIM, X_DIM> DH_X = jac.leftCols(X_DIM);
 	Matrix<double, X_DIM, U_DIM> DH_U = jac.middleCols(X_DIM, U_DIM);
 	Matrix<double, X_DIM, 1> DH_delta = jac.rightCols(1);
@@ -289,7 +291,7 @@ void fill_in_C_and_e(StdVectorX& X, StdVectorU& U, double& delta, double trust_b
 
 	fill_col_major(C[0], C0_temp);
 
-	xt1 = rk4(continuous_cartpole_dynamics, x0, u0, delta);
+	xt1 = rk4(continuous_acrobot_dynamics, x0, u0, delta);
 
 	e0_temp.setZero();
 	e0_temp.head(X_DIM) = bounds.x_start;
@@ -305,8 +307,8 @@ void fill_in_C_and_e(StdVectorX& X, StdVectorU& U, double& delta, double trust_b
 		VectorX& xt = X[t];
 		VectorU& ut = U[t];
 
-		xt1 = rk4(continuous_cartpole_dynamics, xt, ut, delta);
-		jac = numerical_jacobian(continuous_cartpole_dynamics, xt, ut, delta);
+		xt1 = rk4(continuous_acrobot_dynamics, xt, ut, delta);
+		jac = numerical_jacobian(continuous_acrobot_dynamics, xt, ut, delta);
 		DH_X = jac.leftCols(X_DIM);
 		DH_U = jac.middleCols(X_DIM, U_DIM);
 		DH_delta = jac.rightCols(1);
@@ -344,7 +346,7 @@ double computeObjective(double& delta, StdVectorX& X, StdVectorU& U) {
 double computeMerit(double& delta, StdVectorX& X, StdVectorU& U, double penalty_coeff) {
 	double merit = computeObjective(delta, X, U);
 	for(int t = 0; t < T-1; ++t) {
-		VectorXd hval = dynamics_difference(continuous_cartpole_dynamics, X[t], X[t+1], U[t], delta);
+		VectorXd hval = dynamics_difference(continuous_acrobot_dynamics, X[t], X[t+1], U[t], delta);
 		merit += penalty_coeff*(hval.cwiseAbs()).sum();
 	}
 	return merit;
@@ -352,7 +354,7 @@ double computeMerit(double& delta, StdVectorX& X, StdVectorU& U, double penalty_
 
 
 bool minimize_merit_function(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bounds, double penalty_coeff,
-		cartpole_QP_solver_params& problem, cartpole_QP_solver_output& output, cartpole_QP_solver_info& info) {
+		acrobot_QP_solver_params& problem, acrobot_QP_solver_output& output, acrobot_QP_solver_info& info) {
 
 	// Initialize trust box size
 	double trust_box_size;
@@ -395,7 +397,7 @@ bool minimize_merit_function(StdVectorX& X, StdVectorU& U, double& delta, bounds
 			}
 
 			// call FORCES
-			int exitflag = cartpole_QP_solver_solve(&problem, &output, &info);
+			int exitflag = acrobot_QP_solver_solve(&problem, &output, &info);
 			if (exitflag == 1) {
 				optcost = info.pobj;
 				deltaopt = z[0][X_DIM]; // Hard coded, I know the index of this
@@ -464,37 +466,40 @@ bool minimize_merit_function(StdVectorX& X, StdVectorU& U, double& delta, bounds
 }
 
 bool penalty_sqp(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bounds,
-		cartpole_QP_solver_params& problem, cartpole_QP_solver_output& output, cartpole_QP_solver_info& info) {
+		acrobot_QP_solver_params& problem, acrobot_QP_solver_output& output, acrobot_QP_solver_info& info) {
 	double penalty_coeff = cfg::initial_penalty_coeff;
 	int penalty_increases = 0;
 
-	prev_delta = delta;
+        prev_delta = delta;
 
-	bool success = true;
+        bool success = true;
 
-	while(penalty_increases < cfg::max_penalty_coeff_increases) {
-		success = minimize_merit_function(X, U, delta, bounds, penalty_coeff, problem, output, info);
+	double constraint_violation = (computeMerit(delta, X, U, penalty_coeff) - computeObjective(delta, X, U))/penalty_coeff;
+	LOG_INFO("Initial constraint violation: %.5f\n", constraint_violation);
 
-		if (!success) {
-			LOG_ERROR("Merit function not minimized successfully\n");
-			break;
-		}
+        while(penalty_increases < cfg::max_penalty_coeff_increases) {
+                success = minimize_merit_function(X, U, delta, bounds, penalty_coeff, problem, output, info);
 
-		double constraint_violation = (computeMerit(delta, X, U, penalty_coeff) - computeObjective(delta, X, U))/penalty_coeff;
-		LOG_INFO("Constraint violation: %.5f\n", constraint_violation);
+                if (!success) {
+                        LOG_ERROR("Merit function not minimized successfully\n");
+                        break;
+                }
 
-		if (constraint_violation <= cfg::cnt_tolerance) {
-			break;
-		} else if (constraint_violation > .5 && penalty_increases == 0) {
+                constraint_violation = (computeMerit(delta, X, U, penalty_coeff) - computeObjective(delta, X, U))/penalty_coeff;
+                LOG_INFO("Constraint violation: %.5f\n", constraint_violation);
 
-			if (delta > bounds.delta_max) {
-				LOG_ERROR("Delta exceeds maximum allowed.\n");
-				success = false;
-				break;
-			}
+                if (constraint_violation <= cfg::cnt_tolerance) {
+                        break;
+                } else if (constraint_violation > .5 && penalty_increases == 0) {
 
-			delta = prev_delta + 0.1;
-			prev_delta = delta;
+                        if (delta > bounds.delta_max) {
+                                LOG_ERROR("Delta exceeds maximum allowed.\n");
+                                success = false;
+                                break;
+                        }
+
+                        delta = prev_delta + 0.1;
+                        prev_delta = delta;
 
 			Matrix<double, X_DIM, T> init;
 			for(int i = 0; i < X_DIM; ++i) {
@@ -525,26 +530,25 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bounds,
 
 		// warm start?
 		for(int t = 0; t < T-2; ++t) {
-			X[t+1] = rk4(continuous_cartpole_dynamics, X[t], U[t], delta);
+			X[t+1] = rk4(continuous_acrobot_dynamics, X[t], U[t], delta);
 		}
 	}
 
 	return success;
 }
 
-int solve_cartpole_BVP(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bounds, bool free_vels) {
+int solve_acrobot_BVP(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bounds, bool free_vels) {
 
 	free_velocity = free_vels;
 
-	cartpole_QP_solver_params problem;
-	cartpole_QP_solver_output output;
-	cartpole_QP_solver_info info;
+	acrobot_QP_solver_params problem;
+	acrobot_QP_solver_output output;
+	acrobot_QP_solver_info info;
 	setup_state_vars(problem, output);
 
 	// Smart initialization
 	//delta = std::min((bounds.x_start - bounds.x_goal).norm()/10, .5);
 	delta = 0.01;
-	//std::cout << "Initial delta: " << delta << "\n";
 
 	// Initialize X variable
 	Matrix<double, X_DIM, T> init;
@@ -568,7 +572,6 @@ int solve_cartpole_BVP(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bou
 	cleanup_state_vars();
 
 	if (success) {
-		// std::cout << "Final state:\n" << X[T-1] << "\n";
 		return 1;
 	} else {
 		return 0;
@@ -576,5 +579,4 @@ int solve_cartpole_BVP(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bou
 
 }
 
-#endif /* CARTPOLE_SQP_HPP_ */
-
+#endif
