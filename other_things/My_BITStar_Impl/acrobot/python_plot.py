@@ -8,7 +8,7 @@ from math import pi, atan, cos, sin
 
 # State is: [theta1, theta2, theta1_dot, theta2_dot]
 
-def plot(states, obstacles, seconds, cost, length):
+def plot(states, obstacles, seconds, cost, length, id_num):
     print states
     
     plt.clf()
@@ -58,13 +58,14 @@ def plot(states, obstacles, seconds, cost, length):
 
     plt.title('Cost: ' + str(cost))
 
-    plt.show(block=False)
+    #plt.show(block=False)
     plt.pause(.1)
     
     # way to save the plot
-    #save('figure_name', ext="png", close=False, verbose=False)
+    save('pics/{0}_seconds_{1}'.format(seconds, id_num), ext="png", close=False, verbose=False)
     
     # do pause in python so plot can be resized etc.
+    """
     pause = True
     if (pause):
         print("Type 'save' to save this figure into a pdf file as 'pics/<number of seconds>_seconds.pdf'")
@@ -72,6 +73,7 @@ def plot(states, obstacles, seconds, cost, length):
         user_says = raw_input()
         if user_says.strip() == 'save':
             save('pics/{0}_seconds'.format(seconds), 'pdf')
+    """
 
        
 def save(path, ext='png', close=True, verbose=True):

@@ -61,11 +61,11 @@ py::object ac_init_display() {
 	return plotter;
 }
 
-void ac_plot(py::object& plotter, np::ndarray& goal_path, np::ndarray& obstacles, int seconds, double cost, double length) {
+void ac_plot(py::object& plotter, np::ndarray& goal_path, np::ndarray& obstacles, int seconds, double cost, double length, int id) {
 	
 	try {
 		// pass control to python now
-		plotter(goal_path, obstacles, seconds, cost, length);
+		plotter(goal_path, obstacles, seconds, cost, length, id);
 	}
 	catch(py::error_already_set const &) {
 		// will pass python errors to cpp for printing

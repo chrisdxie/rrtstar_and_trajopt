@@ -208,13 +208,11 @@ int main(int ac, char* av[])
 					//std::cout << "Solution:\n" << (planner->get_solution_path()).transpose() << "\n";
 
 					// Hard code obstacles
-					MatrixXd obstacles(4,4);
+					MatrixXd obstacles(4,2);
 					obstacles.col(0) <<  1.2, .8,  1.2, .8;
 					obstacles.col(1) << -1.2, .8,  1.2, .8;
-					obstacles.col(2) <<  1.2, .8, -1.2, .8;
-					obstacles.col(3) << -1.2, .8, -1.2, .8;
 					np::ndarray obstacles_np = ac_eigen_to_ndarray(obstacles);
-					ac_plot(plotter, goal_path_np, obstacles_np, params::stopping_check, solution_cost, 1);
+					ac_plot(plotter, goal_path_np, obstacles_np, params::stopping_check, solution_cost, 1, params::scene_number);
 				}
 
 				/*

@@ -46,8 +46,8 @@ using namespace Eigen;
 #define MAX_V_1 6
 #define MIN_V_2 -6
 #define MAX_V_2 6
-#define MIN_T -4
-#define MAX_T 4
+#define MIN_T -8
+#define MAX_T 8
 
 VectorXd _rk4(VectorXd (*f)(VectorXd, VectorXd),
         VectorXd x, VectorXd u, double delta) {

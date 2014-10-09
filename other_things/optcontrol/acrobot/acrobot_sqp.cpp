@@ -36,12 +36,12 @@ namespace cfg {
 const double improve_ratio_threshold = .1;
 const double min_approx_improve = 1e-4;
 const double min_trust_box_size = 1e-3;
-const double trust_shrink_ratio = .5;
-const double trust_expand_ratio = 1.25;
+const double trust_shrink_ratio = .6;
+const double trust_expand_ratio = 1.3;
 const double cnt_tolerance = 1e-5;
 const double penalty_coeff_increase_ratio = 10;
-const double initial_penalty_coeff = 1;
-const double initial_trust_box_size = 10;
+const double initial_penalty_coeff = 10;
+const double initial_trust_box_size = 4;
 const int max_penalty_coeff_increases = 3;
 const int max_sqp_iterations = 100;
 }
@@ -60,7 +60,6 @@ struct bounds_t {
 	VectorX x_goal;
 };
 
-double prev_delta;
 bool free_velocity;
 
 // fill in X in column major format with matrix XMat
@@ -467,7 +466,7 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bounds,
 	double penalty_coeff = cfg::initial_penalty_coeff;
 	int penalty_increases = 0;
 
-        prev_delta = delta;
+        double prev_delta = delta;
 
         bool success = true;
 
@@ -489,14 +488,14 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bounds,
                         break;
                 } else if (constraint_violation > .5 && penalty_increases == 0) {
 
+			delta = prev_delta + 0.05;
+			prev_delta = delta;
+
                         if (delta > bounds.delta_max) {
                                 LOG_ERROR("Delta exceeds maximum allowed.\n");
                                 success = false;
                                 break;
                         }
-
-                        delta = prev_delta + 0.1;
-                        prev_delta = delta;
 
 			Matrix<double, X_DIM, T> init;
 			for(int i = 0; i < X_DIM; ++i) {
@@ -604,8 +603,8 @@ int main(int argc, char* argv[]) {
 	// Init bounds
 	bounds_t bounds;
 
-	bounds.u_min << -4;
-	bounds.u_max << 4;
+	bounds.u_min << -8;
+	bounds.u_max << 8;
 	bounds.x_min << -8*M_PI, -8*M_PI, -6, -6;
 	bounds.x_max << 8*M_PI, 8*M_PI, 6, 6;
 	bounds.delta_min = 0;

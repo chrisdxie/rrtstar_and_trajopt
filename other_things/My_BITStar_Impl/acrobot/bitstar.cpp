@@ -208,8 +208,8 @@ void setup(int max_time, std::string& randomize, int batch_size, int stats_id) {
 	setup_values.theta1_dot_max = 6;
 	setup_values.theta2_dot_min = -6;
 	setup_values.theta2_dot_max = 6;
-	setup_values.u_min = -4;
-	setup_values.u_max = 4;
+	setup_values.u_min = -8;
+	setup_values.u_max = 8;
 
 	// Sampling stuff
 	if (setup_values.randomize) {
@@ -518,7 +518,7 @@ double c(Edge* e) {
 	bounds.x_min << -8*M_PI, -8*M_PI, setup_values.theta1_dot_min, setup_values.theta2_dot_min;
 	bounds.x_max <<  8*M_PI,  8*M_PI, setup_values.theta1_dot_max, setup_values.theta2_dot_max;
 	bounds.delta_min = 0;
-	bounds.delta_max = .52; // I guess we are putting a max on delta
+	bounds.delta_max = .5; // I guess we are putting a max on delta
 	bounds.x_start = v->state;
 	bounds.x_goal = x->state;
 
@@ -555,20 +555,20 @@ double c(Edge* e) {
 
 	std::clock_t start = std::clock();
 	// Call SQP
-	int success = solve_acrobot_BVP(X, U, delta, bounds, /*false*/ !x->inV && !inSet(x,G));
+	int success = solve_acrobot_BVP(X, U, delta, bounds, false /*!x->inV && !inSet(x,G)*/);
         SQP_times.push_back((std::clock() - start) / (double) CLOCKS_PER_SEC);
 
 	// If not success, say the cost is infinity
 	if (success == 0) {
 		if (!x->inV) {
-			std::cout << "ADDING STATE Unsuccessful...\n";
+			//std::cout << "ADDING STATE Unsuccessful...\n";
 			//std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start(0) << " " << bounds.x_start(1) << " " << bounds.x_start(2) << " " << bounds.x_start(3) << "\nGoal state:\n" << bounds.x_goal(0) << " " << bounds.x_goal(1) << " " << bounds.x_goal(2) << " " << bounds.x_goal(3) << "\n";
 			num_failed_adds++;
 		} else {
-			std::cout << "REWIRING Unsuccessful...\n";
+			//std::cout << "REWIRING Unsuccessful...\n";
 			num_failed_rewires++;
 		}		
-		std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start(0) << " " << bounds.x_start(1) << " " << bounds.x_start(2) << " " << bounds.x_start(3) << "\nGoal state:\n" << bounds.x_goal(0) << " " << bounds.x_goal(1) << " " << bounds.x_goal(2) << " " << bounds.x_goal(3) << "\n";
+		//std::cout << "Unsuccessful...\nStart state:\n" << bounds.x_start(0) << " " << bounds.x_start(1) << " " << bounds.x_start(2) << " " << bounds.x_start(3) << "\nGoal state:\n" << bounds.x_goal(0) << " " << bounds.x_goal(1) << " " << bounds.x_goal(2) << " " << bounds.x_goal(3) << "\n";
 		failedSQPCalls.insert(start_and_end_states);
 		return INFTY;
 	}
@@ -590,12 +590,12 @@ double c(Edge* e) {
 		x->state(3) = X[T-1](3,0); 
 	}
 	if (!x->inV) {
-		std::cout << "ADDING STATE Successful!!!\n";
+		//std::cout << "ADDING STATE Successful!!!\n";
 		//std::cout << "Successful...\nStart state:\n" << bounds.x_start(0) << " " << bounds.x_start(1) << " " << bounds.x_start(2) << " " << bounds.x_start(3) << "\nGoal state:\n" << bounds.x_goal(0) << " " << bounds.x_goal(1) << " " << bounds.x_goal(2) << " " << bounds.x_goal(3) << "\n";
 	} else {
-		std::cout << "REWIRING Successful!!!\n";
+		//std::cout << "REWIRING Successful!!!\n";
 	}	
-	std::cout << "Start state:\n" << bounds.x_start << "\nGoal state:\n" << bounds.x_goal << "\n";
+	//std::cout << "Start state:\n" << bounds.x_start << "\nGoal state:\n" << bounds.x_goal << "\n";
 
 	StdVectorX allButLastState(X.begin(), X.begin()+T-1);
 	e->states = allButLastState;
@@ -1003,7 +1003,7 @@ double BITStar() {
 
 	while (true) {
 
-		if (k % 100 == 0) {
+		if (k % 10 == 0) {
 			std::cout << "Iteration: " << k << "\n";
 			std::cout << "Size of sample set: " << X_sample.size() << "\n";
 			std::cout << "Size of vertex set: " << V.size() << "\n";
@@ -1140,7 +1140,7 @@ double BITStar() {
 		np::ndarray obstacles_np = ac_eigen_to_ndarray(setup_values.obstacles);
 
 		std::cout << "Plotting...\n";
-		ac_plot(plotter, goal_path_np, obstacles_np, setup_values.max_time, g_T(goal_node), acrobot_params.l);
+		ac_plot(plotter, goal_path_np, obstacles_np, setup_values.max_time, g_T(goal_node), acrobot_params.l, setup_values.stats_id);
 
 	}
 	return g_T(goal_node);

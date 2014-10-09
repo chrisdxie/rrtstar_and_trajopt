@@ -30,8 +30,6 @@ public:
 		// Just barely cover the edge of the circle
 		obstacles.push_back(Rectangle_t(  1.2,  1.2, .8, .8,true));
 		obstacles.push_back(Rectangle_t( -1.2,  1.2, .8, .8,true));		
-		obstacles.push_back(Rectangle_t(  1.2, -1.2, .8, .8,true));		
-		obstacles.push_back(Rectangle_t( -1.2, -1.2, .8, .8,true));		
 
 	}
 	virtual ~two_link_acrobot_t(){}
