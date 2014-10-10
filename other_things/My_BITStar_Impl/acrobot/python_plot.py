@@ -9,7 +9,7 @@ from math import pi, atan, cos, sin
 # State is: [theta1, theta2, theta1_dot, theta2_dot]
 
 def plot(states, obstacles, seconds, cost, length, id_num):
-    print states
+    #print states
     
     plt.clf()
     plt.cla()

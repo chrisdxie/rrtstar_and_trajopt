@@ -96,6 +96,13 @@ VectorXd _continuous_acrobot_dynamics(VectorXd z, VectorXd u) {
     double theta1dot_dot = (d22 * (u1 - c1 - g1) - d12 * (u2 - c2 - g2)) / (d11 * d22 - d12 * d21);
     double theta2dot_dot = (d11 * (u2 - c2 - g2) - d21 * (u1 - c1 - g1)) / (d11 * d22 - d12 * d21);
 
+    //std::cout << "SST: " << theta1dot_dot << " " << theta2dot_dot << "\n"; 
+
+    double _theta1dot_dot = (-d12 * (_tau - c2 - g2) - d22 * (c1 + g1)) / (d11 * d22 - d12 * d12); 
+    double _theta2dot_dot = (d11 * (_tau - c2 - g2) + d12 * (c1 + g1)) / (d11 * d22 - d12 * d12);
+
+    //std::cout << "GAT: " << _theta1dot_dot << " " << _theta2dot_dot << "\n";
+
     zdot(2) = theta1dot_dot;
     zdot(3) = theta2dot_dot;
 

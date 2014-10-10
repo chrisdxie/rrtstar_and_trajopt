@@ -212,7 +212,7 @@ int main(int ac, char* av[])
 					obstacles.col(0) <<  1.2, .8,  1.2, .8;
 					obstacles.col(1) << -1.2, .8,  1.2, .8;
 					np::ndarray obstacles_np = ac_eigen_to_ndarray(obstacles);
-					ac_plot(plotter, goal_path_np, obstacles_np, params::stopping_check, solution_cost, 1, params::scene_number);
+					ac_plot(plotter, goal_path_np, obstacles_np, params::stopping_check, solution_cost, 1, params::random_seed);
 				}
 
 				/*

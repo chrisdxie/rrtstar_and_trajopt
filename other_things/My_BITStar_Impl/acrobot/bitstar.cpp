@@ -71,7 +71,7 @@ int num_failed_rewires = 0;
 std::vector<double> SQP_times;
 
 // TODO
-double max_speed = sqrt(125); // Hard coded for this example
+double max_speed = 1;//sqrt(125); // Hard coded for this example
 
 inline double uniform(double low, double high) {
 	return (high - low)*(*u_sampler)() + low;
@@ -184,7 +184,7 @@ void setup(int max_time, std::string& randomize, int batch_size, int stats_id) {
 	update_C_ellipse_Matrix();
 
 	// Gamma TODO
-	setup_values.gamma = 20; // Looked up thing in paper
+	setup_values.gamma = 30; // Looked up thing in paper
 
 	// Randomize argument
 	if (randomize == "true") {
@@ -543,10 +543,11 @@ double c(Edge* e) {
         }
 
 
-
+	/*
 	if (x == goal_node) {
 		std::cout << "Attempting to connect to GOAL_NODE!!\n";
 	}
+	*/
 
 	// Initialize pointer to time variable, delta
 	double delta = 1;
@@ -715,6 +716,9 @@ void sample_batch() {
 
 	double best_cost = g_T(goal_node);
 	double c_min = g_hat(goal_node);
+
+	//sample_uniform_batch();
+	//return;
 
 	//sample_from_goal_region();
 
@@ -1003,16 +1007,18 @@ double BITStar() {
 
 	while (true) {
 
+		/*
 		if (k % 10 == 0) {
 			std::cout << "Iteration: " << k << "\n";
 			std::cout << "Size of sample set: " << X_sample.size() << "\n";
 			std::cout << "Size of vertex set: " << V.size() << "\n";
 		}
+		*/
 
 		// New Batch of samples!!
 		if (Q_edge.size() == 0) {
 
-			std::cout << "New batch! Batch number: " << num_sample_batches+1 << "\n";
+			//std::cout << "New batch! Batch number: " << num_sample_batches+1 << "\n";
 
 			pruneVertexSet();			
 			pruneSampleSet();
@@ -1081,7 +1087,7 @@ double BITStar() {
 					f_max = costOfBestGoalNode(); // Best goal node is update here too
 					if (f_max < old_cost) {
 						stats.push_back(std::make_pair(f_max, ( std::clock() - start ) / (double) CLOCKS_PER_SEC ));
-						std::cout << "New goal cost: " << f_max << "\n";
+						//std::cout << "New goal cost: " << f_max << "\n";
 						//std::cout << "State of goal:\n" << goal_node->state << "\n";
 					}
 
@@ -1092,7 +1098,7 @@ double BITStar() {
 
 					if (curr_time - last_time > report_interval) {
 						// Write time, # of nodes, cost to file
-						ofstream outfile("BITSTAR_cartpole_statistics_" + std::to_string(setup_values.max_time) + "_seconds_run_" + std::to_string(setup_values.stats_id) + ".txt", ios::app);
+						ofstream outfile("BITSTAR_acrobot_statistics_" + std::to_string(setup_values.max_time) + "_seconds_run_" + std::to_string(setup_values.stats_id) + ".txt", ios::app);
 						if (outfile.is_open()) {
 							outfile << std::setprecision(10) << ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 							outfile << ", " << V.size();
@@ -1103,7 +1109,7 @@ double BITStar() {
 					}
 
 					if (curr_time > setup_values.max_time) {
-						std::cout << "Done\n";
+						//std::cout << "Done\n";
 						break;
 					}
 

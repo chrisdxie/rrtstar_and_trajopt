@@ -45,7 +45,7 @@ const double cnt_tolerance = 1e-5;
 const double penalty_coeff_increase_ratio = 10;
 const double initial_penalty_coeff = 10;
 const double initial_trust_box_size = 1;
-const int max_penalty_coeff_increases = 3;
+const int max_penalty_coeff_increases = 2;
 const int max_sqp_iterations = 100;
 }
 
@@ -490,7 +490,7 @@ bool penalty_sqp(StdVectorX& X, StdVectorU& U, double& delta, bounds_t bounds,
 
                 if (constraint_violation <= cfg::cnt_tolerance) {
                         break;
-                } else if (constraint_violation > .5 && penalty_increases == 0) {
+                } else if (constraint_violation > 0.5 && penalty_increases == 0) {
 
 			delta = prev_delta + 0.05;
 			prev_delta = delta;
